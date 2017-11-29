@@ -3,10 +3,13 @@ package com.finnair.gamifiedpartnermap;
 import android.Manifest;
 import android.annotation.SuppressLint;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 
+import android.location.Criteria;
 import android.location.Location;
 
+import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -14,11 +17,16 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+
+
+
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener {
@@ -26,10 +34,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Constants marking which permissions were granted.
     final private int locationPermission = 100;
-    //final private int internetPermission = 101;
+    final private int internetPermission = 101;
 
 
     private GoogleMap mMap;
+
+    LocationManager locationManager;
+    Criteria criteria;
+    Location location;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +52,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        //Request permission to use user's internet connection.
+        //Currently this connection isn't used for anything other than checking location data if the gps isn't available.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, internetPermission);
+        }
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, internetPermission);
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        criteria = new Criteria();
+
 
 
     }
@@ -51,6 +76,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case (locationPermission): {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mMap.setMyLocationEnabled(true);
+
                 }
                 else {
                     //TODO:
@@ -60,10 +86,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 return;
             }
-            //TODO:
-                /*
-                Add other cases for other possible permissions.
-                 */
+
+            case (internetPermission): {
+                //Currently there isn't anything to add here.
+            }
+
         }
     }
 
@@ -81,21 +108,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-
+        //In case the user's current location isn't available center the view on Helsinki.
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
+        //Request permission to use the user's location data.
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
+        } else {
+            location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
         }
-        else mMap.setMyLocationEnabled(true);
+
+        if (location != null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(location.getLatitude(), location.getLongitude()), 13));
+
+        //Enable the myLocation Layer
+        mMap.setMyLocationEnabled(true);
 
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
+
+
+
 
     }
 
