@@ -3,6 +3,7 @@ package com.finnair.gamifiedpartnermap;
 import android.Manifest;
 import android.annotation.SuppressLint;
 
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
@@ -14,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
 
@@ -29,16 +31,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener {
+        GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener {
 
 
     //Constants marking which permissions were granted.
-    final private int locationPermission = 100;
-    final private int internetPermission = 101;
+    final static int locationPermission = 100;
 
 
     private GoogleMap mMap;
 
+    //These are used to get the users current location.
     LocationManager locationManager;
     Criteria criteria;
     Location location;
@@ -53,14 +55,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //Request permission to use user's internet connection.
-        //Currently this connection isn't used for anything other than checking location data if the gps isn't available.
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, internetPermission);
-        }
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, internetPermission);
-
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         criteria = new Criteria();
 
@@ -68,31 +62,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
         switch (requestCode) {
             case (locationPermission): {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mMap.setMyLocationEnabled(true);
+
+                if ( grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        mMap.setMyLocationEnabled(true);
+                    }
+
 
                 }
                 else {
-                    //TODO:
-                    /*
-                    If the user doesn't allow the use of location information what does the program do?
-                     */
+                    LocationPermissionDialog dialog = new LocationPermissionDialog();
+                    dialog.show(getFragmentManager(), "permissionInfo");
+
                 }
                 return;
             }
 
-            case (internetPermission): {
-                //Currently there isn't anything to add here.
-            }
+
 
         }
     }
+
+
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following methods
+    // defined by the NoticeDialogFragment.NoticeDialogListener interface
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
+    }
+
+
 
 
     /**
@@ -104,29 +111,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //In case the user's current location isn't available center the view on Helsinki.
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
-        //Request permission to use the user's location data.
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
-        } else {
+
+        //Request permission to use the user's location data.
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
             location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+            if (location != null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(location.getLatitude(), location.getLongitude()), 13));
+                //Location not available so center on Helsinki.
+            else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
+
+            //Enable the myLocation Layer
+            mMap.setMyLocationEnabled(true);
+            mMap.setOnMyLocationButtonClickListener(this);
+            mMap.setOnMyLocationClickListener(this);
+
         }
 
-        if (location != null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(location.getLatitude(), location.getLongitude()), 13));
-
-        //Enable the myLocation Layer
-        mMap.setMyLocationEnabled(true);
-
-        mMap.setOnMyLocationButtonClickListener(this);
-        mMap.setOnMyLocationClickListener(this);
-
-
+        else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+            }
 
 
     }
