@@ -71,8 +71,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if ( grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+                        if (location != null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(location.getLatitude(), location.getLongitude()), 13));
+                            //Location not available so center on Helsinki.
+                        else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
+
+                        //Enable the myLocation Layer
                         mMap.setMyLocationEnabled(true);
+                        mMap.setOnMyLocationButtonClickListener(this);
+                        mMap.setOnMyLocationClickListener(this);
+
                     }
 
 
