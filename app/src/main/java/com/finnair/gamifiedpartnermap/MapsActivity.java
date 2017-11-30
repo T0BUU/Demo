@@ -11,6 +11,7 @@ import android.location.Criteria;
 import android.location.Location;
 
 import android.location.LocationManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -77,8 +78,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
                 else {
-                    LocationPermissionDialog dialog = new LocationPermissionDialog();
-                    dialog.show(getFragmentManager(), "permissionInfo");
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                            LocationPermissionDialog dialog = new LocationPermissionDialog();
+                            dialog.show(getFragmentManager(), "permissionInfo");
+
+                        }
+                        //Location not available so center on Helsinki.
+                        else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
+
+                    }
+
 
                 }
                 return;
