@@ -51,7 +51,11 @@ public class PermissionEspressoTest {
 
 
             UiDevice device = UiDevice.getInstance(getInstrumentation());
-            UiObject allowPermissions = device.findObject(new UiSelector().text("Deny"));
+            UiObject allowPermissions;
+            if (Build.VERSION.SDK_INT == 24) {
+                allowPermissions = device.findObject(new UiSelector().text("DENY"));
+            }
+            else allowPermissions = device.findObject(new UiSelector().text("Deny"));
 
             if (allowPermissions.exists()) {
                 try {
@@ -67,10 +71,10 @@ public class PermissionEspressoTest {
             onView(withId(R.id.permissionOk)).perform(click());
 
 
-
-            device = UiDevice.getInstance(getInstrumentation());
-             allowPermissions = device.findObject(new UiSelector().text("Allow"));
-
+        if (Build.VERSION.SDK_INT == 24) {
+            allowPermissions = device.findObject(new UiSelector().text("ALLOW"));
+        }
+        else allowPermissions =  device.findObject(new UiSelector().text("Allow"));
             if (allowPermissions.exists()) {
                 try {
                     allowPermissions.click();
@@ -81,6 +85,7 @@ public class PermissionEspressoTest {
             }
 
             assert (buttonsFound);
-        }
+
+    }
 
 }
