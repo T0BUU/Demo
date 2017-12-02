@@ -17,6 +17,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 
@@ -88,6 +90,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
                 else {
+
+                    Log.i("assert", "Denied");
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
                             LocationPermissionDialog dialog = new LocationPermissionDialog();
@@ -157,6 +161,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
             }
+
 
 
     }
