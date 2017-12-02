@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">GamifiedPartnerMap</string>
     <string name="title_activity_maps">Map</string>
-    <string name="dialogLocationPermission">This application needs your current location in order to work. Please give it permission
-                                            to use this information.
-                                            Thank you.</string>
+    <string name="dialogLocationPermission">This application needs your current location in order to work. Please give it permission to use this information. Thank you.</string>
     <string name="understood">I understand</string>
 </resources>
