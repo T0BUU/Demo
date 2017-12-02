@@ -49,26 +49,27 @@ public class PermissionEspressoTest {
     public void TestSystemPermission() {
         boolean buttonsFound = true;
 
-        if (Build.VERSION.SDK_INT >= 23) {
+
             UiDevice device = UiDevice.getInstance(getInstrumentation());
-            UiObject allowPermissions = device.findObject(new UiSelector().text("DENY"));
+            UiObject allowPermissions = device.findObject(new UiSelector().text("Deny"));
 
             if (allowPermissions.exists()) {
                 try {
+                    Log.i("Info", "found Deny");
                     allowPermissions.click();
                 } catch (UiObjectNotFoundException e) {
                     buttonsFound = false;
-                    Log.i("assert", "There is no permissions dialog to interact with ");
+                    Log.i("Assert", "There is no permissions dialog to interact with ");
                 }
             }
             assert(buttonsFound);
-            onView(ViewMatchers.withText("I understand")).check(matches(isDisplayed()));
+            onView(withId(R.id.permissionOk)).check(matches(isDisplayed()));
             onView(withId(R.id.permissionOk)).perform(click());
-        }
 
-        if (Build.VERSION.SDK_INT >= 23) {
-            UiDevice device = UiDevice.getInstance(getInstrumentation());
-            UiObject allowPermissions = device.findObject(new UiSelector().text("ALLOW"));
+
+
+            device = UiDevice.getInstance(getInstrumentation());
+             allowPermissions = device.findObject(new UiSelector().text("Allow"));
 
             if (allowPermissions.exists()) {
                 try {
@@ -81,6 +82,5 @@ public class PermissionEspressoTest {
 
             assert (buttonsFound);
         }
-    }
 
 }
