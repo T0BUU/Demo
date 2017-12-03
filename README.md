@@ -17,6 +17,8 @@ for asking to use the user's location information.
  * Handle the situation where user doesn't give location permissions
  * BUG: Remove 'don't ask again' from location permission widnow
 
+
+
 ## Branch: MapAndLocation SPRINT 1 Closed on 3.12.
 
 In this branch _Santeri Niemelä_ modified the styling of the Google Map. 
