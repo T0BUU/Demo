@@ -7,6 +7,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import android.content.res.Resources;
 import android.location.Criteria;
 import android.location.Location;
 
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
@@ -36,6 +38,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener {
 
+
+    private static final String TAG = MapsActivity.class.getSimpleName();
 
     //Constants marking which permissions were granted.
     final static int locationPermission = 100;
@@ -107,9 +111,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 return;
             }
-
-
-
         }
     }
 
@@ -142,6 +143,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
+        // Customize the styling of the base map using a JSON object
+        // defined in a raw resource file
+        try{
+            boolean success = mMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.style_json));
+
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e){
+            Log.e(TAG, "Can't find style. Error: ", e);
+        }
+
+
         //Request permission to use the user's location data.
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -157,10 +173,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setOnMyLocationClickListener(this);
 
         }
-
         else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
-            }
+        }
 
 
 
