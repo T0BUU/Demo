@@ -17,3 +17,20 @@ for asking to use the user's location information.
  * Handle the situation where user doesn't give location permissions
  * BUG: Remove 'don't ask again' from location permission widnow
 
+## Branch: MapAndLocation SPRINT 1 Closed on 3.12.
+
+In this branch _Santeri Niemelä_ modified the styling of the Google Map. 
+
+### The tasks that were completed:
+* Hid unnecessary parts of the map (road numbers, points of interest etc.)
+* Changed coloring to match Finnair's brand coloring
+
+
+### Major parts of implementation:
+
+* Created a JSON file res/raw/style_json.json which includes styling
+* Added a call to method GoogleMap.setMapStyle() in MapsActivity.onMapReady()
+
+### TODO:
+* Modify how markers show depending on zoom level
+- This will be implemented in another issue ("Design the look of partner dots")
