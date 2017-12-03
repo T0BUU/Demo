@@ -1,3 +1,5 @@
 														THIS IS THE README DOCUMENT OF THIS PROJECT
 
-##Branch: MapAndLocation
+##Branch: MapAndLocation SPRINT 1
+In this branch Lari Alakukku worked on adding a visible and usable Google Map to the project and the functionality
+for asking to use the user's location information.
