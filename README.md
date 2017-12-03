@@ -1,6 +1,6 @@
 #														THIS IS THE README DOCUMENT OF THIS PROJECT
 
-![Finnair Plus](/app/src/main/res/drawable-v24/finnair_logo.jpg) "Title")
+![Finnair Plus](/app/src/main/res/drawable-v24/finnair_logo.jpg "Finnair Plus")
 ## Branch: MapAndLocation SPRINT 1 Closed on 3.12.
 
 
