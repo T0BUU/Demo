@@ -25,7 +25,7 @@ for asking to use the user's location information.
 
 
 
-
+--------------------------------------------------------------------------------------------
 
 
 In this branch _Santeri Niemelä_ modified the styling of the Google Map. The modifications were 
