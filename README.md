@@ -1,8 +1,6 @@
 #														THIS IS THE README DOCUMENT OF THIS PROJECT
 
-Linked logo: [![Finnair Plus](/FINNAIR-Logo-Blue.png)]
-(http://www.swedcham.com.hk/wp-content/uploads/2013/06/ "Finnair Plus")
-
+![Finnair Plus](/app/src/main/res/drawable-v24/finnair_logo.jpg) "Title")
 ## Branch: MapAndLocation SPRINT 1 Closed on 3.12.
 
 
