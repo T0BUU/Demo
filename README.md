@@ -21,7 +21,8 @@ for asking to use the user's location information.
 
 ## Branch: MapAndLocation SPRINT 1 Closed on 3.12.
 
-In this branch _Santeri Niemelä_ modified the styling of the Google Map. 
+In this branch _Santeri Niemelä_ modified the styling of the Google Map. The modifications were 
+accidentlly done in the same branch as default location and permissions.
 
 ### The tasks that were completed:
 * Hid unnecessary parts of the map (road numbers, points of interest etc.)
