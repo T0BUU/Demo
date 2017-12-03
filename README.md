@@ -23,6 +23,11 @@ for asking to use the user's location information.
  * Added the layout file location_permission_layout for a custom dialog.
  * Added functionality to center the map on Helsinki in case location data isn't available.
 
+
+
+
+
+
 In this branch _Santeri Niemelä_ modified the styling of the Google Map. The modifications were 
 accidentlly done in the same branch as default location and permissions.
 
