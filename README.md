@@ -1,5 +1,8 @@
 #														THIS IS THE README DOCUMENT OF THIS PROJECT
 
+Linked logo: [![alt text]()]
+(https://cdn-finnairshop.ecom.finnair.com/img/partners/FINNAIR%20Plus%20Logo_53.png "Finnair Plus")
+
 ## Branch: MapAndLocation SPRINT 1 Closed on 3.12.
 
 
