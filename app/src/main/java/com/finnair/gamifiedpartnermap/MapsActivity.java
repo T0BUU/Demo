@@ -8,6 +8,11 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 
@@ -19,6 +24,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.Toast;
 
@@ -27,8 +33,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
@@ -38,7 +48,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener {
 
-
+    // String for class name. Can be used for reporting errors.
     private static final String TAG = MapsActivity.class.getSimpleName();
 
     //Constants marking which permissions were granted.
@@ -141,8 +151,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-
-
         // Customize the styling of the base map using a JSON object
         // defined in a raw resource file
         try{
@@ -178,6 +186,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
+        MarkerClass markerClass = new MarkerClass(this);
+        // Create an ordinary balloon Marker:
+        MarkerOptions farOptions = markerClass.balloonMarkerOptions(
+                new LatLng( 60.1841, 24.8301),
+                "Otaniemi",
+                "Otaniemi is here, trust me.");
+        // Create an image Marker by copying and modifying the balloon Marker:
+        MarkerOptions closeOptions = markerClass.imageMarkerOptions(farOptions);
+
+        // Add both (balloon, image) Markers on the map:
+        final Marker markerClose = mMap.addMarker(closeOptions);
+        final Marker markerFar = mMap.addMarker(farOptions);
+
+
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                CameraPosition cameraPosition = mMap.getCameraPosition();
+
+                // Depending on the zoom level hide one and set visible the other Marker
+                if(cameraPosition.zoom > 10) {
+                    markerClose.setVisible(true);
+                    markerFar.setVisible(false);
+                } else {
+                    markerClose.setVisible(false);
+                    markerFar.setVisible(true);
+                }
+            }
+        });
 
     }
 
