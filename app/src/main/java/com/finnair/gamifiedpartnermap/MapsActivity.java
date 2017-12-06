@@ -3,7 +3,9 @@ package com.finnair.gamifiedpartnermap;
 import android.Manifest;
 import android.annotation.SuppressLint;
 
+import android.app.ActionBar;
 import android.app.DialogFragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
@@ -65,9 +67,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         criteria = new Criteria();
 
+//        createNavigation();
 
 
     }
+
+    public void createNavigation() {
+
+        //Initialize actionbar
+        final ActionBar actionBar = getActionBar();
+
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+        };
+
+        actionBar.addTab(actionBar.newTab().setText("Map").setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().setText("Puzzle").setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().setText("Profile").setTabListener(tabListener));
+    }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
