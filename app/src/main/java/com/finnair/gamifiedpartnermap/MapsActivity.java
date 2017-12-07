@@ -46,16 +46,20 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener {
+        GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener, GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowClickListener{
 
     // String for class name. Can be used for reporting errors.
     private static final String TAG = MapsActivity.class.getSimpleName();
+    Marker markerClose;
+    Marker markerFar;
 
     //Constants marking which permissions were granted.
     final static int locationPermission = 100;
 
 
     private GoogleMap mMap;
+
 
     //These are used to get the users current location.
     LocationManager locationManager;
@@ -74,8 +78,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         criteria = new Criteria();
-
-
 
     }
 
@@ -101,7 +103,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     }
 
-
                 }
                 else {
 
@@ -116,7 +117,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
 
                     }
-
 
                 }
                 return;
@@ -150,6 +150,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMarkerClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
 
         // Customize the styling of the base map using a JSON object
         // defined in a raw resource file
@@ -189,15 +191,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MarkerClass markerClass = new MarkerClass(this);
         // Create an ordinary balloon Marker:
         MarkerOptions farOptions = markerClass.balloonMarkerOptions(
-                new LatLng( 60.1841, 24.8301),
+                new LatLng( 60.1699, 24.9384), // 60.1699° N, 24.9384° E  60.1841, 24.8301
                 "Otaniemi",
-                "Otaniemi is here, trust me.");
+                "Otaniemi is here, trust me. Click to turn me BLUE!");
         // Create an image Marker by copying and modifying the balloon Marker:
         MarkerOptions closeOptions = markerClass.imageMarkerOptions(farOptions);
 
         // Add both (balloon, image) Markers on the map:
-        final Marker markerClose = mMap.addMarker(closeOptions);
-        final Marker markerFar = mMap.addMarker(farOptions);
+        markerClose = mMap.addMarker(closeOptions);
+        markerFar = mMap.addMarker(farOptions);
+        if (mMap.getCameraPosition().zoom > 10){
+            markerClose.setVisible(true);
+            markerFar.setVisible(false);
+        }
+        else {
+            markerClose.setVisible(false);
+            markerFar.setVisible(true);
+        }
 
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
@@ -218,6 +228,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+
+
+    @Override
+    public boolean onMarkerClick(final Marker marker){
+        if (marker.equals(markerClose) || marker.equals(markerFar)){
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
+            markerClose.setVisible(true);
+            markerFar.setVisible((false));
+
+            markerClose.showInfoWindow();
+        }
+        return true;  // What am I supposed to return? public void gets rejected...
+    }
+
+    @Override
+    public void onInfoWindowClick(final Marker marker){
+        // This is just a simple event for infoWindowOnClick. This will be replaced with a proper event!
+        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+    }
 
     @Override
     public void onMyLocationClick(Location location) {
