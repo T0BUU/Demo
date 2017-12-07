@@ -1,7 +1,7 @@
 #														THIS IS THE README DOCUMENT OF THIS PROJECT
 
 ![Finnair Plus](/app/src/main/res/drawable-v24/finnair_logo.jpg "Finnair Plus")
-## Branch: MapAndLocation SPRINT 1 Closed on 3.12.
+## Branch: MapAndLocation SPRINT 1 Closed on 3.12.2017
 
 
 In this branch _Lari Alakukku_ worked on adding a visible and usable Google Map to the project and the functionality
@@ -41,6 +41,18 @@ accidentlly done in the same branch as default location and permissions.
 * Created a JSON file res/raw/style_json.json which includes styling
 * Added a call to method GoogleMap.setMapStyle() in MapsActivity.onMapReady()
 
-### TODO:
-* Modify how markers show depending on zoom level
-- This will be implemented in another issue ("Design the look of partner dots")
+-----------------------------------------------------------------------------------------------
+
+### Branch: Design the look of partner dots SPRINT 1 Closed 7.12.2017
+
+In this branch _Santeri Niemelä_ worked on adding possible partner locations on the map.
+
+### The tasks that were completed:
+    
+* 9-design-the-look-of-partner-dots
+
+### Major parts of implementation:
+
+* Created a MarkerClass which are used to add Finnair Plus partners on the map.
+* Modified how markers are shown depending on zoom level.
+* Added one test marker in the middle of Helsinki.
