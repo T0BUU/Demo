@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.util.Pair;
 import android.view.Display;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
@@ -20,12 +23,15 @@ public class MarkerClass {
     Integer screenWidth;
     Integer screenHeight;
     Activity activity;
+    java.util.ArrayList<Pair<Marker, Marker>> markerArrayList = new java.util.ArrayList<>();
+    GoogleMap mMap;
 
-    public MarkerClass(Activity activity) {
+
+    public MarkerClass(Activity activity, GoogleMap mMap) {
 
         // Activity is for example MapsActivity
         this.activity = activity;
-
+        this.mMap = mMap;
         // Get window size for scaling Marker image size:
         Display display = this.activity.getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -33,6 +39,32 @@ public class MarkerClass {
         this.screenWidth = size.x;
         this.screenHeight = size.y;
 
+    }
+
+    public void addOneMarkerOnMap(Double latitude, Double longitude, String title, String snippet){
+
+        LatLng position = new LatLng(latitude, longitude);
+        MarkerOptions balloonOptions = this.balloonMarkerOptions(position, title, snippet);
+        MarkerOptions imageOptions = this.imageMarkerOptions(balloonOptions);
+
+        Marker farMarker = this.mMap.addMarker(balloonOptions);
+        Marker closeMarker =  this.mMap.addMarker(imageOptions);
+
+        this.markerArrayList.add( new Pair<>(closeMarker, farMarker) );
+    }
+
+    public void showCloseMarkers(){
+        for (Pair<Marker, Marker> markerPair : this.markerArrayList) {
+            markerPair.first.setVisible(true);
+            markerPair.second.setVisible(false);
+        }
+    }
+
+    public void showFarMarkers(){
+        for (Pair<Marker, Marker> markerPair : this.markerArrayList) {
+            markerPair.first.setVisible(false);
+            markerPair.second.setVisible(true);
+        }
     }
 
     public MarkerOptions balloonMarkerOptions(LatLng position, String title, String snippet){

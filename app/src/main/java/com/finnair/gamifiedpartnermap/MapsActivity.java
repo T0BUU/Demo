@@ -24,6 +24,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Display;
 import android.view.View;
 import android.widget.Toast;
@@ -51,14 +52,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // String for class name. Can be used for reporting errors.
     private static final String TAG = MapsActivity.class.getSimpleName();
-    Marker markerClose;
-    Marker markerFar;
+
 
     //Constants marking which permissions were granted.
     final static int locationPermission = 100;
 
 
     private GoogleMap mMap;
+    private MarkerClass markerClass;
 
 
     //These are used to get the users current location.
@@ -117,7 +118,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
 
                     }
-
                 }
                 return;
             }
@@ -184,30 +184,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
         else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
         }
 
+        markerClass = new MarkerClass(this, mMap);
+        markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
+        markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
 
-        MarkerClass markerClass = new MarkerClass(this);
-        // Create an ordinary balloon Marker:
-        MarkerOptions farOptions = markerClass.balloonMarkerOptions(
-                new LatLng( 60.1699, 24.9384), // 60.1699° N, 24.9384° E  60.1841, 24.8301
-                "Otaniemi",
-                "Otaniemi is here, trust me. Click to turn me BLUE!");
-        // Create an image Marker by copying and modifying the balloon Marker:
-        MarkerOptions closeOptions = markerClass.imageMarkerOptions(farOptions);
 
-        // Add both (balloon, image) Markers on the map:
-        markerClose = mMap.addMarker(closeOptions);
-        markerFar = mMap.addMarker(farOptions);
-        if (mMap.getCameraPosition().zoom > 10){
-            markerClose.setVisible(true);
-            markerFar.setVisible(false);
-        }
-        else {
-            markerClose.setVisible(false);
-            markerFar.setVisible(true);
-        }
+        if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
+        else markerClass.showFarMarkers();
 
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
@@ -215,30 +201,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onCameraMove() {
                 CameraPosition cameraPosition = mMap.getCameraPosition();
 
-                // Depending on the zoom level hide one and set visible the other Marker
-                if(cameraPosition.zoom > 10) {
-                    markerClose.setVisible(true);
-                    markerFar.setVisible(false);
-                } else {
-                    markerClose.setVisible(false);
-                    markerFar.setVisible(true);
-                }
+                // Depending on the zoom level hide ones and set visible the other Markers
+                if (cameraPosition.zoom > 10) markerClass.showCloseMarkers();
+                else markerClass.showFarMarkers();
+
             }
         });
-
     }
-
 
 
     @Override
     public boolean onMarkerClick(final Marker marker){
-        if (marker.equals(markerClose) || marker.equals(markerFar)){
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-            markerClose.setVisible(true);
-            markerFar.setVisible((false));
 
-            markerClose.showInfoWindow();
-        }
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
+        markerClass.showCloseMarkers();
+
+        marker.showInfoWindow();
+
         return true;  // What am I supposed to return? public void gets rejected...
     }
 
