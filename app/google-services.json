@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "375419472719",
+    "firebase_url": "https://datademo-2a85f.firebaseio.com",
+    "project_id": "datademo-2a85f",
+    "storage_bucket": "datademo-2a85f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375419472719:android:cd5c2d2991701b99",
+        "android_client_info": {
+          "package_name": "com.finnair.gamifiedpartnermap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375419472719-rb5pikdg2leod3giogvfe1onrm9s0p1t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1bZO6gNPz45rSbJuOT3xRu0joQxGrRqs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
