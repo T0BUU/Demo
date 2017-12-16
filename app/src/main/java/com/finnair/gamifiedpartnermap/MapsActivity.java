@@ -1,31 +1,22 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 
 import android.location.LocationManager;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.Display;
-import android.view.View;
 import android.widget.Toast;
 
 
@@ -33,16 +24,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-
-
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
@@ -51,14 +42,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // String for class name. Can be used for reporting errors.
     private static final String TAG = MapsActivity.class.getSimpleName();
-    Marker markerClose;
-    Marker markerFar;
+    private DatabaseReference databaseReference;
+
+
 
     //Constants marking which permissions were granted.
     final static int locationPermission = 100;
 
 
     private GoogleMap mMap;
+    private MarkerClass markerClass;
 
 
     //These are used to get the users current location.
@@ -117,7 +110,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
 
                     }
-
                 }
                 return;
             }
@@ -149,6 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
         mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
@@ -184,30 +177,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
         else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
         }
 
+        markerClass = new MarkerClass(this, mMap);
 
-        MarkerClass markerClass = new MarkerClass(this);
-        // Create an ordinary balloon Marker:
-        MarkerOptions farOptions = markerClass.balloonMarkerOptions(
-                new LatLng( 60.1699, 24.9384), // 60.1699° N, 24.9384° E  60.1841, 24.8301
-                "Otaniemi",
-                "Otaniemi is here, trust me. Click to turn me BLUE!");
-        // Create an image Marker by copying and modifying the balloon Marker:
-        MarkerOptions closeOptions = markerClass.imageMarkerOptions(farOptions);
 
-        // Add both (balloon, image) Markers on the map:
-        markerClose = mMap.addMarker(closeOptions);
-        markerFar = mMap.addMarker(farOptions);
-        if (mMap.getCameraPosition().zoom > 10){
-            markerClose.setVisible(true);
-            markerFar.setVisible(false);
-        }
-        else {
-            markerClose.setVisible(false);
-            markerFar.setVisible(true);
-        }
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference ref = databaseReference.child("locations");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                    String title = singleSnapshot.child("name").getValue().toString();
+                    Double lat = Double.parseDouble( singleSnapshot.child("lat").getValue().toString() );
+                    Double lng = Double.parseDouble( singleSnapshot.child("lng").getValue().toString() );
+                    String snippet = "All have same snippet. Click for BLUE!";
+                    markerClass.addOneMarkerOnMap(lat, lng, title, snippet);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "onCancelled", databaseError.toException());
+            }
+        });
+
+
+        markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
+        markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
+
+
+        if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
+        else markerClass.showFarMarkers();
 
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
@@ -215,31 +219,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onCameraMove() {
                 CameraPosition cameraPosition = mMap.getCameraPosition();
 
-                // Depending on the zoom level hide one and set visible the other Marker
-                if(cameraPosition.zoom > 10) {
-                    markerClose.setVisible(true);
-                    markerFar.setVisible(false);
-                } else {
-                    markerClose.setVisible(false);
-                    markerFar.setVisible(true);
-                }
+                // Depending on the zoom level hide ones and set visible the other Markers
+                if (cameraPosition.zoom > 10) markerClass.showCloseMarkers();
+                else markerClass.showFarMarkers();
+
             }
         });
-
     }
-
 
 
     @Override
     public boolean onMarkerClick(final Marker marker){
-        if (marker.equals(markerClose) || marker.equals(markerFar)){
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-            markerClose.setVisible(true);
-            markerFar.setVisible((false));
 
-            markerClose.showInfoWindow();
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
+        markerClass.showCloseMarkers();
 
-        }
+        marker.showInfoWindow();
+
         return true;  // What am I supposed to return? public void gets rejected...
     }
 
