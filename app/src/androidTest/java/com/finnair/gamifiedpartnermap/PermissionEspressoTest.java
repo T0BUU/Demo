@@ -35,14 +35,15 @@ import android.util.Log;
 
 //Test the functionality used to ask for location permissions.
 //THIS WILL FAIL IF PERMISSION HAS ALREADY BEEN GIVEN!
+//These test were implemented before the switch to fragment based tabs!
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 
 public class PermissionEspressoTest {
 
     @Rule
-    public ActivityTestRule<MapsActivity> mActivityRule = new ActivityTestRule<>(
-            MapsActivity.class);
+    public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<>(
+            MainActivity.class);
 
 
     @Test

@@ -13,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 
-import static com.finnair.gamifiedpartnermap.MapsActivity.locationPermission;
 
 /**
  * Created by huzla on 29.11.2017.
