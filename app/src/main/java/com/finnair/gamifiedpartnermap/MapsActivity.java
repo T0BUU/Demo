@@ -243,6 +243,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onInfoWindowClick(final Marker marker){
         // This is just a simple event for infoWindowOnClick. This will be replaced with a proper event!
         marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+        PartnerInfoFragment p = new PartnerInfoFragment();
+        p.show(getFragmentManager(), "Partner Information");
     }
 
     @Override
