@@ -36,4 +36,7 @@ dependencies {
     compile 'com.google.firebase:firebase-database:11.6.0'
     apply plugin: 'com.google.gms.google-services'
 
+    compile 'com.android.support:design:26.1.0'
+    compile 'com.android.support:support-v4:26.1.0'
+
 }
