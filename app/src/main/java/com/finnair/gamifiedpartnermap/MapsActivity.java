@@ -1,8 +1,11 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 
+import android.app.ActionBar;
 import android.app.DialogFragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
@@ -12,11 +15,13 @@ import android.location.Location;
 
 import android.location.LocationManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 
@@ -24,35 +29,25 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+
+
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener, GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnInfoWindowClickListener{
+        GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener {
 
-    // String for class name. Can be used for reporting errors.
+
     private static final String TAG = MapsActivity.class.getSimpleName();
-    private DatabaseReference databaseReference;
-
-
 
     //Constants marking which permissions were granted.
     final static int locationPermission = 100;
 
 
     private GoogleMap mMap;
-    private MarkerClass markerClass;
-
 
     //These are used to get the users current location.
     LocationManager locationManager;
@@ -72,7 +67,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         criteria = new Criteria();
 
+//        createNavigation();
+
+
     }
+
+    public void createNavigation() {
+
+        //Initialize actionbar
+        final ActionBar actionBar = getActionBar();
+
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+        };
+
+        actionBar.addTab(actionBar.newTab().setText("Map").setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().setText("Puzzle").setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().setText("Profile").setTabListener(tabListener));
+    }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -96,6 +119,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     }
 
+
                 }
                 else {
 
@@ -110,6 +134,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
 
                     }
+
+
                 }
                 return;
             }
@@ -141,10 +167,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         mMap = googleMap;
-        mMap.setOnMarkerClickListener(this);
-        mMap.setOnInfoWindowClickListener(this);
+
+
 
         // Customize the styling of the base map using a JSON object
         // defined in a raw resource file
@@ -177,76 +202,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
         else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
         }
 
-        markerClass = new MarkerClass(this, mMap);
 
 
-        databaseReference = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference ref = databaseReference.child("locations");
-
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-                    String title = singleSnapshot.child("name").getValue().toString();
-                    Double lat = Double.parseDouble( singleSnapshot.child("lat").getValue().toString() );
-                    Double lng = Double.parseDouble( singleSnapshot.child("lng").getValue().toString() );
-                    String snippet = "All have same snippet. Click for BLUE!";
-                    markerClass.addOneMarkerOnMap(lat, lng, title, snippet);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "onCancelled", databaseError.toException());
-            }
-        });
-
-
-        markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
-        markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
-
-
-        if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
-        else markerClass.showFarMarkers();
-
-
-        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-            @Override
-            public void onCameraMove() {
-                CameraPosition cameraPosition = mMap.getCameraPosition();
-
-                // Depending on the zoom level hide ones and set visible the other Markers
-                if (cameraPosition.zoom > 10) markerClass.showCloseMarkers();
-                else markerClass.showFarMarkers();
-
-            }
-        });
     }
 
-
-    @Override
-    public boolean onMarkerClick(final Marker marker){
-
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-        markerClass.showCloseMarkers();
-
-        marker.showInfoWindow();
-
-        return true;  // What am I supposed to return? public void gets rejected...
-    }
-
-    @Override
-    public void onInfoWindowClick(final Marker marker){
-        // This is just a simple event for infoWindowOnClick. This will be replaced with a proper event!
-        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-
-        PartnerInfoFragment p = new PartnerInfoFragment();
-        p.show(getFragmentManager(), "Partner Information");
-    }
 
     @Override
     public void onMyLocationClick(Location location) {
