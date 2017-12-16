@@ -65,3 +65,14 @@ _Santeri Niemelä_ worked on Markers.
     - @override onInfoWindowClick()
     - mMap.setOnCameraMoveListener()
 
+## Branch: Partner information lightbox  SPRINT 1 Closed on 16.12.
+_Viljami Nurminen_ worked on Partner information lightbox
+
+### The tasks that were completed
+* Designed an initial template for a box displaying partner information 
+* 
+
+
+### Major parts of the implementation
+* Added a new class PartnerInfoFragment which holds the logic for the box.
+* Added a new xml-file fragment\_partner\_info.xml that holds the layout for the fragment.
