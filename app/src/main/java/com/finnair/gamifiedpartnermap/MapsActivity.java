@@ -205,7 +205,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-
+        //TODO: Remove these test locations that aren't pulled from the database.
         markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
         markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
 
@@ -241,10 +241,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onInfoWindowClick(final Marker marker){
-        // This is just a simple event for infoWindowOnClick. This will be replaced with a proper event!
-        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
         PartnerInfoFragment p = new PartnerInfoFragment();
+        p.fillFields("Company");
         p.show(getFragmentManager(), "Partner Information");
     }
 
