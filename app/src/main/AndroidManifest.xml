@@ -12,9 +12,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/finnair_logo"
+        android:icon="@drawable/finnair_logo_round_24dp"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/finnair_logo"
+        android:roundIcon="@drawable/finnair_logo_round_24dp"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <!--
