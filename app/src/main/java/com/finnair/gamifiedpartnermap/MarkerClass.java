@@ -101,9 +101,9 @@ public class MarkerClass {
 
         MarkerOptions imageOptions = new MarkerOptions();
         imageOptions.position(balloonOptions.getPosition())
-                    .title(balloonOptions.getTitle())
-                    .snippet(balloonOptions.getSnippet())
-                    .icon(bitmapIcon);
+                .title(balloonOptions.getTitle())
+                .snippet(balloonOptions.getSnippet())
+                .icon(bitmapIcon);
         return imageOptions;
     }
 
@@ -121,15 +121,3 @@ public class MarkerClass {
         return newBitmap;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

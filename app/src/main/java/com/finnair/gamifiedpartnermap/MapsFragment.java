@@ -21,6 +21,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,6 +35,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -45,6 +47,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 
 public class MapsFragment extends Fragment implements LocationPermissionDialog.LocationDialogListener{
 
@@ -56,6 +59,8 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
     // String for class name. Can be used for reporting errors.
     private static final String TAG = MapsFragment.class.getSimpleName();
     private DatabaseReference databaseReference;
+
+    private HashMap<String, PartnerData> markerPartnerData = new HashMap<>();
 
 
 
@@ -142,26 +147,39 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                 ref.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-
+                        // Loop through children in "locations" (i.e. loop through partners in FireBase):
                         for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-                            String title = singleSnapshot.child("name").getValue().toString();
+                            String companyName = singleSnapshot.child("name").getValue().toString();
                             Double lat = Double.parseDouble( singleSnapshot.child("lat").getValue().toString() );
                             Double lng = Double.parseDouble( singleSnapshot.child("lng").getValue().toString() );
-                            String snippet = "All have same snippet. Click for BLUE!";
-                            markerClass.addOneMarkerOnMap(lat, lng, title, snippet);
+                            String address = singleSnapshot.child("address").getValue().toString();
+                            String business = singleSnapshot.child("field_of_business").getValue().toString();
+                            String description = singleSnapshot.child("description").getValue().toString();
+
+                            // Place two Markers (close, far) on the map and hide one depending on zoom:
+                            String[] tags = markerClass.addOneMarkerOnMap(lat, lng, companyName, business);
+
+                            // Record partner data into a HashMap which has Marker tag as key and ParterData as content:
+                            PartnerData pData = new PartnerData();
+                            pData.setAllData(companyName, address, business, description, lat, lng);
+
+                            // Both Markers (close, far) must be recorded in the HashMap:
+                            markerPartnerData.put(tags[0], pData);
+                            markerPartnerData.put(tags[1], pData);
                         }
+
+                        if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
+                        else markerClass.showFarMarkers();
+
                     }
+
+
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Log.e(TAG, "onCancelled", databaseError.toException());
                     }
                 });
-
-                //TODO: Remove these test locations that aren't pulled from the database.
-                markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
-                markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
-
 
                 if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
                 else markerClass.showFarMarkers();
@@ -213,9 +231,23 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                     @Override
                     public void onInfoWindowClick(final Marker marker){
 
+
+                        // Instantiate PartnerInfoFragment:
                         PartnerInfoFragment p = new PartnerInfoFragment();
-                        p.fillFields("Company");
-                        p.show(getActivity().getFragmentManager(), "Partner Information");
+                        p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
+                        // Find PartnerData for the Marker clicked recently. Find correct by reading markerID:
+                        PartnerData currentPartner = markerPartnerData.get( marker.getId() );
+
+
+                        // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
+                        p.setAllFragmentData( currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
+
+                        // Display PartnerInfoFragment:
+                        // Notice! Content (company name etc.) could not be changed with p.show()
+
+
+
+
                     }
                 });
             }
