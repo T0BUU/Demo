@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical">
+
+
 
     <TableLayout
         android:id="@+id/info_table"
@@ -18,10 +21,12 @@
             android:layout_height="52dp"
             android:gravity="center_horizontal">
 
+
             <ImageView
                 android:id="@+id/imageView"
                 android:layout_width="230dp"
                 android:layout_height="98dp"
+                android:visibility="visible"
                 app:srcCompat="@drawable/finnair_logo" />
 
         </TableRow>
@@ -35,9 +40,10 @@
                 android:id="@+id/company_name"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:textAlignment="center"
                 android:fontFamily="sans-serif-smallcaps"
                 android:paddingBottom="5dp"
-                android:text="Company name here"
+                android:text="Name"
                 android:textColor="#787878"
                 android:textSize="30sp" />
         </TableRow>
@@ -81,7 +87,7 @@
                 android:paddingBottom="7dp"
                 android:paddingLeft="3dp"
                 android:paddingTop="15dp"
-                android:text=" Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed accumsan, nisi et tincidunt fringilla, erat urna venenatis justo, vitae maximus nunc sapien id tortor. Phasellus vestibulum sollicitudin tortor porta accumsan. Nulla tincidunt placerat nulla nec aliquet. Integer dignissim ornare nisl a suscipit. Pellentesque ac suscipit sem. Suspendisse ligula erat, elementum." />
+                android:text="Company description" />
 
         </TableRow>
 
@@ -95,5 +101,9 @@
                 android:layout_height="wrap_content"
                 android:text="Take a quiz" />
         </TableRow>
+
+
+
+
     </TableLayout>
 </LinearLayout>

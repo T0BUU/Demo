@@ -3,6 +3,7 @@ package com.finnair.gamifiedpartnermap;
 import android.Manifest;
 
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
@@ -24,7 +25,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -35,6 +35,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener, GoogleMap.OnMarkerClickListener,
@@ -43,12 +45,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // String for class name. Can be used for reporting errors.
     private static final String TAG = MapsActivity.class.getSimpleName();
     private DatabaseReference databaseReference;
-
+    private HashMap<String, PartnerData> markerPartnerData = new HashMap<>();
 
 
     //Constants marking which permissions were granted.
     final static int locationPermission = 100;
-
 
     private GoogleMap mMap;
     private MarkerClass markerClass;
@@ -127,8 +128,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -182,37 +181,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         markerClass = new MarkerClass(this, mMap);
 
-
+        // Open connection to FireBase:
         databaseReference = FirebaseDatabase.getInstance().getReference();
         DatabaseReference ref = databaseReference.child("locations");
 
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
+                // Loop through children in "locations" (i.e. loop through partners in FireBase):
                 for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-                    String title = singleSnapshot.child("name").getValue().toString();
+                    String companyName = singleSnapshot.child("name").getValue().toString();
                     Double lat = Double.parseDouble( singleSnapshot.child("lat").getValue().toString() );
                     Double lng = Double.parseDouble( singleSnapshot.child("lng").getValue().toString() );
-                    String snippet = "All have same snippet. Click for BLUE!";
-                    markerClass.addOneMarkerOnMap(lat, lng, title, snippet);
+                    String address = singleSnapshot.child("address").getValue().toString();
+                    String business = singleSnapshot.child("field_of_business").getValue().toString();
+                    String description = singleSnapshot.child("description").getValue().toString();
+
+                    // Place two Markers (close, far) on the map and hide one depending on zoom:
+                    String[] tags = markerClass.addOneMarkerOnMap(lat, lng, companyName, business);
+
+                    // Record partner data into a HashMap which has Marker tag as key and ParterData as content:
+                    PartnerData pData = new PartnerData();
+                    pData.setAllData(companyName, address, business, description, lat, lng);
+
+                    // Both Markers (close, far) must be recorded in the HashMap:
+                    markerPartnerData.put(tags[0], pData);
+                    markerPartnerData.put(tags[1], pData);
                 }
+
+                if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
+                else markerClass.showFarMarkers();
+
             }
+
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.e(TAG, "onCancelled", databaseError.toException());
             }
         });
-
-
-        markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
-        markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
-
-
-        if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
-        else markerClass.showFarMarkers();
-
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -241,11 +248,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onInfoWindowClick(final Marker marker){
-        // This is just a simple event for infoWindowOnClick. This will be replaced with a proper event!
-        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
+        // Instantiate PartnerInfoFragment:
         PartnerInfoFragment p = new PartnerInfoFragment();
-        p.show(getFragmentManager(), "Partner Information");
+
+        // Find PartnerData for the Marker clicked recently. Find correct by reading markerID:
+        PartnerData currentPartner = markerPartnerData.get( marker.getId() );
+
+        // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
+        p.setAllFragmentData( currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription() );
+
+        // Display PartnerInfoFragment:
+        // Notice! Content (company name etc.) could not be changed with p.show()
+        FragmentManager frgManager = getFragmentManager();
+        frgManager.beginTransaction()
+                .add(p, marker.getTitle())
+                .commit();
+
     }
 
     @Override
