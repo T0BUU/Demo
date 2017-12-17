@@ -78,12 +78,9 @@ _Viljami Nurminen_ worked on Partner information lightbox
 * Added a new xml-file fragment\_partner\_info.xml that holds the layout for the fragment.
 
 
------------------------------------------------------------------------------------------
-
-
 ## Branch: Implement an example template for settings menu
 
-In this branch _Lari Alakukku_ worked on implementing an empty settings menu. He used the GUI made by _Otto von Boehm_ as basis and integrated a tab based navigation menu to the app.
+In this branch _Lari Alakukku_ worked on implementing an empty settings menu. He used the GUI made by _Otto von Boehm_ as a basis and integrated a tab based navigation menu to the app.
 
 ### The tasks that were completed:
 
@@ -92,7 +89,7 @@ In this branch _Lari Alakukku_ worked on implementing an empty settings menu. He
 
 ### Major parts of the implementation
 
-* Change MapsActivity to a fragment
+* Changed MapsActivity to a fragment
 * Added fragments: GameFragment, ProfileFragment and SettingsFragment
 * Added new layout files for each of the fragments.
 * Added a PagerAdapter for switching between tabs.
