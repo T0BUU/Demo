@@ -78,7 +78,7 @@ _Viljami Nurminen_ worked on Partner information lightbox
 * Added a new xml-file fragment\_partner\_info.xml that holds the layout for the fragment.
 
 
-## Branch: Implement an example template for settings menu
+## Branch: Implement an example template for settings menu SPRINT 1 Closed on 17.12.
 
 In this branch _Lari Alakukku_ worked on implementing an empty settings menu. He used the GUI made by _Otto von Boehm_ as a basis and integrated a tab based navigation menu to the app.
 
