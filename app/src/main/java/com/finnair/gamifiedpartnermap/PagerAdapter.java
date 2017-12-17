@@ -25,6 +25,8 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
                 return new MapsActivity();
             case 2:
                 return new GameFragment();
+            case 3:
+                return new SettingsFragment();
             default:
                 return null;
         }
