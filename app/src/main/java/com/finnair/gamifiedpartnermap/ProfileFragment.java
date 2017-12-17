@@ -16,4 +16,6 @@ public class ProfileFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.content_profile, container, false);
     }
+
+    
 }
