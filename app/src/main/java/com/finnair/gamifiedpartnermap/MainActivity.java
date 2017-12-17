@@ -1,11 +1,15 @@
 package com.finnair.gamifiedpartnermap;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.google.android.gms.maps.GoogleMap;
 
 /**
  * Created by ala-hazla on 16.12.2017.
@@ -53,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        viewPager.setCurrentItem(1);
     }
 
 

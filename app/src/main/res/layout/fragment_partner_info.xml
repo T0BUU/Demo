@@ -8,7 +8,6 @@
     android:orientation="vertical">
 
 
-
     <TableLayout
         android:id="@+id/info_table"
         android:layout_width="wrap_content"
@@ -23,12 +22,9 @@
 
 
             <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="230dp"
-                android:layout_height="98dp"
-                android:visibility="visible"
-                app:srcCompat="@drawable/finnair_logo" />
-
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:srcCompat="@mipmap/ic_launcher" />
         </TableRow>
 
         <TableRow

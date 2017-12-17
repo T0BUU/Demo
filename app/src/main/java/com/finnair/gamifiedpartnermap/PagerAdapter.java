@@ -22,7 +22,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
             case 0:
                 return new ProfileFragment();
             case 1:
-                return new MapsActivity();
+                return new MapsFragment();
             case 2:
                 return new GameFragment();
             case 3:
