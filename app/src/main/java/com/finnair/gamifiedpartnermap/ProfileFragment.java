@@ -17,5 +17,5 @@ public class ProfileFragment extends Fragment {
         return inflater.inflate(R.layout.content_profile, container, false);
     }
 
-    
+
 }
