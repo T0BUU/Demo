@@ -10,6 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true  // This was supposed to help draw images in DialogFragment. See: https://stackoverflow.com/questions/40624554/android-what-is-the-difference-between-appsrccompat-and-androidsrc
     }
     buildTypes {
         release {

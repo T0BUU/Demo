@@ -31,40 +31,48 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
+public class MapsFragment extends Fragment implements LocationPermissionDialog.LocationDialogListener{
 
 
-
-public class MapsActivity extends Fragment implements GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,  LocationPermissionDialog.LocationDialogListener {
-
-
-    public MapsActivity() {
+    public MapsFragment() {
 
     }
 
-    private static final String TAG = MapsActivity.class.getSimpleName();
+    // String for class name. Can be used for reporting errors.
+    private static final String TAG = MapsFragment.class.getSimpleName();
+    private DatabaseReference databaseReference;
+
+
 
     //Constants marking which permissions were granted.
     final static int locationPermission = 100;
 
 
     private GoogleMap mMap;
-    MapView mMapView;
+    private MarkerClass markerClass;
+    private MapView mMapView;
+
 
     //These are used to get the users current location.
     LocationManager locationManager;
     Criteria criteria;
     Location location;
+
 
 
     @Override
@@ -89,9 +97,8 @@ public class MapsActivity extends Fragment implements GoogleMap.OnMyLocationButt
         mMapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
+
                 mMap = googleMap;
-
-
 
                 // Customize the styling of the base map using a JSON object
                 // defined in a raw resource file
@@ -118,19 +125,103 @@ public class MapsActivity extends Fragment implements GoogleMap.OnMyLocationButt
                     else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
 
                     //Enable the myLocation Layer
-                    /*mMap.setMyLocationEnabled(true);
-                    mMap.setOnMyLocationButtonClickListener(this);
-                    mMap.setOnMyLocationClickListener(this);*/
+                    mMap.setMyLocationEnabled(true);
+
 
                 }
                 else {
                     ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
                 }
 
+                markerClass = new MarkerClass(getActivity(), mMap);
 
 
+                databaseReference = FirebaseDatabase.getInstance().getReference();
+                DatabaseReference ref = databaseReference.child("locations");
+
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                            String title = singleSnapshot.child("name").getValue().toString();
+                            Double lat = Double.parseDouble( singleSnapshot.child("lat").getValue().toString() );
+                            Double lng = Double.parseDouble( singleSnapshot.child("lng").getValue().toString() );
+                            String snippet = "All have same snippet. Click for BLUE!";
+                            markerClass.addOneMarkerOnMap(lat, lng, title, snippet);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.e(TAG, "onCancelled", databaseError.toException());
+                    }
+                });
+
+                //TODO: Remove these test locations that aren't pulled from the database.
+                markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
+                markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
+
+
+                if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
+                else markerClass.showFarMarkers();
+
+
+                mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+                    @Override
+                    public void onCameraMove() {
+                        CameraPosition cameraPosition = mMap.getCameraPosition();
+
+                        // Depending on the zoom level hide ones and set visible the other Markers
+                        if (cameraPosition.zoom > 10) markerClass.showCloseMarkers();
+                        else markerClass.showFarMarkers();
+
+                    }
+                });
+
+                mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                    @Override
+                    public boolean onMyLocationButtonClick() {
+                        Toast.makeText(getActivity(), "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+                        // Return false so that we don't consume the event and the default behavior still occurs
+                        // (the camera animates to the user's current position).
+                        return false;
+                    }
+                });
+
+                mMap.setOnMyLocationClickListener(new GoogleMap.OnMyLocationClickListener() {
+                    @Override
+                    public void onMyLocationClick(Location location) {
+                        Toast.makeText(getActivity(), "Current location:\n" + location, Toast.LENGTH_LONG).show();
+                    }
+                });
+
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(final Marker marker){
+
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
+                        markerClass.showCloseMarkers();
+
+                        marker.showInfoWindow();
+
+                        return true;  // What am I supposed to return? public void gets rejected...
+                    }
+                });
+
+                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(final Marker marker){
+
+                        PartnerInfoFragment p = new PartnerInfoFragment();
+                        p.fillFields("Company");
+                        p.show(getActivity().getFragmentManager(), "Partner Information");
+                    }
+                });
             }
+
         });
+
 
         return rootView;
     }
@@ -178,8 +269,6 @@ public class MapsActivity extends Fragment implements GoogleMap.OnMyLocationButt
 
                         //Enable the myLocation Layer
                         mMap.setMyLocationEnabled(true);
-                        mMap.setOnMyLocationButtonClickListener(this);
-                        mMap.setOnMyLocationClickListener(this);
 
                     }
 
@@ -216,34 +305,6 @@ public class MapsActivity extends Fragment implements GoogleMap.OnMyLocationButt
         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
     }
 
-
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-
-
-
-
-    @Override
-    public void onMyLocationClick(Location location) {
-        Toast.makeText(getActivity(), "Current location:\n" + location, Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public boolean onMyLocationButtonClick() {
-        Toast.makeText(getActivity(), "MyLocation button clicked", Toast.LENGTH_SHORT).show();
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
-        return false;
-    }
 
 
 }

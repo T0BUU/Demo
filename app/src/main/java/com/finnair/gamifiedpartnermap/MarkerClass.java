@@ -26,6 +26,11 @@ public class MarkerClass {
     java.util.ArrayList<Pair<Marker, Marker>> markerArrayList = new java.util.ArrayList<>();
     GoogleMap mMap;
 
+    private Double lat;
+    private Double lng;
+    private String companyName;
+    private String companyBusiness;
+
 
     public MarkerClass(Activity activity, GoogleMap mMap) {
 
@@ -41,16 +46,26 @@ public class MarkerClass {
 
     }
 
-    public void addOneMarkerOnMap(Double latitude, Double longitude, String title, String snippet){
+    public String[] addOneMarkerOnMap(Double latitude, Double longitude, String companyName, String business){
 
-        LatLng position = new LatLng(latitude, longitude);
-        MarkerOptions balloonOptions = this.balloonMarkerOptions(position, title, snippet);
+        this.lat = latitude;
+        this.lng = longitude;
+        this.companyName = companyName;
+        this.companyBusiness = business;
+
+
+        MarkerOptions balloonOptions = this.balloonMarkerOptions();
         MarkerOptions imageOptions = this.imageMarkerOptions(balloonOptions);
 
         Marker farMarker = this.mMap.addMarker(balloonOptions);
         Marker closeMarker =  this.mMap.addMarker(imageOptions);
 
         this.markerArrayList.add( new Pair<>(closeMarker, farMarker) );
+
+        String[] tags = new String[2];
+        tags[0] = closeMarker.getId();
+        tags[1] = farMarker.getId();
+        return tags;
     }
 
     public void showCloseMarkers(){
@@ -67,12 +82,13 @@ public class MarkerClass {
         }
     }
 
-    public MarkerOptions balloonMarkerOptions(LatLng position, String title, String snippet){
+    public MarkerOptions balloonMarkerOptions(){
 
+        LatLng position = new LatLng(this.lat, this.lng);
         MarkerOptions mOptions = new MarkerOptions();
         mOptions.position(position)
-                .title(title)
-                .snippet(snippet);
+                .title(this.companyName)
+                .snippet(this.companyBusiness);
         return mOptions;
     }
 
@@ -90,7 +106,6 @@ public class MarkerClass {
                     .icon(bitmapIcon);
         return imageOptions;
     }
-
 
 
     private static Bitmap scaleDown(Bitmap image, float maxImageSize) {
