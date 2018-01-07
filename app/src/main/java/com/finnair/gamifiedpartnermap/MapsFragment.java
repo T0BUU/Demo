@@ -49,7 +49,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LocationPermissionDialog.LocationDialogListener{
+import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
+
+public class MapsFragment extends Fragment {
 
 
     public MapsFragment() {
@@ -63,21 +65,15 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
     private HashMap<String, PartnerData> markerPartnerData = new HashMap<>();
 
 
-
-    //Constants marking which permissions were granted.
-    final static int locationPermission = 100;
-
-
     private GoogleMap mMap;
     private MarkerClass markerClass;
     private MapView mMapView;
 
 
     //These are used to get the users current location.
-    LocationManager locationManager;
-    Criteria criteria;
-    Location location;
-
+    private LocationManager locationManager;
+    private Criteria criteria;
+    private Location location;
 
 
     @Override
@@ -105,9 +101,11 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
                 mMap = googleMap;
 
+                ((MainActivity) getActivity()).setMap(mMap);
+
                 // Customize the styling of the base map using a JSON object
                 // defined in a raw resource file
-                try{
+                try {
                     boolean success = mMap.setMapStyle(
                             MapStyleOptions.loadRawResourceStyle(
                                     getActivity(), R.raw.style_json));
@@ -115,7 +113,7 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                     if (!success) {
                         Log.e(TAG, "Style parsing failed.");
                     }
-                } catch (Resources.NotFoundException e){
+                } catch (Resources.NotFoundException e) {
                     Log.e(TAG, "Can't find style. Error: ", e);
                 }
 
@@ -125,18 +123,17 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                         ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                     location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                    if (location != null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(location.getLatitude(), location.getLongitude()), 13));
+                    if (location != null)
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
                         //Location not available so center on Helsinki.
-                    else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
+                    else
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(60.167497, 24.934739), 13));
 
                     //Enable the myLocation Layer
                     mMap.setMyLocationEnabled(true);
 
 
-                }
-                else {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
-                }
+                } else ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
 
                 markerClass = new MarkerClass(getActivity(), mMap);
 
@@ -148,10 +145,10 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // Loop through children in "locations" (i.e. loop through partners in FireBase):
-                        for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                        for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
                             String companyName = singleSnapshot.child("name").getValue().toString();
-                            Double lat = Double.parseDouble( singleSnapshot.child("lat").getValue().toString() );
-                            Double lng = Double.parseDouble( singleSnapshot.child("lng").getValue().toString() );
+                            Double lat = Double.parseDouble(singleSnapshot.child("lat").getValue().toString());
+                            Double lng = Double.parseDouble(singleSnapshot.child("lng").getValue().toString());
                             String address = singleSnapshot.child("address").getValue().toString();
                             String business = singleSnapshot.child("field_of_business").getValue().toString();
                             String description = singleSnapshot.child("description").getValue().toString();
@@ -172,7 +169,6 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                         else markerClass.showFarMarkers();
 
                     }
-
 
 
                     @Override
@@ -216,7 +212,7 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
-                    public boolean onMarkerClick(final Marker marker){
+                    public boolean onMarkerClick(final Marker marker) {
 
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
                         markerClass.showCloseMarkers();
@@ -229,23 +225,21 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
-                    public void onInfoWindowClick(final Marker marker){
+                    public void onInfoWindowClick(final Marker marker) {
 
 
                         // Instantiate PartnerInfoFragment:
                         PartnerInfoFragment p = new PartnerInfoFragment();
                         p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
                         // Find PartnerData for the Marker clicked recently. Find correct by reading markerID:
-                        PartnerData currentPartner = markerPartnerData.get( marker.getId() );
+                        PartnerData currentPartner = markerPartnerData.get(marker.getId());
 
 
                         // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
-                        p.setAllFragmentData( currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
+                        p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
 
                         // Display PartnerInfoFragment:
                         // Notice! Content (company name etc.) could not be changed with p.show()
-
-
 
 
                     }
@@ -254,9 +248,21 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
         });
 
-
         return rootView;
     }
+
+    public Criteria getCriteria() {
+        return criteria;
+    }
+
+    public void setLocation(Location l) {
+        location = l;
+    }
+
+    public LocationManager getLocationManager() {
+        return locationManager;
+    }
+
 
     @Override
     public void onResume() {
@@ -284,58 +290,7 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
 
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
-        switch (requestCode) {
-            case (locationPermission): {
-
-                if ( grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                            ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                        if (location != null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(location.getLatitude(), location.getLongitude()), 13));
-                            //Location not available so center on Helsinki.
-                        else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
-
-                        //Enable the myLocation Layer
-                        mMap.setMyLocationEnabled(true);
-
-                    }
-
-
-                }
-                else {
-
-                    Log.i("assert", "Denied");
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                            LocationPermissionDialog dialog = new LocationPermissionDialog();
-                            dialog.show(getActivity().getFragmentManager(), "permissionInfo");
-
-                        }
-                        //Location not available so center on Helsinki.
-                        else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
-
-                    }
-
-
-                }
-                return;
-            }
-        }
-    }
-
-
-    // The dialog fragment receives a reference to this Activity through the
-    // Fragment.onAttach() callback, which it uses to call the following methods
-    // defined by the NoticeDialogFragment.NoticeDialogListener interface
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        Toast.makeText(getContext(), "Clicked", Toast.LENGTH_SHORT);
-        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
-    }
 
 
 
