@@ -20,6 +20,8 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements LocationPermissio
 
     private MapsFragment mapFragment;
     private GoogleMap gMap;
+
 
     //Constants marking which permissions were granted.
     final static int locationPermission = 100;
@@ -80,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements LocationPermissio
 
         viewPager.setCurrentItem(1);
         mapFragment = (MapsFragment) adapter.getItem(1);
+
+
     }
 
     @Override

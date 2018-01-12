@@ -6,7 +6,9 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import android.content.res.Resources;
@@ -30,6 +32,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -41,6 +47,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -74,6 +82,10 @@ public class MapsFragment extends Fragment {
     private LocationManager locationManager;
     private Criteria criteria;
     private Location location;
+
+    private GeofencingClient mGeofencingClient;
+    private Geofence test;
+    private PendingIntent mGeofencePendingIntent;
 
 
     @Override
@@ -177,6 +189,10 @@ public class MapsFragment extends Fragment {
                     }
                 });
 
+
+
+
+
                 if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
                 else markerClass.showFarMarkers();
 
@@ -192,6 +208,7 @@ public class MapsFragment extends Fragment {
 
                     }
                 });
+
 
                 mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
                     @Override
@@ -244,11 +261,66 @@ public class MapsFragment extends Fragment {
 
                     }
                 });
+
+
             }
 
         });
 
+        //TODO: Remove these when implementing the proper version.
+
+        mGeofencingClient = LocationServices.getGeofencingClient(getActivity());
+
+        test = new Geofence.Builder()
+                .setRequestId("Otaniemi")
+                .setCircularRegion(60.1841, 24.8301, 100.0f)
+                .setExpirationDuration(60000L*10L)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
+
+//        markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
+  //      markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
+
+        mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+                .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                    }
+                })
+                .addOnFailureListener(getActivity(), new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+
+        //-----------------------
+
         return rootView;
+    }
+
+    private GeofencingRequest getGeofencingRequest() {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.addGeofence(test);
+        return builder.build();
+
+    }
+
+
+    private PendingIntent getGeofencePendingIntent() {
+
+        if (mGeofencePendingIntent != null) {
+         return mGeofencePendingIntent;
+        }
+
+
+        Intent intent = new Intent(getContext(), GeofenceTransitionsIntentService.class);
+
+        mGeofencePendingIntent = PendingIntent.getService(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return mGeofencePendingIntent;
     }
 
     public Criteria getCriteria() {
@@ -279,6 +351,21 @@ public class MapsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        mGeofencingClient.removeGeofences(getGeofencePendingIntent())
+                .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                    }
+                })
+                .addOnFailureListener(getActivity(), new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+
         mMapView.onDestroy();
     }
 
