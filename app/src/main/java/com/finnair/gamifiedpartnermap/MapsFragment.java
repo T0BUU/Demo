@@ -86,6 +86,7 @@ public class MapsFragment extends Fragment {
     private GeofencingClient mGeofencingClient;
     private Geofence test;
     private PendingIntent mGeofencePendingIntent;
+    private Marker geoFenceMarker;
 
 
     @Override
@@ -278,6 +279,8 @@ public class MapsFragment extends Fragment {
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                 .build();
 
+        markerForGeofence(new LatLng(60.1841, 24.8301));
+
 //        markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
   //      markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
 
@@ -306,6 +309,23 @@ public class MapsFragment extends Fragment {
         builder.addGeofence(test);
         return builder.build();
 
+    }
+
+    private void markerForGeofence(LatLng latLng) {
+        Log.i(TAG, "markerForGeofence(" + latLng + ")");
+        String title = latLng.latitude + ", " + latLng.longitude;
+        // Define marker options
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(latLng)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                .title(title);
+        if (mMap != null) {
+            // Remove last geoFenceMarker
+            if (geoFenceMarker != null)
+                geoFenceMarker.remove();
+
+            geoFenceMarker = mMap.addMarker(markerOptions);
+        }
     }
 
 
