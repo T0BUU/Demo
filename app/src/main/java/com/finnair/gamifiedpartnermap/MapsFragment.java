@@ -16,6 +16,7 @@ import android.location.Criteria;
 import android.location.Location;
 
 import android.location.LocationManager;
+import android.media.Image;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -74,7 +75,8 @@ public class MapsFragment extends Fragment {
 
 
     private GoogleMap mMap;
-    private MarkerClass markerClass;
+    private CompanyMarkerClass companyMarkerClass;
+    private PlaneMarkerClass planeMarkerClass;
     private MapView mMapView;
 
 
@@ -148,7 +150,8 @@ public class MapsFragment extends Fragment {
 
                 } else ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
 
-                markerClass = new MarkerClass(getActivity(), mMap);
+                companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
+                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap);
 
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -167,7 +170,7 @@ public class MapsFragment extends Fragment {
                             String description = singleSnapshot.child("description").getValue().toString();
 
                             // Place two Markers (close, far) on the map and hide one depending on zoom:
-                            String[] tags = markerClass.addOneMarkerOnMap(lat, lng, companyName, business);
+                            String[] tags = companyMarkerClass.addOneMarkerOnMap(lat, lng, companyName, business);
 
                             // Record partner data into a HashMap which has Marker tag as key and ParterData as content:
                             PartnerData pData = new PartnerData();
@@ -178,8 +181,8 @@ public class MapsFragment extends Fragment {
                             markerPartnerData.put(tags[1], pData);
                         }
 
-                        if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
-                        else markerClass.showFarMarkers();
+                        if (mMap.getCameraPosition().zoom > 10) companyMarkerClass.showCloseMarkers();
+                        else companyMarkerClass.showFarMarkers();
 
                     }
 
@@ -194,8 +197,8 @@ public class MapsFragment extends Fragment {
 
 
 
-                if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
-                else markerClass.showFarMarkers();
+                if (mMap.getCameraPosition().zoom > 10) companyMarkerClass.showCloseMarkers();
+                else companyMarkerClass.showFarMarkers();
 
 
                 mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
@@ -204,8 +207,8 @@ public class MapsFragment extends Fragment {
                         CameraPosition cameraPosition = mMap.getCameraPosition();
 
                         // Depending on the zoom level hide ones and set visible the other Markers
-                        if (cameraPosition.zoom > 10) markerClass.showCloseMarkers();
-                        else markerClass.showFarMarkers();
+                        if (cameraPosition.zoom > 10) companyMarkerClass.showCloseMarkers();
+                        else companyMarkerClass.showFarMarkers();
 
                     }
                 });
@@ -233,7 +236,7 @@ public class MapsFragment extends Fragment {
                     public boolean onMarkerClick(final Marker marker) {
 
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-                        markerClass.showCloseMarkers();
+                        companyMarkerClass.showCloseMarkers();
 
                         marker.showInfoWindow();
 
@@ -263,13 +266,17 @@ public class MapsFragment extends Fragment {
                     }
                 });
 
+            //TODO: Remove these when implementing the proper version.
+                planeMarkerClass.addOneMarkerOnMap(60.168064, 24.940983, "Lentsikka");
 
+                //---------
             }
 
         });
 
-        //TODO: Remove these when implementing the proper version.
 
+
+        //TODO: Currently adds a simple geofence to the first 100 locations. Figure out something different.
         mGeofencingClient = LocationServices.getGeofencingClient(getActivity());
 
         test = new Geofence.Builder()

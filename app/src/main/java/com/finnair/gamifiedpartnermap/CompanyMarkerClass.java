@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * Created by noctuaPC on 5.12.2017.
  */
 
-public class MarkerClass {
+public class CompanyMarkerClass {
 
     Integer screenWidth;
     Integer screenHeight;
@@ -32,7 +32,7 @@ public class MarkerClass {
     private String companyBusiness;
 
 
-    public MarkerClass(Activity activity, GoogleMap mMap) {
+    public CompanyMarkerClass(Activity activity, GoogleMap mMap) {
 
         // Activity is for example MapsActivity
         this.activity = activity;
