@@ -267,7 +267,7 @@ public class MapsFragment extends Fragment {
                 });
 
             //TODO: Remove these when implementing the proper version.
-                planeMarkerClass.addOneMarkerOnMap(60.168064, 24.940983, "Lentsikka");
+                planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Lentsikka", 1000.0);
 
                 //---------
             }
