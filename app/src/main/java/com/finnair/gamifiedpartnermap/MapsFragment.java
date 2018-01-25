@@ -1,6 +1,8 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 
 import android.app.ActionBar;
@@ -27,9 +29,11 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 
@@ -44,6 +48,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -268,6 +273,7 @@ public class MapsFragment extends Fragment {
 
             //TODO: Remove these when implementing the proper version.
                 planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Lentsikka", 1000.0);
+                planeMarkerClass.animateMarker(0, new LatLng(60.191806, 24.878333));
 
                 //---------
             }
@@ -334,6 +340,8 @@ public class MapsFragment extends Fragment {
             geoFenceMarker = mMap.addMarker(markerOptions);
         }
     }
+
+
 
 
     private PendingIntent getGeofencePendingIntent() {
