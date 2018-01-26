@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 
@@ -18,6 +19,11 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Created by huzla on 25.1.2018.
@@ -35,8 +41,9 @@ public class PlaneMarkerClass {
     private String planeName;
 
 
-    public PlaneMarkerClass(Activity activity, GoogleMap mMap) {
 
+
+    public PlaneMarkerClass(Activity activity, GoogleMap mMap) {
         // Activity is for example MapsActivity
         this.activity = activity;
         this.mMap = mMap;
@@ -78,6 +85,19 @@ public class PlaneMarkerClass {
         markerArrayList.get(index).second.setRadius(r);
     }
 
+    public void zoomListener(float zoom) {
+
+
+        for ( Pair<Marker, Circle> temp : markerArrayList) {
+            //Log.d("Circle Radius","" + temp.second.getRadius());
+            //zoom = 0 the entire world and zoom 20 is the closest the camera gets.
+            //zooming one level (0 -> 1 for example) halves the size of one map tile => zooming grows O(pow(2, zoom))
+            if (temp.second.getRadius() < java.lang.Math.pow(2, 20-zoom)) temp.second.setVisible(false);
+            else temp.second.setVisible(true);
+        }
+
+    }
+
 
     private CircleOptions areaMarkerOptions(LatLng coords, Double radius){
 
@@ -99,6 +119,7 @@ public class PlaneMarkerClass {
 
         MarkerOptions imageOptions = new MarkerOptions();
         imageOptions.position(areaOptions.getCenter())
+                .anchor(0.5f, 0.5f)
                 .title(title)
                 .icon(bitmapIcon);
         return imageOptions;

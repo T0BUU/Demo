@@ -97,7 +97,7 @@ public class MapsFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_maps, container, false);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -211,6 +211,8 @@ public class MapsFragment extends Fragment {
                     public void onCameraMove() {
                         CameraPosition cameraPosition = mMap.getCameraPosition();
 
+                        planeMarkerClass.zoomListener(cameraPosition.zoom);
+                        Log.d("Zoom Level", "" + java.lang.Math.pow(2, 20-cameraPosition.zoom));
                         // Depending on the zoom level hide ones and set visible the other Markers
                         if (cameraPosition.zoom > 10) companyMarkerClass.showCloseMarkers();
                         else companyMarkerClass.showFarMarkers();
@@ -273,7 +275,7 @@ public class MapsFragment extends Fragment {
 
             //TODO: Remove these when implementing the proper version.
                 planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Lentsikka", 1000.0);
-                planeMarkerClass.animateMarker(0, new LatLng(60.191806, 24.878333));
+                //planeMarkerClass.animateMarker(0, new LatLng(60.191806, 24.878333));
 
                 //---------
             }
