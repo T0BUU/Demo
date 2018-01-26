@@ -61,6 +61,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
@@ -212,7 +213,7 @@ public class MapsFragment extends Fragment {
                         CameraPosition cameraPosition = mMap.getCameraPosition();
 
                         planeMarkerClass.zoomListener(cameraPosition.zoom);
-                        Log.d("Zoom Level", "" + java.lang.Math.pow(2, 20-cameraPosition.zoom));
+                        //Log.d("Zoom Level", "" + java.lang.Math.pow(2, 20-cameraPosition.zoom));
                         // Depending on the zoom level hide ones and set visible the other Markers
                         if (cameraPosition.zoom > 10) companyMarkerClass.showCloseMarkers();
                         else companyMarkerClass.showFarMarkers();
@@ -274,8 +275,10 @@ public class MapsFragment extends Fragment {
                 });
 
             //TODO: Remove these when implementing the proper version.
-                planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Lentsikka", 1000.0);
-                //planeMarkerClass.animateMarker(0, new LatLng(60.191806, 24.878333));
+                planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Finnair-1", 1000.0);
+                planeMarkerClass.addOneMarkerOnMap(60.165476, 24.940999, "Finnair-2", 10000.0);
+
+                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.187664, 24.939161), new LatLng(60.180822, 24.884789)));
 
                 //---------
             }

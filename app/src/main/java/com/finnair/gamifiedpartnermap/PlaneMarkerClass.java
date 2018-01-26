@@ -10,6 +10,8 @@ import android.graphics.Point;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -20,10 +22,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.lang.Math.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+
+import static java.lang.Math.acos;
+import static java.lang.Math.atan;
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toDegrees;
 
 /**
  * Created by huzla on 25.1.2018.
@@ -39,6 +49,7 @@ public class PlaneMarkerClass {
     private Double lat;
     private Double lng;
     private String planeName;
+    private final Float rotationMultiplier = -100.0f;
 
 
 
@@ -77,8 +88,11 @@ public class PlaneMarkerClass {
 
     }
 
-    public void animateMarker(int index, LatLng destination) {
-        animatePlaneMarkers(destination, markerArrayList.get(index));
+    public void animateMarkers(List<LatLng> coords) {
+        for (int i = 0; i < markerArrayList.size(); i++) {
+            animatePlaneMarker(coords.get(i), markerArrayList.get(i));
+        }
+
     }
 
     public void setRadius(double r, int index) {
@@ -92,7 +106,7 @@ public class PlaneMarkerClass {
             //Log.d("Circle Radius","" + temp.second.getRadius());
             //zoom = 0 the entire world and zoom 20 is the closest the camera gets.
             //zooming one level (0 -> 1 for example) halves the size of one map tile => zooming grows O(pow(2, zoom))
-            if (temp.second.getRadius() < java.lang.Math.pow(2, 20-zoom)) temp.second.setVisible(false);
+            if (temp.second.getRadius() < pow(2, 20-zoom)) temp.second.setVisible(false);
             else temp.second.setVisible(true);
         }
 
@@ -141,16 +155,41 @@ public class PlaneMarkerClass {
 
 
 
-    private static void animatePlaneMarkers(LatLng destination, final Pair<Marker, Circle> planeMarkers) {
+    private void animatePlaneMarker(LatLng destination, final Pair<Marker, Circle> planeMarkers) {
         final Marker plane = planeMarkers.first;
         final Circle area = planeMarkers.second;
 
         final LatLng currentPosition = plane.getPosition();
-        float startRotation = plane.getRotation();
+        final float startRotation = plane.getRotation();
+
+        double rotationLat = (destination.latitude-currentPosition.latitude);
+        double rotationLong = (destination.longitude-currentPosition.longitude);
+        float rotationDirection;
+        float rotationAdd;
+
+        if (rotationLong < 0) {
+            rotationDirection = 1.0f;
+            rotationAdd = 180.0f;
+            if (rotationLat < 0) {
+                rotationDirection = -1.0f;
+                rotationAdd = -180.0f;
+            }
+        }
+        else {
+            rotationDirection = 1.0f;
+            rotationAdd = 0.0f;
+        }
+
+        final float endRotation = (float) -(toDegrees(atan(rotationLat/rotationLong))*rotationDirection + rotationAdd);
+
+        Log.d("Starting Rotation", "" + startRotation);
+        Log.d("End Rotation", "" + endRotation);
 
         ValueAnimator ltAnimation = ValueAnimator.ofFloat((float) currentPosition.latitude, (float) destination.latitude);
 
         ValueAnimator lgAnimation = ValueAnimator.ofFloat((float) currentPosition.longitude, (float) destination.longitude);
+
+       ValueAnimator rotation = ValueAnimator.ofFloat(startRotation, endRotation);
 
         ltAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -170,13 +209,24 @@ public class PlaneMarkerClass {
                 float animatedValue = (float) valueAnimator.getAnimatedValue();
                 LatLng setValue = new LatLng(plane.getPosition().latitude, animatedValue);
 
+
                 plane.setPosition(setValue);
                 area.setCenter(setValue);
             }
         });
 
+        rotation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float animatedValue = (float) valueAnimator.getAnimatedValue();
+
+                plane.setRotation(animatedValue);
+
+            }
+        });
+        Log.d("Animation", "START!");
         AnimatorSet LtLg = new AnimatorSet();
-        LtLg.playTogether(ltAnimation, lgAnimation);
+        LtLg.playTogether(ltAnimation, lgAnimation, rotation);
         LtLg.setDuration(10000);
         LtLg.start();
     }
