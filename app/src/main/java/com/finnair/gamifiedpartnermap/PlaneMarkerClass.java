@@ -93,7 +93,7 @@ public class PlaneMarkerClass {
 
     private MarkerOptions imageMarkerOptions(CircleOptions areaOptions, String title){
 
-        Bitmap bitmap = BitmapFactory.decodeResource(this.activity.getResources(), R.raw.aalto_logo);
+        Bitmap bitmap = BitmapFactory.decodeResource(this.activity.getResources(), R.raw.airplane_top_marker);
         Bitmap smallBitmap = scaleDown(bitmap, this.screenWidth / 8);
         BitmapDescriptor bitmapIcon = BitmapDescriptorFactory.fromBitmap( smallBitmap );
 
