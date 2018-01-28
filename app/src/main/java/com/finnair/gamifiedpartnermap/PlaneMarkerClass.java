@@ -1,17 +1,22 @@
 package com.finnair.gamifiedpartnermap;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
+import android.animation.IntEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.location.Location;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -21,19 +26,25 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.lang.Math.*;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static java.lang.Math.acos;
 import static java.lang.Math.atan;
 import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
 import static java.lang.Math.toDegrees;
+
+
 
 /**
  * Created by huzla on 25.1.2018.
@@ -46,13 +57,12 @@ public class PlaneMarkerClass {
     java.util.ArrayList<Pair<Marker, Circle>> markerArrayList = new java.util.ArrayList<>();
     GoogleMap mMap;
 
-    private Double lat;
-    private Double lng;
-    private String planeName;
     private final Float rotationMultiplier = -100.0f;
-
-
-
+    private Location userLocation;
+    private Location temporaryPlaneLocation = new Location("");
+    private final float radius = 1000;
+    private HashMap<Marker, Pair<ValueAnimator, ValueAnimator>> planeRadarMap = new HashMap<>();
+    private HashMap<Marker, Polyline> planeRadarArcMap = new HashMap<>();
 
     public PlaneMarkerClass(Activity activity, GoogleMap mMap) {
         // Activity is for example MapsActivity
@@ -65,42 +75,48 @@ public class PlaneMarkerClass {
         this.screenWidth = size.x;
         this.screenHeight = size.y;
 
-
-
     }
 
-    public void addOneMarkerOnMap(Double latitude, Double longitude, String planeName, Double radius){
+    public void addOneMarkerOnMap(Double latitude, Double longitude, String planeName){
 
-        this.lat = latitude;
-        this.lng = longitude;
-        this.planeName = planeName;
-
-
-        CircleOptions areaOptions = this.areaMarkerOptions(new LatLng(latitude, longitude), radius);
+        CircleOptions areaOptions = this.areaMarkerOptions(new LatLng(latitude, longitude));
         MarkerOptions imageOptions = this.imageMarkerOptions(areaOptions, planeName);
 
         Circle areaMarker = this.mMap.addCircle(areaOptions);
         Marker planeMarker = this.mMap.addMarker(imageOptions);
 
-
-
         this.markerArrayList.add( new Pair(planeMarker, areaMarker) );
 
     }
 
-    public void animateMarkers(List<LatLng> coords) {
+    public boolean markerArrayContainsMarker(Marker marker){
+
+        for (Pair <Marker, Circle> pair: this.markerArrayList){
+            if (pair.first.equals(marker))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean planeIsWithinReach(Location location, Marker plane){
+        temporaryPlaneLocation.setLatitude(plane.getPosition().latitude);
+        temporaryPlaneLocation.setLongitude(plane.getPosition().longitude);
+        if (location.distanceTo(temporaryPlaneLocation) < radius)
+            return true;
+        else
+            return false;
+    }
+
+
+    public void animateMarkers(List<LatLng> coords, Location userLocation) {
+        this.userLocation = userLocation;
         for (int i = 0; i < markerArrayList.size(); i++) {
             animatePlaneMarker(coords.get(i), markerArrayList.get(i));
         }
 
     }
 
-    public void setRadius(double r, int index) {
-        markerArrayList.get(index).second.setRadius(r);
-    }
-
     public void zoomListener(float zoom) {
-
 
         for ( Pair<Marker, Circle> temp : markerArrayList) {
             //Log.d("Circle Radius","" + temp.second.getRadius());
@@ -109,15 +125,14 @@ public class PlaneMarkerClass {
             if (temp.second.getRadius() < pow(2, 20-zoom)) temp.second.setVisible(false);
             else temp.second.setVisible(true);
         }
-
     }
 
 
-    private CircleOptions areaMarkerOptions(LatLng coords, Double radius){
+    private CircleOptions areaMarkerOptions(LatLng coords){
 
             return new CircleOptions()
                 .center(coords)
-                .radius(radius)
+                .radius(this.radius)
                 .strokeWidth(10)
                 .strokeColor(Color.WHITE)
                 .fillColor(Color.argb(100, 0, 0, 100));
@@ -155,7 +170,85 @@ public class PlaneMarkerClass {
 
 
 
+    private LatLng getPointGivenRadiusAndDegree(LatLng centre, double radius, double degree){
+        final double EARTH_RADIUS = 6378100.0;
+        // Convert to radians
+        double lat = centre.latitude * Math.PI / 180.0;
+        double lon = centre.longitude * Math.PI / 180.0;
+
+        double radians = Math.toRadians(degree);
+
+        // Calculate points
+        double latPoint = lat + (radius / EARTH_RADIUS) * Math.sin(radians);
+        double lonPoint = lon + (radius / EARTH_RADIUS) * Math.cos(radians) / Math.cos(lat);
+
+        return new LatLng(latPoint * 180.0 / Math.PI, lonPoint * 180.0 / Math.PI);
+    }
+
+    final PolylineOptions radarPolyLineOptions(Marker plane, double degree){
+        LatLng center = plane.getPosition();
+
+        ArrayList<LatLng> arcPoints = new ArrayList<>();
+        for (int i=0; i < 45; i+=2)
+            arcPoints.add(getPointGivenRadiusAndDegree(center, this.radius, degree + i));
+
+        return new PolylineOptions()
+                .addAll(arcPoints)
+                .width(8)
+                .color(Color.argb(255, 0, 255, 0));
+    }
+
+    private ValueAnimator animateRadarPulseForClosePlane(final Circle circle){
+        final float radiusCopy = this.radius;
+        circle.setStrokeColor(circle.getFillColor());
+        ValueAnimator circlePulseAnimator = ValueAnimator.ofInt(0, 100);
+        circlePulseAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        circlePulseAnimator.setRepeatMode(ValueAnimator.RESTART);
+        circlePulseAnimator.setDuration(2500);
+        circlePulseAnimator.setEvaluator(new IntEvaluator());
+        circlePulseAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        circlePulseAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float animatedFraction = valueAnimator.getAnimatedFraction();
+                circle.setRadius(animatedFraction * radiusCopy); // * SIZE
+
+            }
+        });
+
+        return circlePulseAnimator;
+    }
+
+    private Pair<Polyline, ValueAnimator> animateRadarArcForClosePlane(final Marker plane){
+        final float radiusCopy = this.radius;
+        final Polyline radarArc = this.mMap.addPolyline(radarPolyLineOptions(plane, 0) );
+
+
+        ValueAnimator radarAnimator = ValueAnimator.ofInt(0, 100);
+        radarAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        radarAnimator.setRepeatMode(ValueAnimator.RESTART);
+        radarAnimator.setDuration(1000);
+        radarAnimator.setEvaluator(new IntEvaluator());
+        radarAnimator.setInterpolator(new LinearInterpolator());
+        radarAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float animatedFraction = valueAnimator.getAnimatedFraction();
+                ArrayList<LatLng> points = new ArrayList<LatLng>();
+                for (int i=0; i < 45; i+=2){ // Skip the first point (center)
+                    points.add(getPointGivenRadiusAndDegree(plane.getPosition(), radiusCopy, 360*animatedFraction + i));
+                }
+                radarArc.setPoints(points);
+
+            }
+        });
+        return Pair.create(radarArc, radarAnimator);
+
+    }
+
     private void animatePlaneMarker(LatLng destination, final Pair<Marker, Circle> planeMarkers) {
+        // WARNING: Animations might cause problems if they last longer than the refresh rate!
+
         final Marker plane = planeMarkers.first;
         final Circle area = planeMarkers.second;
 
@@ -182,14 +275,9 @@ public class PlaneMarkerClass {
 
         final float endRotation = (float) -(toDegrees(atan(rotationLat/rotationLong))*rotationDirection + rotationAdd);
 
-        Log.d("Starting Rotation", "" + startRotation);
-        Log.d("End Rotation", "" + endRotation);
-
         ValueAnimator ltAnimation = ValueAnimator.ofFloat((float) currentPosition.latitude, (float) destination.latitude);
-
         ValueAnimator lgAnimation = ValueAnimator.ofFloat((float) currentPosition.longitude, (float) destination.longitude);
-
-       ValueAnimator rotation = ValueAnimator.ofFloat(startRotation, endRotation);
+        ValueAnimator rotation = ValueAnimator.ofFloat(startRotation, endRotation);
 
         ltAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -209,7 +297,6 @@ public class PlaneMarkerClass {
                 float animatedValue = (float) valueAnimator.getAnimatedValue();
                 LatLng setValue = new LatLng(plane.getPosition().latitude, animatedValue);
 
-
                 plane.setPosition(setValue);
                 area.setCenter(setValue);
             }
@@ -224,11 +311,96 @@ public class PlaneMarkerClass {
 
             }
         });
-        Log.d("Animation", "START!");
+
+
         AnimatorSet LtLg = new AnimatorSet();
-        LtLg.playTogether(ltAnimation, lgAnimation, rotation);
+        rotation.setDuration(500);
+        rotation.start();
+        // Rotation cannot happen together with directional animation (plane flies sideways):
+        LtLg.playTogether(ltAnimation, lgAnimation);
         LtLg.setDuration(10000);
         LtLg.start();
+        LtLg.addListener(new AnimatorListenerAdapter() {
+            // Animation ending must be listened separately, because it runs in its own thread
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                // If plane has existing animations, destroy them:
+                if (planeRadarMap.containsKey(plane)){
+                    planeRadarMap.get(plane).first.cancel();
+                    planeRadarMap.get(plane).second.cancel();
+                    planeRadarMap.remove(plane);
+                    planeRadarArcMap.get(plane).remove(); // Remove old arc (PolyLine)
+                }
+
+                if (planeIsWithinReach(userLocation, plane)){
+                    area.setFillColor(Color.argb(100, 0, 255, 0));
+
+                    ValueAnimator radarPulse = animateRadarPulseForClosePlane(area);
+                    Pair<Polyline, ValueAnimator> radarArc = animateRadarArcForClosePlane(plane);
+                    radarPulse.start();
+                    planeRadarArcMap.put(plane, radarArc.first);
+                    radarArc.second.start();
+
+                    planeRadarMap.put(plane, Pair.create(radarPulse, radarArc.second));
+
+                } else{
+
+                    // Set area circle to have original information:
+                    area.setFillColor(Color.argb(100, 0, 0, 100));
+                    area.setRadius(radius);
+                    area.setStrokeColor(Color.WHITE);
+                }
+            }
+        });
+
+
+    }
+    public void saveCollectedPlane(Marker plane, Context context){
+        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
+        String filename = "myPlanes";
+        String earlierText = readCollectedPlanes(context);
+        String text = plane.getTitle();
+        String string = earlierText + " " + text;
+
+        try {
+            FileOutputStream outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(string.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String readCollectedPlanes(Context context) {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = context.openFileInput("myPlanes");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
     }
 }
 
