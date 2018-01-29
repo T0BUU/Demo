@@ -1,13 +1,6 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.Manifest;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-
-import android.app.ActionBar;
-import android.app.DialogFragment;
-import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -18,22 +11,16 @@ import android.location.Criteria;
 import android.location.Location;
 
 import android.location.LocationManager;
-import android.media.Image;
-import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.LinearInterpolator;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -48,7 +35,6 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -100,6 +86,35 @@ public class MapsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
+
+
+        // Lazy testing of OpenSky.org:
+        // Add these to (app) build.gradle:
+        // compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
+        // compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
+        // compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
+        // compile 'com.squareup.okhttp3:okhttp:3.5.0'
+        /*
+        Log.d("POOP", "Trying to open connection...");
+        final OpenSkyApi api = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
+        Log.d("POOP", "That went through");
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Log.d("POOP", "Trying to download now");
+                    OpenSkyStates os = api.getStates(0, null);
+                    Log.d("POOP", os.getStates().toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+
+        */
+
+
         View rootView = inflater.inflate(R.layout.content_maps, container, false);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
@@ -144,11 +159,14 @@ public class MapsFragment extends Fragment {
                         ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                     location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                    if (location != null)
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
-                        //Location not available so center on Helsinki.
-                    else
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(60.167497, 24.934739), 13));
+                    if (location == null) {
+                        // Location not available so center on Helsinki. Location provider set to <"">
+                        location = new Location("");
+                        location.setLatitude(60.167497);
+                        location.setLongitude(24.934739);
+                    }
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
 
                     //Enable the myLocation Layer
                     mMap.setMyLocationEnabled(true);
@@ -244,7 +262,6 @@ public class MapsFragment extends Fragment {
                     public boolean onMarkerClick(final Marker marker) {
 
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-                        companyMarkerClass.showCloseMarkers();
 
                         marker.showInfoWindow();
 
@@ -256,30 +273,43 @@ public class MapsFragment extends Fragment {
                     @Override
                     public void onInfoWindowClick(final Marker marker) {
 
+                        if (planeMarkerClass.markerArrayContainsMarker(marker)){
+                            // User clicked an airplane
 
-                        // Instantiate PartnerInfoFragment:
-                        PartnerInfoFragment p = new PartnerInfoFragment();
-                        p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
-                        // Find PartnerData for the Marker clicked recently. Find correct by reading markerID:
-                        PartnerData currentPartner = markerPartnerData.get(marker.getId());
+                            if (planeMarkerClass.planeIsWithinReach(location, marker)){
+                                Log.d("POOP", "You can collect this plane. It now flies away!");
+                                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.150, 24.93470), new LatLng(60.180822, 24.884789)), location);
+                                planeMarkerClass.saveCollectedPlane(marker, getContext());
+                                TextView textView = container.findViewById(R.id.profileFragmentTextView);
+                                textView.setText(planeMarkerClass.readCollectedPlanes(getContext()));
+                            } else{
+                                Log.d("POOP", "Nuh-uh, you can't reach this. It now flies somewhere");
+                                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.1841, 24.8301), new LatLng(60.160, 24.93470)), location);
+                            }
 
+                        } else {
+                            // User clicked something else than an airplane (company marker):
+                            // Instantiate PartnerInfoFragment:
+                            PartnerInfoFragment p = new PartnerInfoFragment();
+                            p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
+                            // Find PartnerData for the Marker clicked recently. Find correct by reading markerID:
+                            PartnerData currentPartner = markerPartnerData.get(marker.getId());
 
-                        // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
-                        p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
+                            // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
+                            p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
 
-                        // Display PartnerInfoFragment:
-                        // Notice! Content (company name etc.) could not be changed with p.show()
-
+                        }
 
                     }
                 });
 
             //TODO: Remove these when implementing the proper version.
-                planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Finnair-1", 1000.0);
-                planeMarkerClass.addOneMarkerOnMap(60.165476, 24.940999, "Finnair-2", 10000.0);
-
-                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.187664, 24.939161), new LatLng(60.180822, 24.884789)));
-
+                planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Finnair-1"); // 60.1841, 24.8301
+                planeMarkerClass.addOneMarkerOnMap(60.1870, 24.9390, "Finnair-2");
+                // 60.167497, 24.934739
+                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.16740, 24.93470), new LatLng(60.180822, 24.884789)), location);  // new LatLng(60.187664, 24.939161), new LatLng(60.180822, 24.884789)
+                // User: Latitude(60.167497);
+                // User: Longitude(24.934739);
                 //---------
             }
 
@@ -298,9 +328,6 @@ public class MapsFragment extends Fragment {
                 .build();
 
         markerForGeofence(new LatLng(60.1841, 24.8301));
-
-//        markerClass.addOneMarkerOnMap(60.1841, 24.8301, "Otaniemi", "Otaniemi is here. Click me to turn me BLUE!");
-  //      markerClass.addOneMarkerOnMap(60.1699, 24.9384, "Helsinki", "This is Hki center. Click me to turn me BLUE!");
 
         mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
                 .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
