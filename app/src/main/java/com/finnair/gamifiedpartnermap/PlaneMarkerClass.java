@@ -40,8 +40,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.acos;
 import static java.lang.Math.atan;
 import static java.lang.Math.pow;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
 import static java.lang.Math.toDegrees;
 
 
@@ -55,6 +59,7 @@ public class PlaneMarkerClass {
     Integer screenHeight;
     Activity activity;
     java.util.ArrayList<Pair<Marker, Circle>> markerArrayList = new java.util.ArrayList<>();
+    java.util.ArrayList<LatLng> planeDirectionVectors = new java.util.ArrayList<>();
     GoogleMap mMap;
 
     private final Float rotationMultiplier = -100.0f;
@@ -81,6 +86,10 @@ public class PlaneMarkerClass {
 
         CircleOptions areaOptions = this.areaMarkerOptions(new LatLng(latitude, longitude));
         MarkerOptions imageOptions = this.imageMarkerOptions(areaOptions, planeName);
+
+        //Add a direction vector. All planes start by facing East so a the point (latitude, longtitude - 1) is directly "behind" them.
+        //The actual vector is calculated when need be. The point that is stored here is used to calculate the initial direction of the plane.
+        this.planeDirectionVectors.add(new LatLng(latitude, longitude - 1));
 
         Circle areaMarker = this.mMap.addCircle(areaOptions);
         Marker planeMarker = this.mMap.addMarker(imageOptions);
@@ -111,7 +120,8 @@ public class PlaneMarkerClass {
     public void animateMarkers(List<LatLng> coords, Location userLocation) {
         this.userLocation = userLocation;
         for (int i = 0; i < markerArrayList.size(); i++) {
-            animatePlaneMarker(coords.get(i), markerArrayList.get(i));
+            animatePlaneMarker(coords.get(i), markerArrayList.get(i), i);
+
         }
 
     }
@@ -150,7 +160,8 @@ public class PlaneMarkerClass {
         imageOptions.position(areaOptions.getCenter())
                 .anchor(0.5f, 0.5f)
                 .title(title)
-                .icon(bitmapIcon);
+                .icon(bitmapIcon)
+                .flat(true);
         return imageOptions;
     }
 
@@ -246,7 +257,25 @@ public class PlaneMarkerClass {
 
     }
 
-    private void animatePlaneMarker(LatLng destination, final Pair<Marker, Circle> planeMarkers) {
+    private double vectorNorm(double i, double j) {
+        return sqrt(pow(i, 2)+pow(j, 2));
+    }
+
+    private double dotProduct(double i1, double j1, double i2, double j2) {
+        return i1*i2+j1*j2;
+    }
+
+    private double angleOfRotation(double i1, double j1, double i2, double j2) {
+        //First calculate the angle between the two vectors.
+        double angle = acos( dotProduct(i1,j1,i2,j2)/( vectorNorm(i1,j1)*vectorNorm(i2,j2) ) );
+        //The the cross product
+        double cross = vectorNorm(i1, j1)*vectorNorm(i2, j2)*sin(angle);
+        //Now using the cross product determine the direction of rotation.
+        if (cross < 0) return -abs(angle);
+        else return abs(angle);
+    }
+
+    private void animatePlaneMarker(LatLng destination, final Pair<Marker, Circle> planeMarkers, int i) {
         // WARNING: Animations might cause problems if they last longer than the refresh rate!
 
         final Marker plane = planeMarkers.first;
@@ -255,29 +284,24 @@ public class PlaneMarkerClass {
         final LatLng currentPosition = plane.getPosition();
         final float startRotation = plane.getRotation();
 
-        double rotationLat = (destination.latitude-currentPosition.latitude);
-        double rotationLong = (destination.longitude-currentPosition.longitude);
-        float rotationDirection;
-        float rotationAdd;
+        LatLng directionPoint = planeDirectionVectors.get(i);
 
-        if (rotationLong < 0) {
-            rotationDirection = 1.0f;
-            rotationAdd = 180.0f;
-            if (rotationLat < 0) {
-                rotationDirection = -1.0f;
-                rotationAdd = -180.0f;
-            }
-        }
-        else {
-            rotationDirection = 1.0f;
-            rotationAdd = 0.0f;
-        }
+        final Pair<Double, Double> currentDirection = new Pair(1.0, 0.0);
+        final Pair<Double, Double> destinationDirection = new Pair(destination.longitude-currentPosition.longitude, destination.latitude-currentPosition.latitude);
 
-        final float endRotation = (float) -(toDegrees(atan(rotationLat/rotationLong))*rotationDirection + rotationAdd);
+        planeDirectionVectors.set(i, currentPosition);
+
+        final float endRotation = (float) toDegrees(angleOfRotation(currentDirection.first, currentDirection.second,
+                                                          destinationDirection.first, destinationDirection.second));
+
+        Log.d("The angle of rotation", ""+endRotation + " and  " + destinationDirection);
 
         ValueAnimator ltAnimation = ValueAnimator.ofFloat((float) currentPosition.latitude, (float) destination.latitude);
         ValueAnimator lgAnimation = ValueAnimator.ofFloat((float) currentPosition.longitude, (float) destination.longitude);
-        ValueAnimator rotation = ValueAnimator.ofFloat(startRotation, endRotation);
+
+        plane.setRotation(endRotation);
+
+        Log.d("The final rotation: ", "" + plane.getRotation());
 
         ltAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -302,20 +326,10 @@ public class PlaneMarkerClass {
             }
         });
 
-        rotation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float animatedValue = (float) valueAnimator.getAnimatedValue();
-
-                plane.setRotation(animatedValue);
-
-            }
-        });
 
 
         AnimatorSet LtLg = new AnimatorSet();
-        rotation.setDuration(500);
-        rotation.start();
+
         // Rotation cannot happen together with directional animation (plane flies sideways):
         LtLg.playTogether(ltAnimation, lgAnimation);
         LtLg.setDuration(10000);
