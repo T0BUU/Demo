@@ -26,9 +26,9 @@
         <shape android:shape="rectangle" >
             <corners android:radius="3dip" />
             <stroke
-                android:width="3dp"
-                android:color="@color/blue" />
-            <solid android:color="@color/royalBlue" />
+                android:width="2dp"
+                android:color="@color/nordicBlue"/>
+            <solid android:color="#FFFFFF"/>
         </shape>
     </item>
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="140dp"
+    android:gravity="center_vertical"
+    android:padding="@dimen/header_padding"
+    android:theme="@style/AppTheme"
+    android:background="@drawable/header_background">
+
+    <!-- This contains profile picture in navigation drawer -->
+    <ImageView
+        android:id="@+id/header_image_view"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="@string/header_profile_pic_text"
+        app:srcCompat="@mipmap/ic_launcher_round" />
+
+    <!-- Profile name and maybe some other crucial information here -->
+    <LinearLayout
+        android:id="@+id/header_profile_name_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/nav_profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/fab_margin"
+            android:text="@string/header_profile_name" />
+
+    <!--    <TextView
+            android:id="@+id/nav_profile_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/header_padding"
+            android:paddingTop="@dimen/header_padding"
+            android:text="@string/header_profile_nickname" />  -->
+    </LinearLayout>
+
+</LinearLayout>

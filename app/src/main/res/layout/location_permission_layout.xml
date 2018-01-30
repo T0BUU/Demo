@@ -15,7 +15,7 @@
         android:enabled="false"
         android:inputType="textMultiLine"
         android:text="@string/dialogLocationPermission"
-        android:textColor="@color/colorPrimaryDark" />
+        android:textColor="?attr/colorPrimaryDark" />
 
     <Button
         android:id="@+id/permissionOk"
@@ -25,5 +25,5 @@
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="47dp"
         android:layout_marginEnd="65dp"
-        android:text="@string/understood" />
+        android:text="@string/understood"/>
 </RelativeLayout>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- This is contains profile pic, name, etc. -->
+    <include
+        layout="@layout/nav_drawer_header"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"/>
+
+    <!-- Here is all other stuff in navigation drawer, for example points/cards and login button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/drawer_points_item"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/drawer_item_height"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_height="@dimen/drawer_item_icon_size"
+                android:layout_width="@dimen/drawer_item_icon_size"
+                android:background="@drawable/ic_money_logo"
+                android:contentDescription="@string/drawer_points_image_description"
+                android:backgroundTint="@color/gold"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/header_padding"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textColor="?attr/colorAccent"
+                android:textSize="36sp"
+                android:layout_margin="@dimen/header_padding"
+                android:text="@string/drawer_points_text"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/drawer_item_height"
+            android:orientation="horizontal"
+            android:layout_below="@id/drawer_points_item">
+
+            <ImageView
+                android:layout_width="@dimen/drawer_item_icon_size"
+                android:layout_height="@dimen/drawer_item_icon_size"
+                android:background="@drawable/ic_cards_icon_blue"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/header_padding"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorAccent"
+                android:textSize="36sp"
+                android:text="@string/drawer_cards_text"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/header_padding"/>
+        </LinearLayout>
+
+        <!-- Buttons on the bottom; settings and login -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="?attr/colorAccent">
+
+            <ImageButton
+                android:id="@+id/button_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/fab_margin"
+                android:contentDescription="@string/drawer_settings_button_text"
+                app:srcCompat="@drawable/ic_settings_blue_36dp"/>
+
+            <Button
+                android:id="@+id/button_login"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/button_login"
+                android:layout_margin="12dp"
+                android:background="@drawable/button_rounded_border" />
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>

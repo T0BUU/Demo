@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="nav_header_vertical_margin">16dp</dimen>
+    <dimen name="nav_header_horizontal_margin">16dp</dimen>
+    <dimen name="nav_header_height">140dp</dimen>
+    <dimen name="header_padding">8dp</dimen>
+
+    <dimen name="fab_margin">8dp</dimen>
+
+    <dimen name="drawer_item_icon_size">60dp</dimen>
+    <dimen name="drawer_item_height">96dp</dimen>
+
+    <dimen name="toolbar_divider_margin_pos">8dp</dimen>
+    <dimen name="toolbar_divider_margin_neg">-8dp</dimen>
+    <dimen name="toolbar_text_size">16sp</dimen>
+    <dimen name="toolbar_margin">16dp</dimen>
+</resources>
