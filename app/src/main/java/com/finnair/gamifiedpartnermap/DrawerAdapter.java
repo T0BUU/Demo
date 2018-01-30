@@ -1,7 +1,6 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.support.v4.app.Fragment;
-import android.view.MenuItem;
 
 /**
  * Created by Otto on 11.1.2018.

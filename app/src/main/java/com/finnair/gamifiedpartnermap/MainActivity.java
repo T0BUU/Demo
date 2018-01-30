@@ -11,6 +11,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -40,12 +41,21 @@ import com.google.android.gms.maps.model.LatLng;
  */
 //Modified by Otto on 11.1.2018, added drawerLayout and toolbar to MainActivity.
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,
+                                                                LocationPermissionDialog.LocationDialogListener{
 
     private DrawerLayout drawerLayout;
     private DrawerAdapter drawerAdapter;
 
     private FragmentManager fragmentManager;
+
+    private MapsFragment mapFragment;
+    private GoogleMap gMap;
+
+
+    //Constants marking which permissions were granted.
+    final static int locationPermission = 100;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

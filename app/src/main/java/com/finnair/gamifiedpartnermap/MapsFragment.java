@@ -280,8 +280,6 @@ public class MapsFragment extends Fragment {
                                 Log.d("POOP", "You can collect this plane. It now flies away!");
                                 planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.150, 24.93470), new LatLng(60.180822, 24.884789)), location);
                                 planeMarkerClass.saveCollectedPlane(marker, getContext());
-                                TextView textView = container.findViewById(R.id.profileFragmentTextView);
-                                textView.setText(planeMarkerClass.readCollectedPlanes(getContext()));
                             } else{
                                 Log.d("POOP", "Nuh-uh, you can't reach this. It now flies somewhere");
                                 planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.1841, 24.8301), new LatLng(60.160, 24.93470)), location);

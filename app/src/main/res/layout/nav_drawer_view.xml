@@ -63,6 +63,14 @@
                 android:text="@string/drawer_cards_text"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="@dimen/header_padding"/>
+
+            <TextView
+                android:id="@+id/profileFragmentTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="TextView" />
+
         </LinearLayout>
 
         <!-- Buttons on the bottom; settings and login -->
