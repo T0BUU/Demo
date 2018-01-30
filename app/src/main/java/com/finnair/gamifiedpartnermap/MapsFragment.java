@@ -1,12 +1,9 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-
-import android.app.ActionBar;
-import android.app.DialogFragment;
-import android.app.FragmentTransaction;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import android.content.res.Resources;
@@ -14,22 +11,23 @@ import android.location.Criteria;
 import android.location.Location;
 
 import android.location.LocationManager;
-import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -41,15 +39,20 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LocationPermissionDialog.LocationDialogListener{
+import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
+
+public class MapsFragment extends Fragment {
 
 
     public MapsFragment() {
@@ -63,26 +66,55 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
     private HashMap<String, PartnerData> markerPartnerData = new HashMap<>();
 
 
-
-    //Constants marking which permissions were granted.
-    final static int locationPermission = 100;
-
-
     private GoogleMap mMap;
-    private MarkerClass markerClass;
+    private CompanyMarkerClass companyMarkerClass;
+    private PlaneMarkerClass planeMarkerClass;
     private MapView mMapView;
 
 
     //These are used to get the users current location.
-    LocationManager locationManager;
-    Criteria criteria;
-    Location location;
+    private LocationManager locationManager;
+    private Criteria criteria;
+    private Location location;
 
+    private GeofencingClient mGeofencingClient;
+    private Geofence test;
+    private PendingIntent mGeofencePendingIntent;
+    private Marker geoFenceMarker;
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
+
+
+        // Lazy testing of OpenSky.org:
+        // Add these to (app) build.gradle:
+        // compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
+        // compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
+        // compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
+        // compile 'com.squareup.okhttp3:okhttp:3.5.0'
+        /*
+        Log.d("POOP", "Trying to open connection...");
+        final OpenSkyApi api = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
+        Log.d("POOP", "That went through");
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Log.d("POOP", "Trying to download now");
+                    OpenSkyStates os = api.getStates(0, null);
+                    Log.d("POOP", os.getStates().toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+
+        */
+
+
         View rootView = inflater.inflate(R.layout.content_maps, container, false);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
@@ -105,9 +137,11 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
                 mMap = googleMap;
 
+                ((MainActivity) getActivity()).setMap(mMap);
+
                 // Customize the styling of the base map using a JSON object
                 // defined in a raw resource file
-                try{
+                try {
                     boolean success = mMap.setMapStyle(
                             MapStyleOptions.loadRawResourceStyle(
                                     getActivity(), R.raw.style_json));
@@ -115,7 +149,7 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                     if (!success) {
                         Log.e(TAG, "Style parsing failed.");
                     }
-                } catch (Resources.NotFoundException e){
+                } catch (Resources.NotFoundException e) {
                     Log.e(TAG, "Can't find style. Error: ", e);
                 }
 
@@ -125,20 +159,23 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                         ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                     location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                    if (location != null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(location.getLatitude(), location.getLongitude()), 13));
-                        //Location not available so center on Helsinki.
-                    else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
+                    if (location == null) {
+                        // Location not available so center on Helsinki. Location provider set to <"">
+                        location = new Location("");
+                        location.setLatitude(60.167497);
+                        location.setLongitude(24.934739);
+                    }
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
 
                     //Enable the myLocation Layer
                     mMap.setMyLocationEnabled(true);
 
 
-                }
-                else {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
-                }
+                } else ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
 
-                markerClass = new MarkerClass(getActivity(), mMap);
+                companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
+                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap);
 
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -148,16 +185,16 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // Loop through children in "locations" (i.e. loop through partners in FireBase):
-                        for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                        for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
                             String companyName = singleSnapshot.child("name").getValue().toString();
-                            Double lat = Double.parseDouble( singleSnapshot.child("lat").getValue().toString() );
-                            Double lng = Double.parseDouble( singleSnapshot.child("lng").getValue().toString() );
+                            Double lat = Double.parseDouble(singleSnapshot.child("lat").getValue().toString());
+                            Double lng = Double.parseDouble(singleSnapshot.child("lng").getValue().toString());
                             String address = singleSnapshot.child("address").getValue().toString();
                             String business = singleSnapshot.child("field_of_business").getValue().toString();
                             String description = singleSnapshot.child("description").getValue().toString();
 
                             // Place two Markers (close, far) on the map and hide one depending on zoom:
-                            String[] tags = markerClass.addOneMarkerOnMap(lat, lng, companyName, business);
+                            String[] tags = companyMarkerClass.addOneMarkerOnMap(lat, lng, companyName, business);
 
                             // Record partner data into a HashMap which has Marker tag as key and ParterData as content:
                             PartnerData pData = new PartnerData();
@@ -168,11 +205,10 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                             markerPartnerData.put(tags[1], pData);
                         }
 
-                        if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
-                        else markerClass.showFarMarkers();
+                        if (mMap.getCameraPosition().zoom > 10) companyMarkerClass.showCloseMarkers();
+                        else companyMarkerClass.showFarMarkers();
 
                     }
-
 
 
                     @Override
@@ -181,8 +217,12 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                     }
                 });
 
-                if (mMap.getCameraPosition().zoom > 10) markerClass.showCloseMarkers();
-                else markerClass.showFarMarkers();
+
+
+
+
+                if (mMap.getCameraPosition().zoom > 10) companyMarkerClass.showCloseMarkers();
+                else companyMarkerClass.showFarMarkers();
 
 
                 mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
@@ -190,12 +230,15 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
                     public void onCameraMove() {
                         CameraPosition cameraPosition = mMap.getCameraPosition();
 
+                        planeMarkerClass.zoomListener(cameraPosition.zoom);
+                        //Log.d("Zoom Level", "" + java.lang.Math.pow(2, 20-cameraPosition.zoom));
                         // Depending on the zoom level hide ones and set visible the other Markers
-                        if (cameraPosition.zoom > 10) markerClass.showCloseMarkers();
-                        else markerClass.showFarMarkers();
+                        if (cameraPosition.zoom > 10) companyMarkerClass.showCloseMarkers();
+                        else companyMarkerClass.showFarMarkers();
 
                     }
                 });
+
 
                 mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
                     @Override
@@ -216,10 +259,9 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
-                    public boolean onMarkerClick(final Marker marker){
+                    public boolean onMarkerClick(final Marker marker) {
 
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-                        markerClass.showCloseMarkers();
 
                         marker.showInfoWindow();
 
@@ -229,34 +271,137 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
-                    public void onInfoWindowClick(final Marker marker){
+                    public void onInfoWindowClick(final Marker marker) {
 
+                        if (planeMarkerClass.markerArrayContainsMarker(marker)){
+                            // User clicked an airplane
 
-                        // Instantiate PartnerInfoFragment:
-                        PartnerInfoFragment p = new PartnerInfoFragment();
-                        p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
-                        // Find PartnerData for the Marker clicked recently. Find correct by reading markerID:
-                        PartnerData currentPartner = markerPartnerData.get( marker.getId() );
+                            if (planeMarkerClass.planeIsWithinReach(location, marker)){
+                                Log.d("POOP", "You can collect this plane. It now flies away!");
+                                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.150, 24.93470), new LatLng(60.180822, 24.884789)), location);
+                                planeMarkerClass.saveCollectedPlane(marker, getContext());
+                                TextView textView = container.findViewById(R.id.profileFragmentTextView);
+                                textView.setText(planeMarkerClass.readCollectedPlanes(getContext()));
+                            } else{
+                                Log.d("POOP", "Nuh-uh, you can't reach this. It now flies somewhere");
+                                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.1841, 24.8301), new LatLng(60.160, 24.93470)), location);
+                            }
 
+                        } else {
+                            // User clicked something else than an airplane (company marker):
+                            // Instantiate PartnerInfoFragment:
+                            PartnerInfoFragment p = new PartnerInfoFragment();
+                            p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
+                            // Find PartnerData for the Marker clicked recently. Find correct by reading markerID:
+                            PartnerData currentPartner = markerPartnerData.get(marker.getId());
 
-                        // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
-                        p.setAllFragmentData( currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
+                            // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
+                            p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
 
-                        // Display PartnerInfoFragment:
-                        // Notice! Content (company name etc.) could not be changed with p.show()
-
-
-
+                        }
 
                     }
                 });
+
+            //TODO: Remove these when implementing the proper version.
+                planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Finnair-1"); // 60.1841, 24.8301
+                planeMarkerClass.addOneMarkerOnMap(60.1870, 24.9390, "Finnair-2");
+                // 60.167497, 24.934739
+                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.16740, 24.93470), new LatLng(60.180822, 24.884789)), location);  // new LatLng(60.187664, 24.939161), new LatLng(60.180822, 24.884789)
+                // User: Latitude(60.167497);
+                // User: Longitude(24.934739);
+                //---------
             }
 
         });
 
 
+
+        //TODO: Currently adds a simple geofence to the first 100 locations. Figure out something different.
+        mGeofencingClient = LocationServices.getGeofencingClient(getActivity());
+
+        test = new Geofence.Builder()
+                .setRequestId("Otaniemi")
+                .setCircularRegion(60.1841, 24.8301, 100.0f)
+                .setExpirationDuration(60000L*10L)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
+
+        markerForGeofence(new LatLng(60.1841, 24.8301));
+
+        mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+                .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                    }
+                })
+                .addOnFailureListener(getActivity(), new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+
+        //-----------------------
+
         return rootView;
     }
+
+    private GeofencingRequest getGeofencingRequest() {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.addGeofence(test);
+        return builder.build();
+
+    }
+
+    private void markerForGeofence(LatLng latLng) {
+        Log.i(TAG, "markerForGeofence(" + latLng + ")");
+        String title = latLng.latitude + ", " + latLng.longitude;
+        // Define marker options
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(latLng)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                .title(title);
+        if (mMap != null) {
+            // Remove last geoFenceMarker
+            if (geoFenceMarker != null)
+                geoFenceMarker.remove();
+
+            geoFenceMarker = mMap.addMarker(markerOptions);
+        }
+    }
+
+
+
+
+    private PendingIntent getGeofencePendingIntent() {
+
+        if (mGeofencePendingIntent != null) {
+         return mGeofencePendingIntent;
+        }
+
+
+        Intent intent = new Intent(getContext(), GeofenceTransitionsIntentService.class);
+
+        mGeofencePendingIntent = PendingIntent.getService(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return mGeofencePendingIntent;
+    }
+
+    public Criteria getCriteria() {
+        return criteria;
+    }
+
+    public void setLocation(Location l) {
+        location = l;
+    }
+
+    public LocationManager getLocationManager() {
+        return locationManager;
+    }
+
 
     @Override
     public void onResume() {
@@ -273,6 +418,21 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        mGeofencingClient.removeGeofences(getGeofencePendingIntent())
+                .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                    }
+                })
+                .addOnFailureListener(getActivity(), new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+
         mMapView.onDestroy();
     }
 
@@ -284,58 +444,7 @@ public class MapsFragment extends Fragment implements LocationPermissionDialog.L
 
 
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
-        switch (requestCode) {
-            case (locationPermission): {
-
-                if ( grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                            ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                        if (location != null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(location.getLatitude(), location.getLongitude()), 13));
-                            //Location not available so center on Helsinki.
-                        else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
-
-                        //Enable the myLocation Layer
-                        mMap.setMyLocationEnabled(true);
-
-                    }
-
-
-                }
-                else {
-
-                    Log.i("assert", "Denied");
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                            LocationPermissionDialog dialog = new LocationPermissionDialog();
-                            dialog.show(getActivity().getFragmentManager(), "permissionInfo");
-
-                        }
-                        //Location not available so center on Helsinki.
-                        else mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(60.167497, 24.934739), 13));
-
-                    }
-
-
-                }
-                return;
-            }
-        }
-    }
-
-
-    // The dialog fragment receives a reference to this Activity through the
-    // Fragment.onAttach() callback, which it uses to call the following methods
-    // defined by the NoticeDialogFragment.NoticeDialogListener interface
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        Toast.makeText(getContext(), "Clicked", Toast.LENGTH_SHORT);
-        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
-    }
 
 
 
