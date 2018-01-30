@@ -284,9 +284,10 @@ public class PlaneMarkerClass {
         final LatLng currentPosition = plane.getPosition();
         final float startRotation = plane.getRotation();
 
+        //This is used tp calculate a direction vector.
         LatLng directionPoint = planeDirectionVectors.get(i);
 
-        final Pair<Double, Double> currentDirection = new Pair(1.0, 0.0);
+        final Pair<Double, Double> currentDirection = new Pair(1.0, 0.0); //Currently the direction vector isn't used in an effort to simplify the math.
         final Pair<Double, Double> destinationDirection = new Pair(destination.longitude-currentPosition.longitude, destination.latitude-currentPosition.latitude);
 
         planeDirectionVectors.set(i, currentPosition);
