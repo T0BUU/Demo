@@ -40,9 +40,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 import static java.lang.Math.acos;
 import static java.lang.Math.atan;
+import static java.lang.Math.atan2;
 import static java.lang.Math.pow;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
@@ -282,25 +284,34 @@ public class PlaneMarkerClass {
         final Circle area = planeMarkers.second;
 
         final LatLng currentPosition = plane.getPosition();
-        final float startRotation = plane.getRotation();
+        float initialRotation = plane.getRotation();
+
+        if (initialRotation > 360.0) initialRotation -= 360;
+
+        final float startRotation = initialRotation;
 
         //This is used tp calculate a direction vector.
         LatLng directionPoint = planeDirectionVectors.get(i);
 
-        final Pair<Double, Double> currentDirection = new Pair(1.0, 0.0); //Currently the direction vector isn't used in an effort to simplify the math.
+        final Pair<Double, Double> currentDirection = new Pair(currentPosition.longitude-directionPoint.longitude, currentPosition.latitude-directionPoint.latitude); //Currently the direction vector isn't used in an effort to simplify the math.
         final Pair<Double, Double> destinationDirection = new Pair(destination.longitude-currentPosition.longitude, destination.latitude-currentPosition.latitude);
 
         planeDirectionVectors.set(i, currentPosition);
 
-        final float endRotation = (float) toDegrees(angleOfRotation(currentDirection.first, currentDirection.second,
-                                                          destinationDirection.first, destinationDirection.second));
+        double signedAngle = atan2(destinationDirection.second, destinationDirection.first) - atan2(currentDirection.second,currentDirection.first);
+
+        if (abs(signedAngle) > PI) signedAngle += 2*PI;
+        else signedAngle -= 2*PI;
+        //Don't know why but it seems like Google Maps has been implemented "upside down" so clockwise is anti-clockwise in Google Maps.
+        final float endRotation = (float) toDegrees(-signedAngle);
 
         Log.d("The angle of rotation", ""+endRotation + " and  " + destinationDirection);
 
         ValueAnimator ltAnimation = ValueAnimator.ofFloat((float) currentPosition.latitude, (float) destination.latitude);
         ValueAnimator lgAnimation = ValueAnimator.ofFloat((float) currentPosition.longitude, (float) destination.longitude);
 
-        plane.setRotation(endRotation);
+
+        plane.setRotation(startRotation + endRotation);
 
         Log.d("The final rotation: ", "" + plane.getRotation());
 
