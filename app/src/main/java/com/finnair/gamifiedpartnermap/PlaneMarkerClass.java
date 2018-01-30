@@ -259,23 +259,6 @@ public class PlaneMarkerClass {
 
     }
 
-    private double vectorNorm(double i, double j) {
-        return sqrt(pow(i, 2)+pow(j, 2));
-    }
-
-    private double dotProduct(double i1, double j1, double i2, double j2) {
-        return i1*i2+j1*j2;
-    }
-
-    private double angleOfRotation(double i1, double j1, double i2, double j2) {
-        //First calculate the angle between the two vectors.
-        double angle = acos( dotProduct(i1,j1,i2,j2)/( vectorNorm(i1,j1)*vectorNorm(i2,j2) ) );
-        //The the cross product
-        double cross = vectorNorm(i1, j1)*vectorNorm(i2, j2)*sin(angle);
-        //Now using the cross product determine the direction of rotation.
-        if (cross < 0) return -abs(angle);
-        else return abs(angle);
-    }
 
     private void animatePlaneMarker(LatLng destination, final Pair<Marker, Circle> planeMarkers, int i) {
         // WARNING: Animations might cause problems if they last longer than the refresh rate!
@@ -298,10 +281,11 @@ public class PlaneMarkerClass {
 
         planeDirectionVectors.set(i, currentPosition);
 
-        double signedAngle = atan2(destinationDirection.second, destinationDirection.first) - atan2(currentDirection.second,currentDirection.first);
+        double signedAngle = atan2(currentDirection.first*destinationDirection.second - currentDirection.second*destinationDirection.first
+                                    , currentDirection.first*destinationDirection.first - currentDirection.second*destinationDirection.second);
 
-        if (abs(signedAngle) > PI) signedAngle += 2*PI;
-        else signedAngle -= 2*PI;
+        /*if (abs(signedAngle) > PI) signedAngle += 2*PI;
+        else signedAngle -= 2*PI;*/
         //Don't know why but it seems like Google Maps has been implemented "upside down" so clockwise is anti-clockwise in Google Maps.
         final float endRotation = (float) toDegrees(-signedAngle);
 
