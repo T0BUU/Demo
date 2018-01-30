@@ -10,13 +10,19 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,15 +38,14 @@ import com.google.android.gms.maps.model.LatLng;
 /**
  * Created by ala-hazla on 16.12.2017.
  */
+//Modified by Otto on 11.1.2018, added drawerLayout and toolbar to MainActivity.
 
-public class MainActivity extends AppCompatActivity implements LocationPermissionDialog.LocationDialogListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private MapsFragment mapFragment;
-    private GoogleMap gMap;
+    private DrawerLayout drawerLayout;
+    private DrawerAdapter drawerAdapter;
 
-
-    //Constants marking which permissions were granted.
-    final static int locationPermission = 100;
+    private FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,106 +53,86 @@ public class MainActivity extends AppCompatActivity implements LocationPermissio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        android.support.design.widget.TabLayout tabLayout = findViewById(R.id.tab_layout);
+        createUI();
+    }
 
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_profile), 0);
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_map), 1);
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_game), 2);
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_settings), 3);
+    public void createUI(){
 
-        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        drawerAdapter = new DrawerAdapter();        //DrawerAdapter instanties fragments
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
-        final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
+        //This handles all our fragments
+        fragmentManager = getSupportFragmentManager();
 
-        viewPager.setAdapter(adapter);
 
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        //This is toolbar on top of screen.
+        Toolbar myToolBar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myToolBar);
 
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        //Navigation buttons
+        Button loginButton = (Button) findViewById(R.id.button_login);
+        ImageButton settingsButton = (ImageButton) findViewById(R.id.button_settings);
+        Button mapButton = (Button) findViewById(R.id.toolbar_map_button);
+        Button partnersButton = (Button) findViewById(R.id.toolbar_partners_button);
+
+        //Add click listeners to all buttons
+        loginButton.setOnClickListener(this);
+        settingsButton.setOnClickListener(this);
+        mapButton.setOnClickListener(this);
+        partnersButton.setOnClickListener(this);
+
+        //Add drawer toggle button and listener for it.
+        ActionBarDrawerToggle abToggle = new ActionBarDrawerToggle(
+                this, drawerLayout, myToolBar, R.string.actionbar_drawer_open, R.string.actionbar_drawer_close);
+        drawerLayout.addDrawerListener(abToggle);
+        abToggle.setToolbarNavigationClickListener(new View.OnClickListener(){
             @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
+            public void onClick(View view){
+                drawerLayout.openDrawer(GravityCompat.START);
             }
         });
 
-        viewPager.setCurrentItem(1);
-        mapFragment = (MapsFragment) adapter.getItem(1);
+        //Set default drawerToggleButton to false, and then replace it with custom icon.
+        abToggle.setDrawerIndicatorEnabled(false);
+        abToggle.setHomeAsUpIndicator(R.drawable.ic_person_blue);
+        abToggle.syncState();
 
-
+        //Insert map fragment to main_content view.
+        fragmentManager.beginTransaction()
+                .replace(R.id.main_content, drawerAdapter.getItem(0))
+                .commit();
     }
 
+    //Handle button click events here.
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-
-        switch (requestCode) {
-            case (locationPermission): {
-
-                if ( grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                            ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                        LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-                        Log.i("Info", "This is: " + (manager == null));
-
-                        Location location = manager.getLastKnownLocation(manager.getBestProvider(new Criteria(), false));
-
-                        mapFragment.setLocation(location);
-
-
-
-                        if (location != null)
-                            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
-                            //Location not available so center on Helsinki.
-                        else
-                            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(60.167497, 24.934739), 13));
-
-                        //Enable the myLocation Layer
-                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                        }
-                        gMap.setMyLocationEnabled(true);
-
-                    }
-
-
-                }
-                else {
-
-                    Log.i("assert", "Denied");
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                            LocationPermissionDialog dialog = new LocationPermissionDialog();
-                            dialog.show(this.getFragmentManager(), "permissionInfo");
-
-                        }
-                        //Location not available so center on Helsinki.
-                        else {
-                            mapFragment.setLocation(null);
-                            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(60.167497, 24.934739), 13));
-                        }
-
-                    }
-
-
-                }
-
-                return;
-            }
+    public void onClick(View view){
+        switch(view.getId()){
+            case R.id.button_settings:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.main_content, drawerAdapter.getItem(1))
+                        .commit();
+             //   myTitleView.setText(R.string.tab_settings);
+                drawerLayout.closeDrawer(GravityCompat.START);
+                break;
+            case R.id.button_login:
+                drawerLayout.closeDrawer(GravityCompat.START);
+                Toast.makeText(MainActivity.this, "Clicked login", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.finnair_logo_button:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.main_content, drawerAdapter.getItem(0))
+                        .commit();
+            //    myTitleView.setText(R.string.tab_map);
+                break;
+            case R.id.toolbar_map_button:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.main_content, drawerAdapter.getItem(0))
+                        .commit();
+                break;
+            case R.id.toolbar_partners_button:
+                Toast.makeText(MainActivity.this, "Open partner list", Toast.LENGTH_SHORT).show();
+            default: break;
         }
-
     }
 
     public void setMap(GoogleMap m) {
@@ -163,3 +148,4 @@ public class MainActivity extends AppCompatActivity implements LocationPermissio
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
     }
 }
+
