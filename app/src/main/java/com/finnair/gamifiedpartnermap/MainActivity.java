@@ -3,11 +3,14 @@ package com.finnair.gamifiedpartnermap;
 import android.*;
 import android.Manifest;
 import android.app.DialogFragment;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -34,6 +37,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+
+import net.openid.appauth.AuthorizationRequest;
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.ResponseTypeValues;
+
+import java.util.HashMap;
 
 
 /**
@@ -111,7 +121,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fragmentManager.beginTransaction()
                 .replace(R.id.main_content, drawerAdapter.getItem(0))
                 .commit();
+
+        if(getIntent() != null){
+            if(getIntent().getAction().equals("com.finnair.gamifiedpartnermap.AUTHORIZATION_FAILED")){
+                Toast.makeText(this, "Authorization failed", Toast.LENGTH_SHORT).show();
+            }
+            else if(getIntent().getAction().equals("com.finnair.gamifiedpartnermap.PROFILE_REQUEST_SUCCESSFUL")){
+                HashMap<String, String> profileInformation = (HashMap<String, String>) getIntent().getSerializableExtra("profileInformation");
+                Toast.makeText(this, "Finnair Plus ID: " + profileInformation.get("id"), Toast.LENGTH_SHORT).show();
+            }
+        }
+
     }
+
 
     //Handle button click events here.
     @Override
@@ -127,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.button_login:
                 drawerLayout.closeDrawer(GravityCompat.START);
                 Toast.makeText(MainActivity.this, "Clicked login", Toast.LENGTH_SHORT).show();
+                makeAuthorizationRequest();
                 break;
             case R.id.finnair_logo_button:
                 fragmentManager.beginTransaction()
@@ -143,6 +166,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "Open partner list", Toast.LENGTH_SHORT).show();
             default: break;
         }
+    }
+
+    private void makeAuthorizationRequest() {
+        //Creates the configuration for the authorization service
+        AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
+                Uri.parse("https://preauth.finnair.com/cas/oauth2.0/authorize"), // Authorization endpoint
+                Uri.parse("https://preauth.finnair.com/cas/oauth2.0/accessToken") // Token endpoint
+        );
+
+        AuthorizationRequest.Builder authRequestBuilder =
+                new AuthorizationRequest.Builder(
+                        serviceConfiguration, // the authorization service configuration
+                        "aalto-0Cs", // the client ID, typically pre-registered and static
+                        ResponseTypeValues.CODE, // the response_type value: we want a code
+                        Uri.parse("https://datademo-2a85f.firebaseapp.com/auth/finnair/login")); // the redirect URI to which the auth response is sent
+
+
+        // Create the authorization request using Builder and the authorization service
+        AuthorizationRequest authRequest = authRequestBuilder.build();
+        AuthorizationService authService = new AuthorizationService(this);
+
+        // Perform the request. The pending intents will be redirected through intent filters in the manifest
+        PendingIntent positive = PendingIntent.getActivity(this, 0, new Intent(this, LoginActivity.class), 0);
+        PendingIntent negative = PendingIntent.getActivity(this, 0, new Intent("com.finnair.gamifiedpartnermap.HANDLE_AUTHORIZATION_RESPONSE"), 0);
+        authService.performAuthorizationRequest(authRequest,positive, negative);
+
+
     }
 
     public void setMap(GoogleMap m) {
