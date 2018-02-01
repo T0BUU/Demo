@@ -42,7 +42,8 @@ import com.google.android.gms.maps.model.LatLng;
 //Modified by Otto on 11.1.2018, added drawerLayout and toolbar to MainActivity.
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
-                                                                LocationPermissionDialog.LocationDialogListener{
+                                                                LocationPermissionDialog.LocationDialogListener,
+                                                                PlaneCatchFragment.PlaneCatchListener{
 
     private DrawerLayout drawerLayout;
     private DrawerAdapter drawerAdapter;
@@ -156,6 +157,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onDialogPositiveClick(DialogFragment dialog) {
         Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
+    }
+
+    @Override
+    public void onPlaneDialogPositiveClick(DialogFragment dialog) {
+        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
     }
 }
 

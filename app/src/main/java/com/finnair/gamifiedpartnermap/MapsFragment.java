@@ -263,21 +263,16 @@ public class MapsFragment extends Fragment {
 
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
 
-                        marker.showInfoWindow();
-
-                        return true;  // What am I supposed to return? public void gets rejected...
-                    }
-                });
-
-                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(final Marker marker) {
-
                         if (planeMarkerClass.markerArrayContainsMarker(marker)){
                             // User clicked an airplane
 
                             if (planeMarkerClass.planeIsWithinReach(location, marker)){
                                 Log.d("POOP", "You can collect this plane. It now flies away!");
+                                PlaneCatchFragment caught = new PlaneCatchFragment();
+                                caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
+
+                                caught.setAllFragmentData(marker.getTitle(), "Sutsi satsi satsaa, sutsi satsaa");
+
                                 planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.150, 24.93470), new LatLng(60.180822, 24.884789)), location);
                                 planeMarkerClass.saveCollectedPlane(marker, getContext());
                             } else{
@@ -297,6 +292,15 @@ public class MapsFragment extends Fragment {
                             p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
 
                         }
+                        return true;
+                    }
+                });
+
+                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(final Marker marker) {
+
+
 
                     }
                 });

@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="com.android.support.test.uiautomator:uiautomator-v18-2.1.3">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/uiautomator-v18-2.1.3.aar/fdb8e0e69cd35b3addf957da25f229d1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/uiautomator-v18-2.1.3.aar/fdb8e0e69cd35b3addf957da25f229d1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/uiautomator-v18-2.1.3.aar/fefa8c8f76aa71b711302b1095c3dead/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/uiautomator-v18-2.1.3.aar/fefa8c8f76aa71b711302b1095c3dead/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
