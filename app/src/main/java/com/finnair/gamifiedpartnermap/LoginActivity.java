@@ -35,7 +35,7 @@ public class LoginActivity extends Activity implements TokenResponseHandler, Pro
         AuthorizationException exp = AuthorizationException.fromIntent(getIntent());
 
         if (resp != null) {
-            Toast.makeText(this, "Authentication successful", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Authentication successful", Toast.LENGTH_SHORT).show();
             TokenRequest tokenRequest = new TokenRequest();
             tokenRequest.handler = this;
            String url = String.format("https://preauth.finnair.com/cas/oauth2.0/accessToken?client_id=%s&redirect_uri=%s&code=%s&client_secret=%s", CLIENT_ID, "https%3A%2F%2Fdatademo-2a85f.firebaseapp.com%2Fauth%2Ffinnair%2Flogin",resp.authorizationCode,CLIENT_SECRET);
