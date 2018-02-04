@@ -26,11 +26,6 @@ public class CompanyMarkerClass {
     java.util.ArrayList<Pair<Marker, Marker>> markerArrayList = new java.util.ArrayList<>();
     GoogleMap mMap;
 
-    private Double lat;
-    private Double lng;
-    private String companyName;
-    private String companyBusiness;
-
 
     public CompanyMarkerClass(Activity activity, GoogleMap mMap) {
 
@@ -48,13 +43,7 @@ public class CompanyMarkerClass {
 
     public String[] addOneMarkerOnMap(Double latitude, Double longitude, String companyName, String business){
 
-        this.lat = latitude;
-        this.lng = longitude;
-        this.companyName = companyName;
-        this.companyBusiness = business;
-
-
-        MarkerOptions balloonOptions = this.balloonMarkerOptions();
+        MarkerOptions balloonOptions = this.balloonMarkerOptions(latitude, longitude, companyName, business);
         MarkerOptions imageOptions = this.imageMarkerOptions(balloonOptions);
 
         Marker farMarker = this.mMap.addMarker(balloonOptions);
@@ -82,13 +71,13 @@ public class CompanyMarkerClass {
         }
     }
 
-    public MarkerOptions balloonMarkerOptions(){
+    public MarkerOptions balloonMarkerOptions(Double lat, Double lng, String companyName, String business){
 
-        LatLng position = new LatLng(this.lat, this.lng);
+        LatLng position = new LatLng(lat, lng);
         MarkerOptions mOptions = new MarkerOptions();
         mOptions.position(position)
-                .title(this.companyName)
-                .snippet(this.companyBusiness);
+                .title(companyName)
+                .snippet(business);
         return mOptions;
     }
 

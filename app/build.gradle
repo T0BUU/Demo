@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
+
     defaultConfig {
         applicationId "com.finnair.gamifiedpartnermap"
         minSdkVersion 18
@@ -17,6 +18,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
     }
 }
 
@@ -41,4 +46,22 @@ dependencies {
     compile 'com.android.support:design:26.1.0'
     compile 'com.android.support:support-v4:26.1.0'
 
+    compile 'commons-codec:commons-codec:1.10'
+    compile 'org.apache.httpcomponents:httpcore:4.4.1'
+    compile 'org.apache.httpcomponents:httpclient:4.5'
+
+    compile 'com.google.code.gson:gson:2.8.1'
+
+
+    compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
+
+    compile 'com.squareup.okhttp3:okhttp:3.5.0'
+
+}
+
+repositories{
+    mavenLocal()
+    mavenCentral()
 }

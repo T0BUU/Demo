@@ -11,6 +11,7 @@ import android.location.Criteria;
 import android.location.Location;
 
 import android.location.LocationManager;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -20,7 +21,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -47,7 +47,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
@@ -72,10 +71,10 @@ public class MapsFragment extends Fragment {
     private MapView mMapView;
 
 
-    //These are used to get the users current location.
+    //These are used to get the users current userLocation.
     private LocationManager locationManager;
     private Criteria criteria;
-    private Location location;
+    private Location userLocation;
 
     private GeofencingClient mGeofencingClient;
     private Geofence test;
@@ -88,31 +87,7 @@ public class MapsFragment extends Fragment {
                              Bundle savedInstanceState) {
 
 
-        // Lazy testing of OpenSky.org:
-        // Add these to (app) build.gradle:
-        // compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
-        // compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
-        // compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
-        // compile 'com.squareup.okhttp3:okhttp:3.5.0'
-        /*
-        Log.d("POOP", "Trying to open connection...");
-        final OpenSkyApi api = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
-        Log.d("POOP", "That went through");
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Log.d("POOP", "Trying to download now");
-                    OpenSkyStates os = api.getStates(0, null);
-                    Log.d("POOP", os.getStates().toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        thread.start();
 
-        */
 
 
         View rootView = inflater.inflate(R.layout.content_maps, container, false);
@@ -139,8 +114,7 @@ public class MapsFragment extends Fragment {
 
                 ((MainActivity) getActivity()).setMap(mMap);
 
-                // Customize the styling of the base map using a JSON object
-                // defined in a raw resource file
+                // Customize the styling of the base map using a JSON object defined in a raw resource file
                 try {
                     boolean success = mMap.setMapStyle(
                             MapStyleOptions.loadRawResourceStyle(
@@ -154,19 +128,21 @@ public class MapsFragment extends Fragment {
                 }
 
 
-                //Request permission to use the user's location data.
+                //Request permission to use the user's userLocation data.
                 if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                         ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                    location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                    if (location == null) {
-                        // Location not available so center on Helsinki. Location provider set to <"">
-                        location = new Location("");
-                        location.setLatitude(60.167497);
-                        location.setLongitude(24.934739);
+                    userLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+                    if (userLocation == null) {
+                        // Location not available so center manually . Location provider set to <"">
+                        // Kamppi (good for testing firms): 60.167497, 24.934739
+                        // Espoo (good for plane spotting): 60.2055, 24.6559
+                        userLocation = new Location("");
+                        userLocation.setLatitude(60.2055);
+                        userLocation.setLongitude(24.6559);
                     }
 
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
 
                     //Enable the myLocation Layer
                     mMap.setMyLocationEnabled(true);
@@ -175,7 +151,7 @@ public class MapsFragment extends Fragment {
                 } else ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
 
                 companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
-                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap);
+                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, userLocation);
 
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -218,9 +194,6 @@ public class MapsFragment extends Fragment {
                 });
 
 
-
-
-
                 if (mMap.getCameraPosition().zoom > 10) companyMarkerClass.showCloseMarkers();
                 else companyMarkerClass.showFarMarkers();
 
@@ -253,7 +226,7 @@ public class MapsFragment extends Fragment {
                 mMap.setOnMyLocationClickListener(new GoogleMap.OnMyLocationClickListener() {
                     @Override
                     public void onMyLocationClick(Location location) {
-                        Toast.makeText(getActivity(), "Current location:\n" + location, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), "Current userLocation:\n" + location, Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -273,16 +246,22 @@ public class MapsFragment extends Fragment {
                     @Override
                     public void onInfoWindowClick(final Marker marker) {
 
-                        if (planeMarkerClass.markerArrayContainsMarker(marker)){
+                        if (planeMarkerClass.containsMarker(marker)){
                             // User clicked an airplane
+                            Plane plane = planeMarkerClass.getPlaneByID(marker.getTitle());
+                            if (plane.planeIsWithinReach(userLocation) ){
+                                Log.d("POOP", "You can collect this plane!");
+                                Log.d("POOP", " " + plane.getPlaneID() + ": "
+                                        + plane.getPlaneLatLng().latitude + ", "
+                                        + plane.getPlaneLatLng().longitude + ", "
+                                        + plane.getOriginCountry() + ", "
+                                        + plane.getIcao24() + ", Alt: "
+                                        + plane.getGeoAltitude() + ", speed: "
+                                        + plane.getVelocityKmph() );
+                                plane.savePlane(getContext());
 
-                            if (planeMarkerClass.planeIsWithinReach(location, marker)){
-                                Log.d("POOP", "You can collect this plane. It now flies away!");
-                                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.150, 24.93470), new LatLng(60.180822, 24.884789)), location);
-                                planeMarkerClass.saveCollectedPlane(marker, getContext());
                             } else{
-                                Log.d("POOP", "Nuh-uh, you can't reach this. It now flies somewhere");
-                                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.1841, 24.8301), new LatLng(60.160, 24.93470)), location);
+                                Log.d("POOP", "Nuh-uh, you can't reach me.");
                             }
 
                         } else {
@@ -295,20 +274,32 @@ public class MapsFragment extends Fragment {
 
                             // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
                             p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
-
                         }
-
                     }
                 });
 
-            //TODO: Remove these when implementing the proper version.
-                planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Finnair-1"); // 60.1841, 24.8301
-                planeMarkerClass.addOneMarkerOnMap(60.1870, 24.9390, "Finnair-2");
-                // 60.167497, 24.934739
-                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.16740, 24.93470), new LatLng(60.180822, 24.884789)), location);  // new LatLng(60.187664, 24.939161), new LatLng(60.180822, 24.884789)
-                // User: Latitude(60.167497);
-                // User: Longitude(24.934739);
-                //---------
+                // First call to OpenSky (AsyncTask):
+                planeMarkerClass.refreshOpenSkyPlanes();
+                // Timed call to OpenSky (AsyncTask):
+                final long INTERVAL = 1000 * 30; // 30 seconds
+                final Handler handler = new Handler();
+                Runnable runnable = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try{
+                            planeMarkerClass.refreshOpenSkyPlanes();
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        finally{
+                            // Call the same runnable to call it at regular interval
+                            handler.postDelayed(this, INTERVAL);
+                        }
+                    }
+                };
+                handler.postDelayed(runnable, INTERVAL);
             }
 
         });
@@ -392,8 +383,8 @@ public class MapsFragment extends Fragment {
         return criteria;
     }
 
-    public void setLocation(Location l) {
-        location = l;
+    public void setUserLocation(Location l) {
+        userLocation = l;
     }
 
     public LocationManager getLocationManager() {

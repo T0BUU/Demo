@@ -43,6 +43,12 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
                                                                 LocationPermissionDialog.LocationDialogListener{
+    /**
+     * Search with keywords: "The application may be doing too much work on its main thread"
+     * That is an internal warning of too heavy calculations on main thread. Any heavy tasks
+     * should be moved to other threads (like OpenSky downloads with AsyncTask)
+     *
+     */
 
     private DrawerLayout drawerLayout;
     private DrawerAdapter drawerAdapter;
