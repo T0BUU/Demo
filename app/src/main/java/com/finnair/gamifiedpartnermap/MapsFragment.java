@@ -234,18 +234,6 @@ public class MapsFragment extends Fragment {
                     @Override
                     public boolean onMarkerClick(final Marker marker) {
 
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-
-                        marker.showInfoWindow();
-
-                        return true;  // What am I supposed to return? public void gets rejected...
-                    }
-                });
-
-                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(final Marker marker) {
-
                         if (planeMarkerClass.containsMarker(marker)){
                             // User clicked an airplane
                             Plane plane = planeMarkerClass.getPlaneByID(marker.getTitle());
@@ -260,9 +248,31 @@ public class MapsFragment extends Fragment {
                                         + plane.getVelocityKmph() );
                                 plane.savePlane(getContext());
 
+                                Toast.makeText(getContext(), "Caught it!", Toast.LENGTH_SHORT).show();
+
                             } else{
                                 Log.d("POOP", "Nuh-uh, you can't reach me.");
                             }
+
+                        } else {
+
+
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
+
+                            marker.showInfoWindow();
+                        }
+
+
+                        return true;  // What am I supposed to return? public void gets rejected...
+                    }
+                });
+
+                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(final Marker marker) {
+
+                        if (planeMarkerClass.containsMarker(marker)){
+
 
                         } else {
                             // User clicked something else than an airplane (company marker):

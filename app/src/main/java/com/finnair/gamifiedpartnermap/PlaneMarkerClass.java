@@ -32,7 +32,12 @@ public class PlaneMarkerClass {
     /**
      * TODO: Needs some method to delete planes which have landed
      */
-
+/*
+TODO: Add functionality to limit the cathing of planes so that users cant just mash one marker over and over.
+ */
+/*
+TODO:
+ */
 
     Integer screenWidth;
     Integer screenHeight;

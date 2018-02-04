@@ -9,7 +9,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.util.Log;
 import android.util.Pair;
@@ -102,9 +105,10 @@ public class Plane {
     }
     public void setPlaneMarkerOptions(Integer screenWidth){
 
-        Bitmap bitmap = BitmapFactory.decodeResource(this.activity.getResources(), R.raw.airplane_top_marker);
+        Bitmap bitmap = writeOnDrawable(R.raw.airplane_top_marker, this.planeID).getBitmap();
         Bitmap smallBitmap = scaleDown(bitmap, screenWidth / 8);
         BitmapDescriptor bitmapIcon = BitmapDescriptorFactory.fromBitmap( smallBitmap );
+
 
         this.planeMarkerOptions = new MarkerOptions();
         this.planeMarkerOptions.position(this.planeLatLng)
@@ -113,7 +117,24 @@ public class Plane {
                 .title(this.planeID)
                 .icon(bitmapIcon)
                 .flat(true);
+
+
     }
+
+    public BitmapDrawable writeOnDrawable(int drawableId, String text){
+
+        Bitmap bm = BitmapFactory.decodeResource(this.activity.getResources(), drawableId).copy(Bitmap.Config.ARGB_8888, true);
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(400);
+
+        Canvas canvas = new Canvas(bm);
+        canvas.drawText(text, 0, bm.getHeight()/2, paint);
+
+        return new BitmapDrawable(bm);
+    }
+
     public void setPlaneMiscellaneousInformation(Double geoAltitude, Double velocity, String icao24, String originCountry){
         if (geoAltitude != null) this.geoAltitude = geoAltitude;
         if (velocity != null) this.velocityKmph = velocity * 1.852; // From knots to km/h
@@ -138,6 +159,7 @@ public class Plane {
     public Circle getPlaneCircle(){ return this.planeCircle; }
     public Polyline getRadarArcPolyLine(){ return this.radarArcPolyLine; }
     public String getPlaneID(){ return this.planeID; }
+
     public PolylineOptions getRadarPolyLineOptions(){
         LatLng center = planeMarker.getPosition();
 
