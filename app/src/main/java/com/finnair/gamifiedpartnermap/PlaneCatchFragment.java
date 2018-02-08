@@ -67,7 +67,7 @@ public class PlaneCatchFragment extends DialogFragment {
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        View dialogView = inflater.inflate(R.layout.fragment_plane_info, null);
+        View dialogView = inflater.inflate(R.layout.card_layout, null);
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
@@ -77,20 +77,11 @@ public class PlaneCatchFragment extends DialogFragment {
         this.nameTextView = dialogView.findViewById(R.id.plane_name);
         this.descriptionTextView = dialogView.findViewById(R.id.plane_description);
         //Set the color of border. Maybe we should have different types of cards?
-        ((GradientDrawable)dialogView.findViewById(R.id.plane_info_table).getBackground()).setStroke(10, Color.parseColor("#CCCCCC"));
+        ((GradientDrawable)dialogView.findViewById(R.id.card_layout).getBackground()).setStroke(10, Color.parseColor("#CCCCCC"));
 
         this.setContent();
 
-        Button btnOK = dialogView.findViewById(R.id.plane_ok_button);
 
-        btnOK.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-                mListener.onPlaneDialogPositiveClick(PlaneCatchFragment.this);
-
-            }
-        });
 
         // Create the AlertDialog object and return it
         Dialog result = builder.create();
