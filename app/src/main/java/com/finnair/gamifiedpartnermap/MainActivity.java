@@ -128,7 +128,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             else if(getIntent().getAction().equals("com.finnair.gamifiedpartnermap.PROFILE_REQUEST_SUCCESSFUL")){
                 HashMap<String, String> profileInformation = (HashMap<String, String>) getIntent().getSerializableExtra("profileInformation");
-                Toast.makeText(this, "Finnair Plus ID: " + profileInformation.get("id"), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Login successful", Toast.LENGTH_LONG).show();
+                TextView profileNameField = findViewById(R.id.nav_profile_name);
+                profileNameField.setText(profileInformation.get("id"));
+
             }
         }
 
