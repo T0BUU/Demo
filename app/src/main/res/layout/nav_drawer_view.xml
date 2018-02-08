@@ -55,21 +55,15 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="@dimen/header_padding"/>
 
-            <TextView
+            <Button
+                android:id="@+id/button_cards"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?attr/colorAccent"
-                android:textSize="36sp"
-                android:text="@string/drawer_cards_text"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/header_padding"/>
-
-            <TextView
-                android:id="@+id/profileFragmentTextView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_gravity="center"
                 android:layout_weight="1"
-                android:text="TextView" />
+                android:background="@drawable/button_rounded_border"
+                android:onClick="onCardButtonClick"
+                android:text="Cards" />
 
         </LinearLayout>
 
@@ -92,9 +86,10 @@
                 android:id="@+id/button_login"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="@string/button_login"
                 android:layout_margin="12dp"
-                android:background="@drawable/button_rounded_border" />
+                android:background="@drawable/button_rounded_border"
+                android:onClick="onClick"
+                android:text="@string/button_login" />
         </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

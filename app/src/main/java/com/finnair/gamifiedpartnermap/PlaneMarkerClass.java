@@ -17,6 +17,7 @@ import android.util.Pair;
 import android.view.Display;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -409,6 +410,8 @@ public class PlaneMarkerClass {
         } catch (IOException e) {
             Log.e("login activity", "Can not read file: " + e.toString());
         }
+
+        ((MainActivity) this.activity).setPlanesListing(ret);
 
         return ret;
     }

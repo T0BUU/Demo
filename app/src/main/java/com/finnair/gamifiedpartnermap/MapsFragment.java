@@ -88,31 +88,7 @@ public class MapsFragment extends Fragment {
                              Bundle savedInstanceState) {
 
 
-        // Lazy testing of OpenSky.org:
-        // Add these to (app) build.gradle:
-        // compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
-        // compile 'com.fasterxml.jackson.core:jackson-annotations:2.7.3'
-        // compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
-        // compile 'com.squareup.okhttp3:okhttp:3.5.0'
-        /*
-        Log.d("POOP", "Trying to open connection...");
-        final OpenSkyApi api = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
-        Log.d("POOP", "That went through");
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Log.d("POOP", "Trying to download now");
-                    OpenSkyStates os = api.getStates(0, null);
-                    Log.d("POOP", os.getStates().toString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        thread.start();
 
-        */
 
 
         View rootView = inflater.inflate(R.layout.content_maps, container, false);
@@ -176,6 +152,8 @@ public class MapsFragment extends Fragment {
 
                 companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
                 planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap);
+
+                planeMarkerClass.readCollectedPlanes(getActivity());
 
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();

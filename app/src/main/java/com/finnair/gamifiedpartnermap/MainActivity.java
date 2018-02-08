@@ -4,6 +4,7 @@ import android.*;
 import android.Manifest;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private MapsFragment mapFragment;
     private GoogleMap gMap;
+
+    private String planesListing;
 
 
     //Constants marking which permissions were granted.
@@ -85,12 +89,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton settingsButton = (ImageButton) findViewById(R.id.button_settings);
         Button mapButton = (Button) findViewById(R.id.toolbar_map_button);
         Button partnersButton = (Button) findViewById(R.id.toolbar_partners_button);
+        Button cardButton = (Button) findViewById(R.id.button_cards);
 
         //Add click listeners to all buttons
         loginButton.setOnClickListener(this);
         settingsButton.setOnClickListener(this);
         mapButton.setOnClickListener(this);
         partnersButton.setOnClickListener(this);
+        cardButton.setOnClickListener(this);
 
         //Add drawer toggle button and listener for it.
         ActionBarDrawerToggle abToggle = new ActionBarDrawerToggle(
@@ -112,6 +118,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fragmentManager.beginTransaction()
                 .replace(R.id.main_content, drawerAdapter.getItem(0))
                 .commit();
+    }
+
+    public void onCardButtonClick(View view) {
+
     }
 
     //Handle button click events here.
@@ -140,6 +150,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .replace(R.id.main_content, drawerAdapter.getItem(0))
                         .commit();
                 break;
+
+            case R.id.button_cards:
+                Toast.makeText(this, "Hei", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, PlaneCollectionActivity.class);
+                intent.putExtra("123" ,this.planesListing);
+                startActivity(intent);
+                break;
+                
             case R.id.toolbar_partners_button:
                 Toast.makeText(MainActivity.this, "Open partner list", Toast.LENGTH_SHORT).show();
             default: break;
@@ -162,6 +180,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onPlaneDialogPositiveClick(DialogFragment dialog) {
         Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
+    }
+
+    public void setPlanesListing(String s) {
+        this.planesListing = s;
     }
 }
 
