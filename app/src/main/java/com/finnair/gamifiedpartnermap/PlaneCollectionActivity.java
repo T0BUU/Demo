@@ -9,6 +9,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import static com.finnair.gamifiedpartnermap.MainActivity.planeCatchMessage;
+
 /**
  * Created by ala-hazla on 8.2.2018.
  */
@@ -21,7 +23,7 @@ public class PlaneCollectionActivity extends Activity {
         setContentView(R.layout.plane_collection_layout);
 
         Intent intent = getIntent();
-        String message = intent.getStringExtra("123");
+        String message = intent.getStringExtra(planeCatchMessage);
 
 
         TableLayout collection = (TableLayout) findViewById(R.id.collection_table);

@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MapsFragment mapFragment;
     private GoogleMap gMap;
 
-    private String planesListing;
+    private String planesListing = "";
 
 
     //Constants.
@@ -153,9 +153,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.button_cards:
-                Toast.makeText(this, "Hei", Toast.LENGTH_SHORT).show();
+
                 Intent intent = new Intent(this, PlaneCollectionActivity.class);
-                intent.putExtra("123" ,this.planesListing);
+                intent.putExtra(planeCatchMessage ,this.planesListing);
                 startActivity(intent);
                 break;
 

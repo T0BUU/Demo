@@ -201,7 +201,6 @@ public class PlaneMarkerClass {
 
             }
 
-            ((MainActivity) this.activity).setPlanesListing(ret);
         }
     }
 }

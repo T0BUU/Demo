@@ -405,6 +405,7 @@ public class Plane {
             Log.e("login activity", "Can not read file: " + e.toString());
         }
 
+        ((MainActivity) this.activity).setPlanesListing(ret);
         return ret;
     }
 }

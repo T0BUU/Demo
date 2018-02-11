@@ -71,10 +71,10 @@ public class MapsFragment extends Fragment {
     private MapView mMapView;
 
 
-    //These are used to get the users current location.
+    //These are used to get the users current userLocation.
     private LocationManager locationManager;
     private Criteria criteria;
-    private Location location;
+    private Location userLocation;
 
     private GeofencingClient mGeofencingClient;
     private Geofence test;
@@ -114,8 +114,7 @@ public class MapsFragment extends Fragment {
 
                 ((MainActivity) getActivity()).setMap(mMap);
 
-                // Customize the styling of the base map using a JSON object
-                // defined in a raw resource file
+                // Customize the styling of the base map using a JSON object defined in a raw resource file
                 try {
                     boolean success = mMap.setMapStyle(
                             MapStyleOptions.loadRawResourceStyle(
@@ -129,19 +128,21 @@ public class MapsFragment extends Fragment {
                 }
 
 
-                //Request permission to use the user's location data.
+                //Request permission to use the user's userLocation data.
                 if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                         ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                    location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-                    if (location == null) {
-                        // Location not available so center on Helsinki. Location provider set to <"">
-                        location = new Location("");
-                        location.setLatitude(60.167497);
-                        location.setLongitude(24.934739);
+                    userLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+                    if (userLocation == null) {
+                        // Location not available so center manually . Location provider set to <"">
+                        // Kamppi (good for testing firms): 60.167497, 24.934739
+                        // Espoo (good for plane spotting): 60.2055, 24.6559
+                        userLocation = new Location("");
+                        userLocation.setLatitude(60.2055);
+                        userLocation.setLongitude(24.6559);
                     }
 
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
 
                     //Enable the myLocation Layer
                     mMap.setMyLocationEnabled(true);
@@ -150,9 +151,7 @@ public class MapsFragment extends Fragment {
                 } else ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
 
                 companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
-                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, location);
-
-                planeMarkerClass.readCollectedPlanes(getActivity());
+                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, userLocation);
 
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -235,24 +234,48 @@ public class MapsFragment extends Fragment {
                     @Override
                     public boolean onMarkerClick(final Marker marker) {
 
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-
-                        if (planeMarkerClass.markerArrayContainsMarker(marker)){
+                        if (planeMarkerClass.containsMarker(marker)){
                             // User clicked an airplane
+                            Plane plane = planeMarkerClass.getPlaneByID(marker.getTitle());
+                            if (plane.planeIsWithinReach(userLocation) ){
+                                Log.d("POOP", "You can collect this plane!");
+                                Log.d("POOP", " " + plane.getPlaneID() + ": "
+                                        + plane.getPlaneLatLng().latitude + ", "
+                                        + plane.getPlaneLatLng().longitude + ", "
+                                        + plane.getOriginCountry() + ", "
+                                        + plane.getIcao24() + ", Alt: "
+                                        + plane.getGeoAltitude() + ", speed: "
+                                        + plane.getVelocityKmph() );
+                                plane.savePlane(getContext());
 
-                            if (planeMarkerClass.planeIsWithinReach(location, marker)){
-                                Log.d("POOP", "You can collect this plane. It now flies away!");
                                 PlaneCatchFragment caught = new PlaneCatchFragment();
                                 caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
 
-                                caught.setAllFragmentData(marker.getTitle(), "Sutsi satsi satsaa, sutsi satsaa");
+                                caught.setAllFragmentData(plane.getPlaneID(), plane.getOriginCountry());
 
-                                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.150, 24.93470), new LatLng(60.180822, 24.884789)), location);
-                                planeMarkerClass.saveCollectedPlane(marker, getContext());
                             } else{
-                                Log.d("POOP", "Nuh-uh, you can't reach this. It now flies somewhere");
-                                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.1841, 24.8301), new LatLng(60.160, 24.93470)), location);
+                                Log.d("POOP", "Nuh-uh, you can't reach me.");
                             }
+
+                        } else {
+
+
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
+
+                            marker.showInfoWindow();
+                        }
+
+
+                        return true;  // What am I supposed to return? public void gets rejected...
+                    }
+                });
+
+                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(final Marker marker) {
+
+                        if (planeMarkerClass.containsMarker(marker)){
+
 
                         } else {
                             // User clicked something else than an airplane (company marker):
@@ -265,11 +288,8 @@ public class MapsFragment extends Fragment {
                             // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
                             p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
                         }
-                        return true;
                     }
                 });
-
-
 
                 // First call to OpenSky (AsyncTask):
                 planeMarkerClass.refreshOpenSkyPlanes();
@@ -361,7 +381,7 @@ public class MapsFragment extends Fragment {
     private PendingIntent getGeofencePendingIntent() {
 
         if (mGeofencePendingIntent != null) {
-         return mGeofencePendingIntent;
+            return mGeofencePendingIntent;
         }
 
 
@@ -376,8 +396,8 @@ public class MapsFragment extends Fragment {
         return criteria;
     }
 
-    public void setLocation(Location l) {
-        location = l;
+    public void setUserLocation(Location l) {
+        userLocation = l;
     }
 
     public LocationManager getLocationManager() {
@@ -431,5 +451,3 @@ public class MapsFragment extends Fragment {
 
 
 }
-
-
