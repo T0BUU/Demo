@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 intent.putExtra("123" ,this.planesListing);
                 startActivity(intent);
                 break;
-                
+
             case R.id.toolbar_partners_button:
                 Toast.makeText(MainActivity.this, "Open partner list", Toast.LENGTH_SHORT).show();
             default: break;

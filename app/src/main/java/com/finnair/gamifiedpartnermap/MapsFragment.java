@@ -11,6 +11,7 @@ import android.location.Criteria;
 import android.location.Location;
 
 import android.location.LocationManager;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -20,7 +21,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -47,7 +47,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
@@ -151,7 +150,7 @@ public class MapsFragment extends Fragment {
                 } else ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
 
                 companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
-                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap);
+                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, location);
 
                 planeMarkerClass.readCollectedPlanes(getActivity());
 
@@ -196,9 +195,6 @@ public class MapsFragment extends Fragment {
                 });
 
 
-
-
-
                 if (mMap.getCameraPosition().zoom > 10) companyMarkerClass.showCloseMarkers();
                 else companyMarkerClass.showFarMarkers();
 
@@ -231,7 +227,7 @@ public class MapsFragment extends Fragment {
                 mMap.setOnMyLocationClickListener(new GoogleMap.OnMyLocationClickListener() {
                     @Override
                     public void onMyLocationClick(Location location) {
-                        Toast.makeText(getActivity(), "Current location:\n" + location, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), "Current userLocation:\n" + location, Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -268,29 +264,35 @@ public class MapsFragment extends Fragment {
 
                             // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
                             p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
-
                         }
                         return true;
                     }
                 });
 
-                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+
+
+                // First call to OpenSky (AsyncTask):
+                planeMarkerClass.refreshOpenSkyPlanes();
+                // Timed call to OpenSky (AsyncTask):
+                final long INTERVAL = 1000 * 30; // 30 seconds
+                final Handler handler = new Handler();
+                Runnable runnable = new Runnable() {
+
                     @Override
-                    public void onInfoWindowClick(final Marker marker) {
-
-
-
+                    public void run() {
+                        try{
+                            planeMarkerClass.refreshOpenSkyPlanes();
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        finally{
+                            // Call the same runnable to call it at regular interval
+                            handler.postDelayed(this, INTERVAL);
+                        }
                     }
-                });
-
-            //TODO: Remove these when implementing the proper version.
-                planeMarkerClass.addOneMarkerOnMap(60.1841, 24.8301, "Finnair-1"); // 60.1841, 24.8301
-                planeMarkerClass.addOneMarkerOnMap(60.1870, 24.9390, "Finnair-2");
-                // 60.167497, 24.934739
-                planeMarkerClass.animateMarkers(Arrays.asList(new LatLng(60.16740, 24.93470), new LatLng(60.180822, 24.884789)), location);  // new LatLng(60.187664, 24.939161), new LatLng(60.180822, 24.884789)
-                // User: Latitude(60.167497);
-                // User: Longitude(24.934739);
-                //---------
+                };
+                handler.postDelayed(runnable, INTERVAL);
             }
 
         });
