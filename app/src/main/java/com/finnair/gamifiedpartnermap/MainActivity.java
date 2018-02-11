@@ -58,8 +58,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String planesListing;
 
 
-    //Constants marking which permissions were granted.
+    //Constants.
     final static int locationPermission = 100;
+    final static String planeCatchMessage = "com.finnair.gamifiedpartnermap.planeCaught";
 
 
     @Override
@@ -180,6 +181,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onPlaneDialogPositiveClick(DialogFragment dialog) {
         Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
+        Intent intent = new Intent(this, PlaneCollectionActivity.class);
+        intent.putExtra(planeCatchMessage ,this.planesListing);
+        startActivity(intent);
     }
 
     public void setPlanesListing(String s) {

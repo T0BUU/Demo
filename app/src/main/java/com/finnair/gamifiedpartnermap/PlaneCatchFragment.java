@@ -63,11 +63,15 @@ public class PlaneCatchFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
 
+        /*TODO: Currently this fragment is used to show a pop up of a card when a plane is collected.
+         This class is to be replaced by a separate activity.
+        */
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        View dialogView = inflater.inflate(R.layout.card_layout, null);
+        //fragment_plane_info will become useless once the activity is implemented.
+        View dialogView = inflater.inflate(R.layout.fragment_plane_info, null);
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
@@ -76,8 +80,8 @@ public class PlaneCatchFragment extends DialogFragment {
         // Get references to TextViews. Method setContents() places information into the TextViews
         this.nameTextView = dialogView.findViewById(R.id.plane_name);
         this.descriptionTextView = dialogView.findViewById(R.id.plane_description);
-        //Set the color of border. Maybe we should have different types of cards?
-        ((GradientDrawable)dialogView.findViewById(R.id.card_layout).getBackground()).setStroke(10, Color.parseColor("#CCCCCC"));
+        //Set the color of border. Maybe we should have different types of with different colors for borders cards?
+        ((GradientDrawable)dialogView.findViewById(R.id.plane_info_table).getBackground()).setStroke(10, Color.parseColor("#CCCCCC"));
 
         this.setContent();
 
