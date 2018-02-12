@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="48dp"
+    android:background="@drawable/header_background"
+    android:id="@+id/popup_partner_window">
+
+   <!-- <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@drawable/header_background"
+        android:id="@+id/popup_header_view">    -->
+
+        <Button
+            android:id="@+id/popup_close_button"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/ic_close_button_blue_8dp"
+            android:layout_alignParentEnd="true"/>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/popup_list_view"/>
+
+    </RelativeLayout>

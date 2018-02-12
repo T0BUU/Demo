@@ -5,7 +5,7 @@
     "elementType": "labels.text.fill",
     "stylers": [
       {
-        "color": "#000000"
+        "color": "#0B1560"           //NordicBlue color
       }
     ]
   },
@@ -59,7 +59,7 @@
     "elementType": "geometry",
     "stylers": [
       {
-        "color": "#A6C6EE" //Color/ice
+        "color": "#A6C6EE"           //Ice color (light blue)
       }
     ]
   },
@@ -69,7 +69,7 @@
     "elementType": "geometry",
     "stylers": [
       {
-        "color": "#AFAFAF"
+        "color": "#AFAFAF"           //Darkgray color
       }
     ]
   },
@@ -83,7 +83,7 @@
         "visibility": "on"
       },
       {
-        "color": "#B4CB66"
+        "color": "#D3D3D3"           //Lightgray color
       }
     ]
   },
@@ -93,7 +93,7 @@
     "elementType": "geometry",
     "stylers": [
       {
-        "color": "#FFFFFF"
+        "color": "#FFFFFF"           //White color
       },
       {
         "visibility": "simplified"
