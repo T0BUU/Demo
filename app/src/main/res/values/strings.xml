@@ -21,7 +21,7 @@
 
     <string name="toolbar_image_description">Finnair logo</string>
     <string name="toolbar_map_text">Map</string>
-    <string name="toolbar_list_text">Partners</string>
+    <string name="toolbar_partners_text">Partners</string>
 
     <string name="drawer_points_image_description">Points logo here</string>
     <string name="drawer_points_text">Points</string>
