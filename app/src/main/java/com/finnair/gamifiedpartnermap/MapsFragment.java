@@ -49,8 +49,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
-import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
-
 public class MapsFragment extends Fragment {
 
 
@@ -133,22 +131,39 @@ public class MapsFragment extends Fragment {
                         ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                     userLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+
                     if (userLocation == null) {
                         // Location not available so center manually . Location provider set to <"">
                         // Kamppi (good for testing firms): 60.167497, 24.934739
                         // Espoo (good for plane spotting): 60.2055, 24.6559
                         userLocation = new Location("");
-                        userLocation.setLatitude(60.2055);
-                        userLocation.setLongitude(24.6559);
+                        userLocation.setLatitude(60.167497);
+                        userLocation.setLongitude(24.934739);
+
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
+
                     }
+
+
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
+
+                        //Enable the myLocation Layer
+                        mMap.setMyLocationEnabled(true);
+
+
+                }
+
+                if (userLocation == null) {
+                    // Location not available so center manually . Location provider set to <"">
+                    // Kamppi (good for testing firms): 60.167497, 24.934739
+                    // Espoo (good for plane spotting): 60.2055, 24.6559
+                    userLocation = new Location("");
+                    userLocation.setLatitude(60.167497);
+                    userLocation.setLongitude(24.934739);
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
 
-                    //Enable the myLocation Layer
-                    mMap.setMyLocationEnabled(true);
-
-
-                } else ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+                }
 
                 companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
                 planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, userLocation);
@@ -234,6 +249,7 @@ public class MapsFragment extends Fragment {
                     @Override
                     public boolean onMarkerClick(final Marker marker) {
 
+
                         if (planeMarkerClass.containsMarker(marker)){
                             // User clicked an airplane
                             Plane plane = planeMarkerClass.getPlaneByID(marker.getTitle());
@@ -318,32 +334,35 @@ public class MapsFragment extends Fragment {
         });
 
 
-
         //TODO: Currently adds a simple geofence to the first 100 locations. Figure out something different.
-        mGeofencingClient = LocationServices.getGeofencingClient(getActivity());
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-        test = new Geofence.Builder()
-                .setRequestId("Otaniemi")
-                .setCircularRegion(60.1841, 24.8301, 100.0f)
-                .setExpirationDuration(60000L*10L)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build();
+            mGeofencingClient = LocationServices.getGeofencingClient(getActivity());
 
-        markerForGeofence(new LatLng(60.1841, 24.8301));
+            test = new Geofence.Builder()
+                    .setRequestId("Otaniemi")
+                    .setCircularRegion(60.1841, 24.8301, 100.0f)
+                    .setExpirationDuration(60000L * 10L)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .build();
 
-        mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
-                .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
+            markerForGeofence(new LatLng(60.1841, 24.8301));
 
-                    }
-                })
-                .addOnFailureListener(getActivity(), new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
+            mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+                    .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
 
-                    }
-                });
+                        }
+                    })
+                    .addOnFailureListener(getActivity(), new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
+        }
 
         //-----------------------
 
@@ -425,19 +444,23 @@ public class MapsFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        mGeofencingClient.removeGeofences(getGeofencePendingIntent())
-                .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                    }
-                })
-                .addOnFailureListener(getActivity(), new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
+            mGeofencingClient.removeGeofences(getGeofencePendingIntent())
+                    .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
 
-                    }
-                });
+                        }
+                    })
+                    .addOnFailureListener(getActivity(), new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
+        }
 
         mMapView.onDestroy();
     }

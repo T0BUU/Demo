@@ -38,8 +38,7 @@ import com.google.android.gms.maps.model.LatLng;
  * Created by ala-hazla on 16.12.2017.
  */
 
-public class MainActivity extends AppCompatActivity implements LocationPermissionDialog.LocationDialogListener,
-                                                                PlaneCatchFragment.PlaneCatchListener {
+public class MainActivity extends AppCompatActivity implements PlaneCatchFragment.PlaneCatchListener {
 
     private MActivityLayout myMainLayout;
 
@@ -62,15 +61,12 @@ public class MainActivity extends AppCompatActivity implements LocationPermissio
         super.onCreate(savedInstanceState);
         fragmentManager = getSupportFragmentManager();
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
 
             //Main layout class, this instanties whole UI.
             myMainLayout = new MActivityLayout();
             myMainLayout.createUI(this, fragmentManager);
 
-
-        } else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
     }
 
 
@@ -83,48 +79,7 @@ public class MainActivity extends AppCompatActivity implements LocationPermissio
 
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
-        switch (requestCode) {
-            case (locationPermission): {
-
-                if ( grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                            ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                        //Main layout class, this instanties whole UI.
-                        myMainLayout = new MActivityLayout();
-                        myMainLayout.createUI(this, fragmentManager);
-                    }
-
-                }
-                else {
-
-                    Log.i("assert", "Denied");
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                            LocationPermissionDialog dialog = new LocationPermissionDialog();
-                            dialog.show(this.getFragmentManager(), "permissionInfo");
-
-                        }
-                        //Location not available so center on Helsinki.
-                        else {
-                            myMainLayout = new MActivityLayout();
-                            myMainLayout.createUI(this, fragmentManager);
-                        }
-
-                    }
-
-
-                }
-
-                return;
-            }
-        }
-
-    }
 
 
 
@@ -132,14 +87,7 @@ public class MainActivity extends AppCompatActivity implements LocationPermissio
         gMap = m;
     }
 
-    // The dialog fragment receives a reference to this Activity through the
-    // Fragment.onAttach() callback, which it uses to call the following methods
-    // defined by the NoticeDialogFragment.NoticeDialogListener interface
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
-    }
+
 
     @Override
     public void onPlaneDialogPositiveClick(DialogFragment dialog) {

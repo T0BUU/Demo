@@ -17,6 +17,13 @@
         <item name="colorAccent">@color/royalBlue</item>
     </style>
 
+    <!-- Custom theme for splash screen. -->
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+
+        <item name="android:windowBackground">@drawable/splash_background</item>
+
+    </style>
+
     <style name="AppTheme.FloatingActionButtonOverlay">
         <item name="colorAccent">@color/lightGray</item>
     </style>
