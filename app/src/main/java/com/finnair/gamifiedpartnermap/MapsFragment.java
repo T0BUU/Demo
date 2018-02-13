@@ -404,6 +404,10 @@ public class MapsFragment extends Fragment {
         return locationManager;
     }
 
+    public void setLocation(Location loc) {
+        this.userLocation = loc;
+    }
+
 
     @Override
     public void onResume() {

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -15,7 +17,7 @@ import static com.finnair.gamifiedpartnermap.MainActivity.planeCatchMessage;
  * Created by ala-hazla on 8.2.2018.
  */
 
-public class PlaneCollectionActivity extends Activity {
+public class PlaneCollectionActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,10 @@ public class PlaneCollectionActivity extends Activity {
 
             collection.addView(row);
         }
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
     }
