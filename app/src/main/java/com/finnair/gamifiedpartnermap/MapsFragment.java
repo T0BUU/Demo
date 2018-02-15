@@ -329,6 +329,7 @@ public class MapsFragment extends Fragment {
                     }
                 };
                 handler.postDelayed(runnable, INTERVAL);
+                ((MainActivity) getActivity()).setMapVisible();
             }
 
         });
@@ -365,6 +366,8 @@ public class MapsFragment extends Fragment {
         }
 
         //-----------------------
+
+
 
         return rootView;
     }

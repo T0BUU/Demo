@@ -55,6 +55,8 @@ public class PlaneCollectionActivity extends AppCompatActivity {
         }
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+
+        myToolbar.setTitle("Your collection");
         setSupportActionBar(myToolbar);
        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

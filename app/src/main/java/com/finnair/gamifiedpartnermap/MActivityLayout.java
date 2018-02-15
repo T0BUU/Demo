@@ -52,10 +52,10 @@ public class MActivityLayout implements View.OnClickListener {
         partnersButton.setOnClickListener(this);
         drawerToggle.setOnClickListener(this);
 
-        //Insert map fragment to main_content view.
         fragmentManager.beginTransaction()
                 .replace(R.id.main_content, mapFragment)
                 .commit();
+
 
     }
 
@@ -85,6 +85,10 @@ public class MActivityLayout implements View.OnClickListener {
                 drawerLayout.openDrawer(GravityCompat.START);
             default: break;
         }
+    }
+
+    public void setMapVisible() {
+        //Insert map fragment to main_content view.
     }
 
 }

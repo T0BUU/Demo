@@ -17,18 +17,12 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:elevation="4dp"
+            android:gravity="center"
+            android:textAlignment="center"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Your collection"
-        android:textSize="24sp" />
-
-    <TableLayout
+        <TableLayout
         android:id="@+id/collection_table"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

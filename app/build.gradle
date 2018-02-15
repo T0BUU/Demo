@@ -61,6 +61,7 @@ dependencies {
 
     compile 'com.squareup.okhttp3:okhttp:3.5.0'
 
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 }
 
 repositories{

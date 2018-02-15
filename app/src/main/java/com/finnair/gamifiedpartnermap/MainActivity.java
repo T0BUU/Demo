@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
 
 
 
-    protected void onCardButtonClick(View v) {
+    public void onCardButtonClick(View v) {
         Intent intent = new Intent(this, PlaneCollectionActivity.class);
         intent.putExtra(planeCatchMessage ,this.planesListing);
         startActivity(intent);
@@ -85,6 +85,10 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
 
     public void setMap(GoogleMap m) {
         gMap = m;
+    }
+
+    public void setMapVisible() {
+        myMainLayout.setMapVisible();
     }
 
 
