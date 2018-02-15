@@ -44,11 +44,6 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
 
     private FragmentManager fragmentManager;
 
-    private MapsFragment mapFragment;
-    private GoogleMap gMap;
-
-    private String planesListing = "";
-
 
     //Constants.
     final static int locationPermission = 100;
@@ -70,39 +65,21 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
     }
 
 
-
-
     public void onCardButtonClick(View v) {
         Intent intent = new Intent(this, PlaneCollectionActivity.class);
-        intent.putExtra(planeCatchMessage ,this.planesListing);
+        intent.putExtra(planeCatchMessage ,this.myMainLayout.getCollection());
         startActivity(intent);
 
     }
-
-
-
-
-
-    public void setMap(GoogleMap m) {
-        gMap = m;
-    }
-
-    public void setMapVisible() {
-        myMainLayout.setMapVisible();
-    }
-
 
 
     @Override
     public void onPlaneDialogPositiveClick(DialogFragment dialog) {
         Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
         Intent intent = new Intent(this, PlaneCollectionActivity.class);
-        intent.putExtra(planeCatchMessage ,this.planesListing);
+        intent.putExtra(planeCatchMessage ,this.myMainLayout.getCollection());
         startActivity(intent);
     }
 
-    public void setPlanesListing(String s) {
-        this.planesListing = s;
-    }
 }
 

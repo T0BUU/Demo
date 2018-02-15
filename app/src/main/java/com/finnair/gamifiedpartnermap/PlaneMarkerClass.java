@@ -44,7 +44,7 @@ public class PlaneMarkerClass {
     Integer screenHeight;
     Activity activity;
     private ConcurrentHashMap<String, Plane> planeHashMap; // to avoid ConcurrentModificationException with HashMap
-    private ConcurrentHashMap<String, HashMap<String, String>> collectionHashMap; // to avoid ConcurrentModificationException with HashMap
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, String>> collectionHashMap; // to avoid ConcurrentModificationException with HashMap
     private Location tempLocation = new Location("");
     GoogleMap mMap;
 
@@ -68,8 +68,11 @@ public class PlaneMarkerClass {
         this.screenHeight = size.y;
 
         planeHashMap = new ConcurrentHashMap<>();
+        collectionHashMap = new ConcurrentHashMap<>();
 
         openSkyApi = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
+
+        readCollectedPlanes(activity);
 
     }
 
@@ -101,6 +104,8 @@ public class PlaneMarkerClass {
             planeHashMap.put(planeID, newPlane);
         }
     }
+
+
 
     public void removePlaneFromMap(String planeID){
         Plane plane = this.planeHashMap.get(planeID);
@@ -173,27 +178,58 @@ public class PlaneMarkerClass {
     public void savePlane(Context context, Plane saveMe){
         // All apps (root or not) have a default data directory, which is /data/data/<package_name>
 
-        collectionHashMap.get(saveMe.getPlaneID().substring(0,0)).put(saveMe.getPlaneID(), saveMe.getOriginCountry());
+        try {
+            collectionHashMap.get(saveMe.getPlaneID().substring(0, 1)).put(saveMe.getPlaneID(), saveMe.getOriginCountry());
+        }
+        catch (java.lang.NullPointerException nil) {
+            ConcurrentHashMap<String, String> addMe = new ConcurrentHashMap<>();
+            addMe.put(saveMe.getPlaneID(), saveMe.getOriginCountry());
+
+            collectionHashMap.put(saveMe.getPlaneID().substring(0, 1), addMe);
+        }
     }
 
-    public void savePlanes(Context context, Plane saveMe){
-        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
-        String earlierText = readCollectedPlanes(context);
-        String text = saveMe.getPlaneID();
-        String string = earlierText + " " + text;
+    private String formatPlanes() {
+        String result = "";
+
+        for (String planeType : collectionHashMap.keySet()) {
+            ConcurrentHashMap<String, String> row = collectionHashMap.get(planeType);
+
+            result += planeType;
+
+            for ( String planeId : row.keySet()) {
+                result += String.format("#%s:%s", planeId.trim(), row.get(planeId).trim());
+            }
+
+            result += "\n";
+
+        }
+        return result;
+    }
+
+    public void savePlanes(Context context){
+
+        String result = formatPlanes();
 
         try {
             FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION, Context.MODE_PRIVATE);
-            outputStream.write(string.getBytes());
+            outputStream.write(result.getBytes());
             outputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        Log.d("Plane Saving", result);
     }
 
-    public String readCollectedPlanes(Context context) {
+    public String getCollection() {
+        return formatPlanes();
+    }
 
-        String ret = "";
+
+    public void readCollectedPlanes(Context context) {
+
+        ConcurrentHashMap<String, ConcurrentHashMap<String, String>> result = new ConcurrentHashMap<>();
 
         try {
             InputStream inputStream = context.openFileInput(USER_DATA_LOCATION);
@@ -202,14 +238,23 @@ public class PlaneMarkerClass {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
 
                 while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
+
+                    String[] firstSplit = receiveString.split("#");
+                    ConcurrentHashMap<String, String> planes = new ConcurrentHashMap<>();
+
+                    for (int i = 1; i < firstSplit.length; ++i) {
+                        String[] pair = firstSplit[i].split(":");
+
+                        planes.put(pair[0], pair[1]);
+                    }
+
+                    result.put(firstSplit[0], planes);
+
                 }
 
                 inputStream.close();
-                ret = stringBuilder.toString();
             }
         }
         catch (FileNotFoundException e) {
@@ -218,8 +263,7 @@ public class PlaneMarkerClass {
             Log.e("login activity", "Can not read file: " + e.toString());
         }
 
-        ((MainActivity) this.activity).setPlanesListing(ret);
-        return ret;
+        collectionHashMap = result;
     }
 
     private void updatePlanesWithStateVectors(OpenSkyStateVector openSkyStateVector) {

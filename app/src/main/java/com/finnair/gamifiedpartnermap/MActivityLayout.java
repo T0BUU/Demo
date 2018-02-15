@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Created by Otto on 12.2.2018.
  */
@@ -19,7 +21,7 @@ public class MActivityLayout implements View.OnClickListener {
 
     private DrawerLayout drawerLayout;
     private PartnerListWindow partnerListWindow;  //Partner list popup window
-    private Fragment mapFragment;
+    private MapsFragment mapFragment;
     private Activity mActivity;
     private FragmentManager fragmentManager;
 
@@ -87,8 +89,8 @@ public class MActivityLayout implements View.OnClickListener {
         }
     }
 
-    public void setMapVisible() {
-        //Insert map fragment to main_content view.
+    public String getCollection() {
+        return mapFragment.getCollection();
     }
 
 }

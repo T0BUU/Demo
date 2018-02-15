@@ -7,9 +7,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+        android:id="@+id/my_collection"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/my_toolbar"
@@ -22,15 +23,5 @@
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <TableLayout
-        android:id="@+id/collection_table"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:columnCount="3"
-        android:gravity="center">
-
-
-    </TableLayout>
-</LinearLayout>
+    </LinearLayout>
 </ScrollView>
