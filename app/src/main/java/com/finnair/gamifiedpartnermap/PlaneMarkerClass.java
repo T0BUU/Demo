@@ -1,6 +1,7 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -15,10 +16,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,11 +44,13 @@ public class PlaneMarkerClass {
     Integer screenHeight;
     Activity activity;
     private ConcurrentHashMap<String, Plane> planeHashMap; // to avoid ConcurrentModificationException with HashMap
+    private ConcurrentHashMap<String, HashMap<String, String>> collectionHashMap; // to avoid ConcurrentModificationException with HashMap
     private Location tempLocation = new Location("");
     GoogleMap mMap;
 
     private final Float rotationMultiplier = -100.0f;
     private Location userLocation;
+    private String USER_DATA_LOCATION = "myCollection";
 
     OpenSkyApi openSkyApi;
     OpenSkyStates openSkyStates;
@@ -88,7 +98,7 @@ public class PlaneMarkerClass {
             newPlane.setPlaneCircle( this.mMap.addCircle( newPlane.getPlaneCircleOptions() ) );
             newPlane.setRadarArcPolyLine( this.mMap.addPolyline( newPlane.getRadarPolyLineOptions() ) );
             newPlane.showRadarArcPolyline(false);
-            planeHashMap.put(newPlane.getPlaneID(), newPlane);
+            planeHashMap.put(planeID, newPlane);
         }
     }
 
@@ -111,10 +121,11 @@ public class PlaneMarkerClass {
 
     public void zoomListener(float zoom) {
 
-        for ( Plane plane : this.planeHashMap.values()) {
+        for (Plane plane : this.planeHashMap.values()) {
             //zoom = 0 the entire world and zoom 20 is the closest the camera gets.
             //zooming one level (0 -> 1 for example) halves the size of one map tile => zooming grows O(pow(2, zoom))
-            if (plane.getCircleRadius() < pow(2, 20-zoom)) plane.setCircleVisible(true);                                // HUOM !!!! KORJAA setCircleVisible(false) ///////////////////////////////////////
+            if (plane.getCircleRadius() < pow(2, 20 - zoom))
+                plane.setCircleVisible(true);                                // HUOM !!!! KORJAA setCircleVisible(false) ///////////////////////////////////////
             else plane.setCircleVisible(true);
         }
     }
@@ -157,6 +168,58 @@ public class PlaneMarkerClass {
             }
             removePlanesWhichHaveLanded(callSigns);
         }
+    }
+
+    public void savePlane(Context context, Plane saveMe){
+        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
+
+        collectionHashMap.get(saveMe.getPlaneID().substring(0,0)).put(saveMe.getPlaneID(), saveMe.getOriginCountry());
+    }
+
+    public void savePlanes(Context context, Plane saveMe){
+        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
+        String earlierText = readCollectedPlanes(context);
+        String text = saveMe.getPlaneID();
+        String string = earlierText + " " + text;
+
+        try {
+            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION, Context.MODE_PRIVATE);
+            outputStream.write(string.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String readCollectedPlanes(Context context) {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION);
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        ((MainActivity) this.activity).setPlanesListing(ret);
+        return ret;
     }
 
     private void updatePlanesWithStateVectors(OpenSkyStateVector openSkyStateVector) {

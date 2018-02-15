@@ -362,50 +362,5 @@ public class Plane {
 
 
 
-    public void savePlane(Context context){
-        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
-        String filename = "myPlanes";
-        String earlierText = readCollectedPlanes(context);
-        String text = this.planeID;
-        String string = earlierText + " " + text;
 
-        try {
-            FileOutputStream outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(string.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String readCollectedPlanes(Context context) {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = context.openFileInput("myPlanes");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        ((MainActivity) this.activity).setPlanesListing(ret);
-        return ret;
-    }
 }

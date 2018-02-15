@@ -270,7 +270,10 @@ public class MapsFragment extends Fragment {
                                 caught.setAllFragmentData(plane.getPlaneID(), plane.getOriginCountry());
 
                             } else{
-                                Log.d("POOP", "Nuh-uh, you can't reach me.");
+                                PlaneCatchFragment caught = new PlaneCatchFragment();
+                                caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
+                                caught.setAllFragmentData(plane.getPlaneID(), plane.getOriginCountry());
+                                Log.d("POOP", plane.getOriginCountry());
                             }
 
                         } else {
