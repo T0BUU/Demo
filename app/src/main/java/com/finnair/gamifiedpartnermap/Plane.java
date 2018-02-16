@@ -66,6 +66,7 @@ public class Plane {
     private Double velocityKmph;
     private String originCountry;
     private String icao24;
+    private String planeType;
 
     // Available but not in use: //////////
     private Double verticalRate;
@@ -103,6 +104,8 @@ public class Plane {
                 .strokeColor(Color.WHITE)
                 .fillColor(Color.argb(100, 0, 0, 100));
     }
+    public void setPlaneType(String type) { this.planeType = type; }
+
     public void setPlaneMarkerOptions(Integer screenWidth){
 
         Bitmap bitmap = writeOnDrawable(R.raw.airplane_top_marker, this.planeID).getBitmap();
@@ -151,6 +154,7 @@ public class Plane {
     public Double getVelocityKmph(){ return this.velocityKmph; }
     public String getOriginCountry(){ return this.originCountry; }
     public String getIcao24(){ return this.icao24; }
+    public String getPlaneType(){ return this.planeType; }
 
     public MarkerOptions getPlaneMarkerOptions(){ return this.planeMarkerOptions; }
     public CircleOptions getPlaneCircleOptions(){ return this.planeCircleOptions; }
