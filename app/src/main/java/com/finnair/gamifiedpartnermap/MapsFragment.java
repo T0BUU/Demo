@@ -47,7 +47,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MapsFragment extends Fragment {
 
@@ -110,8 +114,6 @@ public class MapsFragment extends Fragment {
 
                 mMap = googleMap;
 
-                ((MainActivity) getActivity()).setMap(mMap);
-
                 // Customize the styling of the base map using a JSON object defined in a raw resource file
                 try {
                     boolean success = mMap.setMapStyle(
@@ -167,6 +169,8 @@ public class MapsFragment extends Fragment {
 
                 companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
                 planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, userLocation);
+
+
 
 
                 databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -262,7 +266,7 @@ public class MapsFragment extends Fragment {
                                         + plane.getIcao24() + ", Alt: "
                                         + plane.getGeoAltitude() + ", speed: "
                                         + plane.getVelocityKmph() );
-                                plane.savePlane(getContext());
+                                planeMarkerClass.savePlane(getContext(), plane  );
 
                                 PlaneCatchFragment caught = new PlaneCatchFragment();
                                 caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
@@ -270,7 +274,12 @@ public class MapsFragment extends Fragment {
                                 caught.setAllFragmentData(plane.getPlaneID(), plane.getOriginCountry());
 
                             } else{
-                                Log.d("POOP", "Nuh-uh, you can't reach me.");
+                                planeMarkerClass.savePlane(getContext(), plane  );
+
+                                PlaneCatchFragment caught = new PlaneCatchFragment();
+                                caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
+                                caught.setAllFragmentData(plane.getPlaneID(), plane.getOriginCountry());
+                                Log.d("POOP", plane.getOriginCountry());
                             }
 
                         } else {
@@ -329,7 +338,6 @@ public class MapsFragment extends Fragment {
                     }
                 };
                 handler.postDelayed(runnable, INTERVAL);
-                ((MainActivity) getActivity()).setMapVisible();
             }
 
         });
@@ -370,6 +378,10 @@ public class MapsFragment extends Fragment {
 
 
         return rootView;
+    }
+
+    public String getCollection() {
+        return planeMarkerClass.getCollection();
     }
 
     private GeofencingRequest getGeofencingRequest() {
@@ -440,12 +452,15 @@ public class MapsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        planeMarkerClass.savePlanes(this.getContext());
         mMapView.onPause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        planeMarkerClass.savePlanes(this.getContext());
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

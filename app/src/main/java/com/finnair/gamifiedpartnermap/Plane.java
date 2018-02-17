@@ -66,6 +66,7 @@ public class Plane {
     private Double velocityKmph;
     private String originCountry;
     private String icao24;
+    private String planeType;
 
     // Available but not in use: //////////
     private Double verticalRate;
@@ -103,6 +104,8 @@ public class Plane {
                 .strokeColor(Color.WHITE)
                 .fillColor(Color.argb(100, 0, 0, 100));
     }
+    public void setPlaneType(String type) { this.planeType = type; }
+
     public void setPlaneMarkerOptions(Integer screenWidth){
 
         Bitmap bitmap = writeOnDrawable(R.raw.airplane_top_marker, this.planeID).getBitmap();
@@ -151,6 +154,7 @@ public class Plane {
     public Double getVelocityKmph(){ return this.velocityKmph; }
     public String getOriginCountry(){ return this.originCountry; }
     public String getIcao24(){ return this.icao24; }
+    public String getPlaneType(){ return this.planeType; }
 
     public MarkerOptions getPlaneMarkerOptions(){ return this.planeMarkerOptions; }
     public CircleOptions getPlaneCircleOptions(){ return this.planeCircleOptions; }
@@ -362,50 +366,5 @@ public class Plane {
 
 
 
-    public void savePlane(Context context){
-        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
-        String filename = "myPlanes";
-        String earlierText = readCollectedPlanes(context);
-        String text = this.planeID;
-        String string = earlierText + " " + text;
 
-        try {
-            FileOutputStream outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(string.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String readCollectedPlanes(Context context) {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = context.openFileInput("myPlanes");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        ((MainActivity) this.activity).setPlanesListing(ret);
-        return ret;
-    }
 }
