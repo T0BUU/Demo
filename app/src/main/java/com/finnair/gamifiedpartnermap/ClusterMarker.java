@@ -43,7 +43,7 @@ public class ClusterMarker implements ClusterItem {
     private MarkerOptions markerOptions;
     private CircleOptions circleOptions;
     private String id;
-    private String description;
+    private String snippet;
     private Double headingDegree = 0.0; // Plane overrides this. Partner doesn't
 
     private ValueAnimator radarPulseAnimator;
@@ -56,14 +56,14 @@ public class ClusterMarker implements ClusterItem {
 
     @Override
     public LatLng getPosition(){
-        return this.latLng;
+        return latLng;
     }
 
     @Override
     public String getTitle() { return this.id;}
 
     @Override
-    public String getSnippet(){ return this.description; }
+    public String getSnippet(){ return this.snippet; }
 
     // SET:
     public void setCircleRadius(float radius){ this.circleRadius = radius; }
@@ -78,7 +78,7 @@ public class ClusterMarker implements ClusterItem {
     public void setRadarArcPolyLine(Polyline radarArcPolyLine){ this.radarArcPolyLine = radarArcPolyLine;}
     public void setHeading(Double headingDegree){ this.headingDegree = headingDegree; }
     public void setID(String id){ this.id = id; }
-    public void setDescription(String description){ this.description = description; }
+    public void setSnippet(String snippet){ this.snippet = snippet; }
 
     public void setCircleOptions(){
         this.circleOptions = new CircleOptions()
@@ -105,7 +105,7 @@ public class ClusterMarker implements ClusterItem {
                 .rotation( Double.valueOf(this.headingDegree).floatValue() )
                 .anchor(0.5f, 0.5f)
                 .title(this.id)
-                .snippet(this.description)
+                .snippet(this.snippet)
                 .flat(true);
     }
 

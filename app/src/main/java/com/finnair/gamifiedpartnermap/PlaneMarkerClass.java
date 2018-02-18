@@ -13,6 +13,7 @@ import android.widget.Button;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.maps.android.clustering.ClusterManager;
 
 
 import java.security.KeyStore;
@@ -39,7 +40,6 @@ public class PlaneMarkerClass {
     private Location tempLocation = new Location("");
     GoogleMap mMap;
 
-    private final Float rotationMultiplier = -100.0f;
     private Location userLocation;
 
     OpenSkyApi openSkyApi;
@@ -72,6 +72,8 @@ public class PlaneMarkerClass {
     }
 
     public boolean containsMarker(Marker planeMarker){
+        if (planeHashMap == null) return false;
+        if (planeMarker.getTitle() == null) return false;
         return planeHashMap.containsKey(planeMarker.getTitle());
     }
 
@@ -79,16 +81,18 @@ public class PlaneMarkerClass {
 
         if ( !this.planeHashMap.containsKey(planeID) ){
             Plane newPlane = new Plane(activity);
-            newPlane.setPlanePosition(latitude, longitude);
+            newPlane.setPosition(latitude, longitude);
             newPlane.setHeading(directionDegree);
-            newPlane.setPlaneID(planeID);
-            newPlane.setPlaneCircleOptions();
-            newPlane.setPlaneMarkerOptions(this.screenWidth);
-            newPlane.setPlaneMarker( this.mMap.addMarker( newPlane.getPlaneMarkerOptions() ) );
-            newPlane.setPlaneCircle( this.mMap.addCircle( newPlane.getPlaneCircleOptions() ) );
+            newPlane.setID(planeID);
+            newPlane.setCircleOptions();
+            newPlane.setMarkerOptions();
+            newPlane.setMarkerImage(screenWidth);
+            newPlane.setMarker( this.mMap.addMarker( newPlane.getMarkerOptions() ) );
+            newPlane.setCircle( this.mMap.addCircle( newPlane.getCircleOptions() ) );
             newPlane.setRadarArcPolyLine( this.mMap.addPolyline( newPlane.getRadarPolyLineOptions() ) );
             newPlane.showRadarArcPolyline(false);
-            planeHashMap.put(newPlane.getPlaneID(), newPlane);
+            planeHashMap.put(newPlane.getID(), newPlane);
+
         }
     }
 
@@ -186,7 +190,7 @@ public class PlaneMarkerClass {
                 }
             }
 
-            if (distanceKM < 100) {
+            else if (distanceKM < 100) {
                 // Add a new plane Marker on the map:
                 if (heading != null) {
                     addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 90);
