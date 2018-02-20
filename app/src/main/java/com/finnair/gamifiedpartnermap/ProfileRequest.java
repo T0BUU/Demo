@@ -16,6 +16,7 @@ import javax.net.ssl.HttpsURLConnection;
  */
 
 public class ProfileRequest extends AsyncTask<URL, Void, String> {
+    // A handler class that implements the ProfileResponseHandler interface
     ProfileResponseHandler handler;
 
     @Override

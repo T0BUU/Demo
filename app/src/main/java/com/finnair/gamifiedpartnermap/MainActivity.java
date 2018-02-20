@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -43,6 +44,11 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.ResponseTypeValues;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 
 
@@ -51,7 +57,8 @@ import java.util.HashMap;
  */
 //Modified by Otto on 11.1.2018, added drawerLayout and toolbar to MainActivity.
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener,
+public class MainActivity extends AppCompatActivity implements ProfileResponseHandler,
+                                                                View.OnClickListener,
                                                                 LocationPermissionDialog.LocationDialogListener{
 
     private DrawerLayout drawerLayout;
@@ -61,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private MapsFragment mapFragment;
     private GoogleMap gMap;
+
+
 
 
     //Constants marking which permissions were granted.
@@ -74,6 +83,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         createUI();
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Auth",Context.MODE_PRIVATE);
+        if(sharedPreferences.contains("Access Token")){
+            makeProfileRequest(sharedPreferences.getString("Access Token", ""));
+        }
+
     }
 
     public void createUI(){
@@ -131,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, "Login successful", Toast.LENGTH_LONG).show();
                 TextView profileNameField = findViewById(R.id.nav_profile_name);
                 profileNameField.setText(profileInformation.get("id"));
+                loginButton.setText("Logout");
+
 
             }
         }
@@ -150,9 +166,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 drawerLayout.closeDrawer(GravityCompat.START);
                 break;
             case R.id.button_login:
-                drawerLayout.closeDrawer(GravityCompat.START);
-                Toast.makeText(MainActivity.this, "Clicked login", Toast.LENGTH_SHORT).show();
-                makeAuthorizationRequest();
+                Button login = findViewById(R.id.button_login);
+                if(login.getText().equals("Login")){
+                    makeAuthorizationRequest();
+                }else if(login.getText().equals("Logout")){
+                    logout();
+                }
                 break;
             case R.id.finnair_logo_button:
                 fragmentManager.beginTransaction()
@@ -171,6 +190,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    // Logs the user out
+    private void logout() {
+
+        // Remove the token from memory
+        SharedPreferences sp = getApplicationContext().getSharedPreferences("Auth", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.remove("Access Token");
+        editor.apply();
+
+        // Reset the UI texts to the default ones
+        TextView tw = findViewById(R.id.nav_profile_name);
+        tw.setText("Not logged in");
+
+        Button login = findViewById(R.id.button_login);
+        login.setText("Login");
+
+
+    }
+
+    //Starts the login process by performing an authorization request
     private void makeAuthorizationRequest() {
         //Creates the configuration for the authorization service
         AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
@@ -197,6 +236,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
+    private void makeProfileRequest(String accessToken){
+        String profileUrl = String.format("https://preauth.finnair.com/cas/oauth2.0/profile?access_token=%s", accessToken);
+        try {
+
+           ProfileRequest pr = new ProfileRequest();
+           pr.handler = this;
+           pr.execute(new URL(profileUrl));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void setMap(GoogleMap m) {
         gMap = m;
@@ -209,6 +259,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onDialogPositiveClick(DialogFragment dialog) {
         Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
+    }
+
+    // Implements handling the request to the profile request and also handles errors
+    @Override
+    public void onProfileResponseAcquired(String profileResponse) {
+        try {
+
+            JSONObject json = new JSONObject(profileResponse);
+            TextView profileName = findViewById(R.id.nav_profile_name);
+            profileName.setText(json.getString("id"));
+            Button login = findViewById(R.id.button_login);
+            login.setText("Logout");
+        } catch (JSONException e) {
+            // If the field 'id' not available in the response, the token is invalid, e.g. expired
+            SharedPreferences sp = getApplicationContext().getSharedPreferences("Auth", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.remove("Access Token");
+            editor.commit();
+          e.printStackTrace();
+        }
+
+
     }
 }
 

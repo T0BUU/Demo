@@ -1,7 +1,9 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -58,13 +60,29 @@ public class LoginActivity extends Activity implements TokenResponseHandler, Pro
     @Override
     public void onTokenResponseAcquired(String tokenResponse) {
         Log.i("onTokenResponse: ", tokenResponse);
-        ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.handler = this;
-        String profileUrl = String.format("https://preauth.finnair.com/cas/oauth2.0/profile?access_token=%s", tokenResponse);
-        try {
-            profileRequest.execute(new URL(profileUrl));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        // Check if the response contains an access token field. Otherwise the request has failed due
+        // to authorization problems, malformed url, etc.
+        if(tokenResponse.startsWith("AT")){
+            ProfileRequest profileRequest = new ProfileRequest();
+            profileRequest.handler = this;
+            String profileUrl = String.format("https://preauth.finnair.com/cas/oauth2.0/profile?access_token=%s", tokenResponse);
+
+            // Save the token
+            SharedPreferences sp = getApplicationContext().getSharedPreferences("Auth", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("Access Token", tokenResponse);
+            editor.commit();
+
+            try {
+                profileRequest.execute(new URL(profileUrl));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+        }else{
+            // Handle the failed request.
+            Intent intent = new Intent("com.finnair.gamifiedpartnermap.AUTHORIZATION_FAILED");
+            startActivity(intent);
         }
 
     }
@@ -83,6 +101,7 @@ public class LoginActivity extends Activity implements TokenResponseHandler, Pro
             Log.i("Profile ID", profileJSON.getString("id"));
 
             profileInformation.put("id", profileJSON.getString("id"));
+
 
             // Go back to MainActivity and include the profile information in intent extras
             Intent intent = new Intent("com.finnair.gamifiedpartnermap.PROFILE_REQUEST_SUCCESSFUL");
