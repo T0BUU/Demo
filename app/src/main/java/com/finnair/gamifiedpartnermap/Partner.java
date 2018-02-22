@@ -22,8 +22,27 @@ public class Partner extends ClusterMarker {
         setCircleRadius(250);
     }
 
+    private int chooseMarkerImage() {
+
+        switch (this.fieldOfBusiness) {
+            case "Restaurant": return R.drawable.ic_restaurants;
+            case "Car rental": return R.drawable.ic_car_rental;
+            case "Charity": return R.drawable.ic_charity;
+            case "Entertainment": return R.drawable.ic_entertainment;
+            case "Finance and insurance": return R.drawable.ic_finance;
+            case "Helsinki Airport": return R.drawable.ic_helsinki_vantaa;
+            case "Golf and leisure time": return R.drawable.ic_hobbies;
+            case "Hotel": return R.drawable.ic_hotels_spas;
+            case "Shopping": return R.drawable.ic_shopping;
+            case "Tour operators and cruise lines": return R.drawable.ic_travel;
+            case "Services and Wellness": return R.drawable.ic_services_healthcare;
+            default: return  R.raw.aalto_logo;
+        }
+    }
+
     public void setMarkerImage(Integer screenWidth){
-        Bitmap bitmap = BitmapFactory.decodeResource(this.activity.getResources(), R.raw.aalto_logo); //
+
+        Bitmap bitmap = BitmapFactory.decodeResource(this.activity.getResources(), chooseMarkerImage()); //
         Bitmap smallBitmap = scaleDown(bitmap, screenWidth / 8);
         BitmapDescriptor bitmapIcon = BitmapDescriptorFactory.fromBitmap( smallBitmap );
 
