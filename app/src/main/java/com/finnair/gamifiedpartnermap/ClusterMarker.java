@@ -86,7 +86,7 @@ public class ClusterMarker implements ClusterItem {
                 .radius(this.circleRadius)
                 .strokeWidth(10)
                 .strokeColor(Color.WHITE)
-                .fillColor(Color.argb(100, 0, 0, 100));
+                .fillColor(Color.argb(0, 0, 0, 100));
     }
 
     public void setMarkerImage(BitmapDescriptor bitmapIcon){
