@@ -114,6 +114,27 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
     }
 
+    public void onCardButtonClick(View v) {
+        final int upper = R.id.card_button_upper;
+        final int lower = R.id.card_button_lower;
+
+        switch (v.getId()) {
+            case upper: {
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                break;
+            }
+            case lower: {
+                ((DialogFragment) this.getFragmentManager().findFragmentByTag("Caught plane")).dismiss();
+                break;
+            }
+            default: {
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+            }
+        }
+    }
+
     @Override
     public void onPlaneDialogPositiveClick(DialogFragment dialog) {
         Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
