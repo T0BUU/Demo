@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -89,7 +90,7 @@ public class MActivityLayout implements View.OnClickListener {
         }
     }
 
-    public String getCollection() {
+    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return mapFragment.getCollection();
     }
 

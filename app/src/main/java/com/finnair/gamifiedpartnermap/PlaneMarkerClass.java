@@ -198,6 +198,8 @@ public class PlaneMarkerClass {
 
             collectionHashMap.put(saveMe.getPlaneType(), addMe);
         }
+
+        Log.d("Plane saving: ", collectionHashMap.toString());
     }
 
     private String formatPlanes() {
@@ -233,8 +235,8 @@ public class PlaneMarkerClass {
         Log.d("Plane Saving", result);
     }
 
-    public String getCollection() {
-        return formatPlanes();
+    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
+        return this.collectionHashMap;
     }
 
 

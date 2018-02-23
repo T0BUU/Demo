@@ -29,6 +29,10 @@
     <string name="drawer_cards_text">Cards</string>
     <string name="drawer_settings_button_text">Settings button here</string>
 
+
+    <string name="collection_progress_bar_text">ROUTES COLLECTED</string>
+    <string name="collection_more_info"><u>View details</u></string>
+
     <string name="button_login">Login</string>
     <string name="button_logout">Logout</string>
 </resources>

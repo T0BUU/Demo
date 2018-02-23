@@ -380,7 +380,7 @@ public class MapsFragment extends Fragment {
         return rootView;
     }
 
-    public String getCollection() {
+    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return planeMarkerClass.getCollection();
     }
 
