@@ -16,7 +16,7 @@
     <string name="actionbar_drawer_close">Close</string>
 
     <string name="header_profile_pic_text">Profile picture</string>
-    <string name="header_profile_name">Insert name here!</string>
+    <string name="header_profile_name">Not logged in</string>
     <string name="header_profile_nickname">Insert your nickname here!</string>
 
     <string name="toolbar_image_description">Finnair logo</string>

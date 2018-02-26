@@ -3,12 +3,15 @@ package com.finnair.gamifiedpartnermap;
 import android.*;
 import android.Manifest;
 import android.app.DialogFragment;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -33,12 +36,26 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
+import net.openid.appauth.AuthorizationRequest;
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.ResponseTypeValues;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+
 
 /**
  * Created by ala-hazla on 16.12.2017.
  */
 
-public class MainActivity extends AppCompatActivity implements PlaneCatchFragment.PlaneCatchListener {
+public class MainActivity extends AppCompatActivity implements ProfileResponseHandler,
+                                                                View.OnClickListener,
+                                                                PlaneCatchFragment.PlaneCatchListener{
 
     private MActivityLayout myMainLayout;
 
@@ -54,6 +71,22 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        createUI();
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Auth",Context.MODE_PRIVATE);
+        if(sharedPreferences.contains("Access Token")){
+            makeProfileRequest(sharedPreferences.getString("Access Token", ""));
+        }
+
+    }
+
+    public void createUI(){
+
+        drawerAdapter = new DrawerAdapter();        //DrawerAdapter instanties fragments
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        //This handles all our fragments
         fragmentManager = getSupportFragmentManager();
 
 
