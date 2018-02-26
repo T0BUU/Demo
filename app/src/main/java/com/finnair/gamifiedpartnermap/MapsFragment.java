@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.location.Criteria;
 import android.location.Location;
 
@@ -18,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,12 +43,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.MarkerManager;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
 
+
+import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,16 +64,12 @@ public class MapsFragment extends Fragment {
 
     // String for class name. Can be used for reporting errors.
     private static final String TAG = MapsFragment.class.getSimpleName();
-    private DatabaseReference databaseReference;
-
-    private HashMap<String, PartnerData> markerPartnerData = new HashMap<>();
-
 
     private GoogleMap mMap;
-    private CompanyMarkerClass companyMarkerClass;
+    private PartnerMarkerClass partnerMarkerClass;
     private PlaneMarkerClass planeMarkerClass;
     private MapView mMapView;
-
+    private ClusterManager<ClusterMarker> clusterManager;
 
     //These are used to get the users current userLocation.
     private LocationManager locationManager;
@@ -88,10 +86,6 @@ public class MapsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
 
-
-
-
-
         View rootView = inflater.inflate(R.layout.content_maps, container, false);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
@@ -106,6 +100,7 @@ public class MapsFragment extends Fragment {
         }
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
         criteria = new Criteria();
 
         mMapView.getMapAsync(new OnMapReadyCallback() {
@@ -167,67 +162,39 @@ public class MapsFragment extends Fragment {
 
                 }
 
-                companyMarkerClass = new CompanyMarkerClass(getActivity(), mMap);
+                partnerMarkerClass = new PartnerMarkerClass(getActivity(), mMap);
                 planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, userLocation);
+                clusterManager = new ClusterManager<ClusterMarker>(getContext(), mMap, new MarkerManager(mMap));
+
+                /*
+                Display display = getActivity().getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                Integer screenWidth = size.x;
+                */
 
 
+                MarkerRenderer markerRenderer = new MarkerRenderer(getContext(), mMap, clusterManager);
 
+                partnerMarkerClass.fetchFromFirebase(clusterManager, markerRenderer);
+                clusterManager.setRenderer(markerRenderer);
 
-                databaseReference = FirebaseDatabase.getInstance().getReference();
-                DatabaseReference ref = databaseReference.child("locations");
-
-                ref.addValueEventListener(new ValueEventListener() {
+                mMap.setOnCameraIdleListener(clusterManager);
+                clusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<ClusterMarker>() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        // Loop through children in "locations" (i.e. loop through partners in FireBase):
-                        for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
-                            String companyName = singleSnapshot.child("name").getValue().toString();
-                            Double lat = Double.parseDouble(singleSnapshot.child("lat").getValue().toString());
-                            Double lng = Double.parseDouble(singleSnapshot.child("lng").getValue().toString());
-                            String address = singleSnapshot.child("address").getValue().toString();
-                            String business = singleSnapshot.child("field_of_business").getValue().toString();
-                            String description = singleSnapshot.child("description").getValue().toString();
-
-                            // Place two Markers (close, far) on the map and hide one depending on zoom:
-                            String[] tags = companyMarkerClass.addOneMarkerOnMap(lat, lng, companyName, business);
-
-                            // Record partner data into a HashMap which has Marker tag as key and ParterData as content:
-                            PartnerData pData = new PartnerData();
-                            pData.setAllData(companyName, address, business, description, lat, lng);
-
-                            // Both Markers (close, far) must be recorded in the HashMap:
-                            markerPartnerData.put(tags[0], pData);
-                            markerPartnerData.put(tags[1], pData);
-                        }
-
-                        if (mMap.getCameraPosition().zoom > 10) companyMarkerClass.showCloseMarkers();
-                        else companyMarkerClass.showFarMarkers();
-
-                    }
-
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.e(TAG, "onCancelled", databaseError.toException());
+                    public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
+                        Log.d("POOP", "Cluster clicked"); // Never called. Unclear why
+                        return false;
                     }
                 });
-
-
-                if (mMap.getCameraPosition().zoom > 10) companyMarkerClass.showCloseMarkers();
-                else companyMarkerClass.showFarMarkers();
 
 
                 mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
                     @Override
                     public void onCameraMove() {
                         CameraPosition cameraPosition = mMap.getCameraPosition();
-
                         planeMarkerClass.zoomListener(cameraPosition.zoom);
-                        //Log.d("Zoom Level", "" + java.lang.Math.pow(2, 20-cameraPosition.zoom));
-                        // Depending on the zoom level hide ones and set visible the other Markers
-                        if (cameraPosition.zoom > 10) companyMarkerClass.showCloseMarkers();
-                        else companyMarkerClass.showFarMarkers();
-
+                        clusterManager.cluster();
                     }
                 });
 
@@ -254,24 +221,18 @@ public class MapsFragment extends Fragment {
                     public boolean onMarkerClick(final Marker marker) {
 
 
-                        if (planeMarkerClass.containsMarker(marker)){
+                        if (planeMarkerClass.containsMarker(marker)) {
                             // User clicked an airplane
                             Plane plane = planeMarkerClass.getPlaneByID(marker.getTitle());
-                            if (plane.planeIsWithinReach(userLocation) ){
+                            if (plane.isWithinReach(userLocation)) {
                                 Log.d("POOP", "You can collect this plane!");
-                                Log.d("POOP", " " + plane.getPlaneID() + ": "
-                                        + plane.getPlaneLatLng().latitude + ", "
-                                        + plane.getPlaneLatLng().longitude + ", "
-                                        + plane.getOriginCountry() + ", "
-                                        + plane.getIcao24() + ", Alt: "
-                                        + plane.getGeoAltitude() + ", speed: "
-                                        + plane.getVelocityKmph() );
-                                planeMarkerClass.savePlane(getContext(), plane  );
+
+                                plane.savePlane(getContext());
 
                                 PlaneCatchFragment caught = new PlaneCatchFragment();
                                 caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
 
-                                caught.setAllFragmentData(plane.getPlaneID(), plane.getOriginCountry());
+                                caught.setAllFragmentData(plane.getID(), plane.getOriginCountry());
 
                             } else{
                                 planeMarkerClass.savePlane(getContext(), plane  );
@@ -282,12 +243,12 @@ public class MapsFragment extends Fragment {
                                 Log.d("POOP", plane.getOriginCountry());
                             }
 
-                        } else {
-
+                        } else if (partnerMarkerClass.containsMarker(marker)) {
 
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-
                             marker.showInfoWindow();
+                        } else {
+                            Log.d("POOP", "You most likely clicked a cluster. Nothing should happen.");
                         }
 
 
@@ -307,11 +268,10 @@ public class MapsFragment extends Fragment {
                             // Instantiate PartnerInfoFragment:
                             PartnerInfoFragment p = new PartnerInfoFragment();
                             p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
-                            // Find PartnerData for the Marker clicked recently. Find correct by reading markerID:
-                            PartnerData currentPartner = markerPartnerData.get(marker.getId());
-
+                            // Find Partner for the Marker clicked recently. Find correct by reading markerID:
+                            Partner currentPartner = partnerMarkerClass.getPartnerByID(marker.getTitle());
                             // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
-                            p.setAllFragmentData(currentPartner.getCompanyName(), currentPartner.getFieldOfBusiness(), currentPartner.getCompanyAddress(), currentPartner.getCompanyDescription());
+                            p.setAllFragmentData(currentPartner.getID(), currentPartner.getFieldOfBusiness(), currentPartner.getAddress(), currentPartner.getDescription());
                         }
                     }
                 });

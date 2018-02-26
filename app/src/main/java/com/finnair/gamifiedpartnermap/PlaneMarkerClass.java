@@ -14,6 +14,7 @@ import android.widget.Button;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.maps.android.clustering.ClusterManager;
 
 
 import java.io.BufferedReader;
@@ -51,7 +52,6 @@ public class PlaneMarkerClass {
     private Location tempLocation = new Location("");
     GoogleMap mMap;
 
-    private final Float rotationMultiplier = -100.0f;
     private Location userLocation;
     private String USER_DATA_LOCATION = "myCollection";
 
@@ -94,6 +94,8 @@ public class PlaneMarkerClass {
     }
 
     public boolean containsMarker(Marker planeMarker){
+        if (planeHashMap == null) return false;
+        if (planeMarker.getTitle() == null) return false;
         return planeHashMap.containsKey(planeMarker.getTitle());
     }
 
@@ -101,18 +103,19 @@ public class PlaneMarkerClass {
 
         if ( !this.planeHashMap.containsKey(planeID) ){
             Plane newPlane = new Plane(activity);
-            newPlane.setPlanePosition(latitude, longitude);
+            newPlane.setPosition(latitude, longitude);
             newPlane.setHeading(directionDegree);
-            newPlane.setPlaneID(planeID);
-            newPlane.setPlaneCircleOptions();
-            newPlane.setPlaneMarkerOptions(this.screenWidth);
-            newPlane.setPlaneMarker( this.mMap.addMarker( newPlane.getPlaneMarkerOptions() ) );
-            newPlane.setPlaneCircle( this.mMap.addCircle( newPlane.getPlaneCircleOptions() ) );
+            newPlane.setID(planeID);
+            newPlane.setCircleOptions();
+            newPlane.setMarkerOptions();
+            newPlane.setMarkerImage(screenWidth);
+            newPlane.setMarker( this.mMap.addMarker( newPlane.getMarkerOptions() ) );
+            newPlane.setCircle( this.mMap.addCircle( newPlane.getCircleOptions() ) );
             newPlane.setRadarArcPolyLine( this.mMap.addPolyline( newPlane.getRadarPolyLineOptions() ) );
             newPlane.setPlaneType( planeType );
             newPlane.showRadarArcPolyline(false);
+            planeHashMap.put(newPlane.getID(), newPlane);
 
-            planeHashMap.put(planeID, newPlane);
         }
     }
 
@@ -137,11 +140,10 @@ public class PlaneMarkerClass {
 
     public void zoomListener(float zoom) {
 
-        for (Plane plane : this.planeHashMap.values()) {
+        for ( Plane plane : this.planeHashMap.values()) {
             //zoom = 0 the entire world and zoom 20 is the closest the camera gets.
             //zooming one level (0 -> 1 for example) halves the size of one map tile => zooming grows O(pow(2, zoom))
-            if (plane.getCircleRadius() < pow(2, 20 - zoom))
-                plane.setCircleVisible(true);                                // HUOM !!!! KORJAA setCircleVisible(false) ///////////////////////////////////////
+            if (plane.getCircleRadius() < pow(2, 20-zoom)) plane.setCircleVisible(true);                                // HUOM !!!! KORJAA setCircleVisible(false) ///////////////////////////////////////
             else plane.setCircleVisible(true);
         }
     }
@@ -304,17 +306,17 @@ public class PlaneMarkerClass {
                 }
             }
 
-            if (distanceKM < 100) {
+            else if (distanceKM < 100) {
                 // Add a new plane Marker on the map:
                 if (heading != null) {
-                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 90, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
+                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 90);
                     planeHashMap.get(callSign).setPlaneMiscellaneousInformation(
                             openSkyStateVector.getGeoAltitude(),
                             openSkyStateVector.getVelocity(),
                             openSkyStateVector.getIcao24(),
                             openSkyStateVector.getOriginCountry());
                 } else {
-                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), 0.0, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
+                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), 0.0);
                 }
 
             }
