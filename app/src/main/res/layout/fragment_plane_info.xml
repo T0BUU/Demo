@@ -7,6 +7,13 @@
     android:orientation="vertical">
 
 
+    <Button
+        android:id="@+id/card_button_upper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onCardButtonClick"
+        android:text="Map" />
+
     <TableLayout
         android:id="@+id/plane_info_table"
         android:layout_width="wrap_content"
@@ -73,4 +80,11 @@
 
 
     </TableLayout>
+
+    <Button
+        android:id="@+id/card_button_lower"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onCardButtonClick"
+        android:text="Collection" />
 </LinearLayout>

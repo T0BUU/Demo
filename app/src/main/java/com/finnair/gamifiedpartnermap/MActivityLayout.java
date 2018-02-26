@@ -20,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashSet;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
@@ -131,7 +132,7 @@ public class MActivityLayout implements View.OnClickListener {
         }
     }
 
-    public String getCollection() {
+    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return mapFragment.getCollection();
     }
 

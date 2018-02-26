@@ -173,10 +173,26 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
     }
 
     public void onCardButtonClick(View v) {
-        Intent intent = new Intent(this, PlaneCollectionActivity.class);
-        intent.putExtra(planeCatchMessage ,this.myMainLayout.getCollection());
-        startActivity(intent);
+        final int upper = R.id.card_button_upper;
+        final int lower = R.id.card_button_lower;
 
+        switch (v.getId()) {
+            case upper: {
+                ((DialogFragment) this.getFragmentManager().findFragmentByTag("Caught plane")).dismiss();
+                break;
+            }
+            case lower: {
+                Intent intent = new Intent(this, PlaneCollectionActivity.class);
+                intent.putExtra(planeCatchMessage, this.myMainLayout.getCollection());
+                startActivity(intent);
+                break;
+            }
+            default: {
+                Intent intent = new Intent(this, PlaneCollectionActivity.class);
+                intent.putExtra(planeCatchMessage, this.myMainLayout.getCollection());
+                startActivity(intent);
+            }
+        }
     }
 
 
