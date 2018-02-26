@@ -16,7 +16,10 @@ import android.widget.Toast;
 /**
  * Created by huzla on 13.2.2018.
  */
+import java.util.HashMap;
+
 import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
+import static com.finnair.gamifiedpartnermap.MainActivity.profileInfoStartUp;
 
 public class SplashActivity extends AppCompatActivity implements LocationPermissionDialog.LocationDialogListener {
 
@@ -27,10 +30,30 @@ public class SplashActivity extends AppCompatActivity implements LocationPermiss
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-        startActivity(new Intent(SplashActivity.this, MainActivity.class));
+            HashMap<String, String> profileInformation = new HashMap();
+
+            if(getIntent() != null){
+                Log.d("Login", ""+getIntent().getAction());
+                if(getIntent().getAction().equals("com.finnair.gamifiedpartnermap.AUTHORIZATION_FAILED")){
+                    Toast.makeText(this, "Authorization failed", Toast.LENGTH_SHORT).show();
+                }
+                else if(getIntent().getAction().equals("com.finnair.gamifiedpartnermap.PROFILE_REQUEST_SUCCESSFUL")){
+                    profileInformation = (HashMap<String, String>) getIntent().getSerializableExtra("profileInformation");
+                    Toast.makeText(this, "Login successful", Toast.LENGTH_LONG).show();
+
+
+                }
+            }
+
+            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+            intent.putExtra(profileInfoStartUp ,profileInformation);
+
+            startActivity(intent);
 
         finish();
         } else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+
+
     }
 
     @Override
