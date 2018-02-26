@@ -227,7 +227,7 @@ public class MapsFragment extends Fragment {
                             if (plane.isWithinReach(userLocation)) {
                                 Log.d("POOP", "You can collect this plane!");
 
-                                plane.savePlane(getContext());
+                                planeMarkerClass.savePlane(getContext(), plane);
 
                                 PlaneCatchFragment caught = new PlaneCatchFragment();
                                 caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
@@ -239,7 +239,7 @@ public class MapsFragment extends Fragment {
 
                                 PlaneCatchFragment caught = new PlaneCatchFragment();
                                 caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
-                                caught.setAllFragmentData(plane.getPlaneID(), plane.getOriginCountry());
+                                caught.setAllFragmentData(plane.getIcao24(), plane.getOriginCountry());
                                 Log.d("POOP", plane.getOriginCountry());
                             }
 

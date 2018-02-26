@@ -309,14 +309,14 @@ public class PlaneMarkerClass {
             else if (distanceKM < 100) {
                 // Add a new plane Marker on the map:
                 if (heading != null) {
-                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 90);
+                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 90, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
                     planeHashMap.get(callSign).setPlaneMiscellaneousInformation(
                             openSkyStateVector.getGeoAltitude(),
                             openSkyStateVector.getVelocity(),
                             openSkyStateVector.getIcao24(),
                             openSkyStateVector.getOriginCountry());
                 } else {
-                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), 0.0);
+                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), 0.0, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
                 }
 
             }

@@ -57,11 +57,31 @@ public class Plane extends ClusterMarker {
         if (originCountry != null) this.originCountry = originCountry;
     }
 
+
+
+    public void setPlaneType(String type) { this.planeType = type; }
+
     // GET:
     public Double getVelocityKmph(){ return this.velocityKmph; }
     public String getOriginCountry(){ return this.originCountry; }
     public String getIcao24(){ return this.icao24; }
     public Double getGeoAltitude(){ return this.geoAltitude; }
+    public String getPlaneType() { return this.planeType; }
+
+
+    public void setMarkerImage(Integer screenWidth){
+        setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane, 2));
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId, int sizeMultiplier) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, sizeMultiplier*vectorDrawable.getIntrinsicWidth(), sizeMultiplier*vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(sizeMultiplier*vectorDrawable.getIntrinsicWidth(), sizeMultiplier*vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
 
 
     public void animatePlaneMarker(final LatLng destination, final float newRotationDegrees, final Location userLocation) {
