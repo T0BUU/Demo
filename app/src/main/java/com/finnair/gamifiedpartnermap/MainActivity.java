@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -48,6 +49,7 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
     final static int locationPermission = 100;
     final static String planeCatchMessage = "com.finnair.gamifiedpartnermap.planeCaught";
     final static String profileInfoStartUp = "com.finnair.gamifiedpartnermap.profileInfo";
+    final static String planesCaught = "com.finnair.gamifiedpartnermap.planesCaught";
 
 
     @Override
@@ -76,7 +79,9 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
 
         //Main layout class, this instanties whole UI.
         myMainLayout = new MActivityLayout();
-        myMainLayout.createUI(this, fragmentManager, (HashMap<String, String>) getIntent().getSerializableExtra(profileInfoStartUp));
+        myMainLayout.createUI(this, fragmentManager,
+                                (HashMap<String, String>) getIntent().getSerializableExtra(profileInfoStartUp),
+                                (Pair<String, String>) getIntent().getSerializableExtra(planesCaught));
 
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Auth",Context.MODE_PRIVATE);
@@ -195,9 +200,17 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
         }
     }
 
-    public void onPlaneCatch() {
+    public void onPlaneCatch(Plane caughtPlane, Plane randomPlane) {
         Intent intent = new Intent(this, CardSelectionActivity.class);
-        //intent.putExtra(planeCatchMessage, this.myMainLayout.getCollection());
+
+        ArrayList<String> caughtPlanes = new ArrayList<>();
+
+        caughtPlanes.add(caughtPlane.getPlaneType());
+        caughtPlanes.add(caughtPlane.getOriginCountry());
+        caughtPlanes.add(randomPlane.getPlaneType());
+        caughtPlanes.add(randomPlane.getOriginCountry());
+
+        intent.putExtra(planesCaught, caughtPlanes);
         startActivity(intent);
     }
 

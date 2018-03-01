@@ -235,10 +235,9 @@ public class MapsFragment extends Fragment {
                                 caught.setAllFragmentData(plane.getID(), plane.getOriginCountry());
 
                             } else{
-                                planeMarkerClass.savePlane(getContext(), plane  );
+                                //planeMarkerClass.savePlane(getContext(), plane  );
 
-                                ((MainActivity) getActivity()).onPlaneCatch();
-
+                                ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
 
                             }
 
@@ -341,6 +340,10 @@ public class MapsFragment extends Fragment {
 
     public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return planeMarkerClass.getCollection();
+    }
+
+    public void savePlane(String planeType, String country) {
+        this.planeMarkerClass.savePlane(planeType, country);
     }
 
     private GeofencingRequest getGeofencingRequest() {

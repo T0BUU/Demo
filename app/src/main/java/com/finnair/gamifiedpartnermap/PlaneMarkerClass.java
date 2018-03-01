@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -204,6 +205,23 @@ public class PlaneMarkerClass {
         Log.d("Plane saving: ", collectionHashMap.toString());
     }
 
+    public void savePlane(String planeType, String country) {
+
+        try {
+            collectionHashMap.get(planeType).add(country);
+        }
+        catch (java.lang.NullPointerException nil) {
+            HashSet<String> addMe = new HashSet<>();
+            addMe.add(country);
+
+            collectionHashMap.put(planeType, addMe);
+        }
+
+        Log.d("Plane saving: ", collectionHashMap.toString());
+
+    }
+
+
     private String formatPlanes() {
         String result = "";
 
@@ -239,6 +257,15 @@ public class PlaneMarkerClass {
 
     public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return this.collectionHashMap;
+    }
+
+    public Plane getRandomPlane() {
+        Random generator = new Random();
+        ArrayList<Plane> entries = new ArrayList();
+
+        entries.addAll(planeHashMap.values());
+
+        return entries.get(generator.nextInt(entries.size()));
     }
 
 

@@ -14,6 +14,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -50,7 +51,7 @@ public class MActivityLayout implements View.OnClickListener {
 
     public MActivityLayout(){}
 
-    public void createUI(Activity act, FragmentManager fm, HashMap<String, String> profileInfo){
+    public void createUI(Activity act, FragmentManager fm, HashMap<String, String> profileInfo, Pair<String, String> caughtPlane){
 
         //Set activity, fragmentManager and create new MapsFragment.
         mActivity = (MainActivity) act;
@@ -90,7 +91,10 @@ public class MActivityLayout implements View.OnClickListener {
 
         }
 
-        //mActivity.test();
+        if (caughtPlane != null) {
+            mapFragment.savePlane(caughtPlane.first, caughtPlane.second);
+        }
+
 
 
     }
