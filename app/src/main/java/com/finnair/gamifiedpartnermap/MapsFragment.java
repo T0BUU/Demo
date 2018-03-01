@@ -237,10 +237,9 @@ public class MapsFragment extends Fragment {
                             } else{
                                 planeMarkerClass.savePlane(getContext(), plane  );
 
-                                PlaneCatchFragment caught = new PlaneCatchFragment();
-                                caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
-                                caught.setAllFragmentData(plane.getIcao24(), plane.getOriginCountry());
-                                Log.d("POOP", plane.getOriginCountry());
+                                ((MainActivity) getActivity()).onPlaneCatch();
+
+
                             }
 
                         } else if (partnerMarkerClass.containsMarker(marker)) {

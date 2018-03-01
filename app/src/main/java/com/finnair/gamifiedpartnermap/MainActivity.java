@@ -195,13 +195,16 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
         }
     }
 
+    public void onPlaneCatch() {
+        Intent intent = new Intent(this, CardSelectionActivity.class);
+        //intent.putExtra(planeCatchMessage, this.myMainLayout.getCollection());
+        startActivity(intent);
+    }
+
 
     @Override
     public void onPlaneDialogPositiveClick(DialogFragment dialog) {
-        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
-        Intent intent = new Intent(this, PlaneCollectionActivity.class);
-        intent.putExtra(planeCatchMessage ,this.myMainLayout.getCollection());
-        startActivity(intent);
+
     }
 
 }

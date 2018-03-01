@@ -91,11 +91,6 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             collection.addView(row);
         }
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-
-        myToolbar.setTitle("Your collection");
-        setSupportActionBar(myToolbar);
-       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
