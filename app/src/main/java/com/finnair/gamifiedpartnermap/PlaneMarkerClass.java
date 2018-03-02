@@ -54,7 +54,7 @@ public class PlaneMarkerClass {
     GoogleMap mMap;
 
     private Location userLocation;
-    private String USER_DATA_LOCATION = "myCollection";
+    public static String USER_DATA_LOCATION = "myCollection";
 
     private List<String> PLANE_TYPES = Arrays.asList("AIRBUS A350-900", "AIRBUS A330-300",
             "AIRBUS A321", "AIRBUS A321-231",
@@ -203,22 +203,6 @@ public class PlaneMarkerClass {
         }
 
         Log.d("Plane saving: ", collectionHashMap.toString());
-    }
-
-    public void savePlane(String planeType, String country) {
-
-        try {
-            collectionHashMap.get(planeType).add(country);
-        }
-        catch (java.lang.NullPointerException nil) {
-            HashSet<String> addMe = new HashSet<>();
-            addMe.add(country);
-
-            collectionHashMap.put(planeType, addMe);
-        }
-
-        Log.d("Plane saving: ", collectionHashMap.toString());
-
     }
 
 

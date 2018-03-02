@@ -342,9 +342,6 @@ public class MapsFragment extends Fragment {
         return planeMarkerClass.getCollection();
     }
 
-    public void savePlane(String planeType, String country) {
-        this.planeMarkerClass.savePlane(planeType, country);
-    }
 
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();

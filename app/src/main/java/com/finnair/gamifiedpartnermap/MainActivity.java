@@ -80,8 +80,7 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
         //Main layout class, this instanties whole UI.
         myMainLayout = new MActivityLayout();
         myMainLayout.createUI(this, fragmentManager,
-                                (HashMap<String, String>) getIntent().getSerializableExtra(profileInfoStartUp),
-                                (Pair<String, String>) getIntent().getSerializableExtra(planesCaught));
+                                (HashMap<String, String>) getIntent().getSerializableExtra(profileInfoStartUp));
 
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Auth",Context.MODE_PRIVATE);
@@ -211,7 +210,9 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
         caughtPlanes.add(randomPlane.getOriginCountry());
 
         intent.putExtra(planesCaught, caughtPlanes);
+        intent.putExtra(planeCatchMessage, this.myMainLayout.getCollection());
         startActivity(intent);
+        finish();
     }
 
 

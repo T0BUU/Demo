@@ -6,12 +6,14 @@ import android.app.DialogFragment;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -25,8 +27,11 @@ public class PlaneCatchFragment extends DialogFragment {
     private String planeName = "ERROR";
     private int planeLevel = -1; //This could be used to indicated different kinds of cards(gold, silver etc.)
     private String planeDescription = "ERROR";
+    private int planeImage;
+
     private TextView nameTextView;
     private TextView descriptionTextView;
+    private ImageView planeImageView;
 
 
     public PlaneCatchFragment(){}  // This default constructor should be left alone
@@ -35,6 +40,13 @@ public class PlaneCatchFragment extends DialogFragment {
         // All private data should be set before calling onCreateView:
         this.planeName = planeName;
         this.planeDescription = planeDescription;
+    }
+
+    public void setAllFragmentData(String planeName, String planeDescription, int imageID){
+        // All private data should be set before calling onCreateView:
+        this.planeName = planeName;
+        this.planeDescription = planeDescription;
+        this.planeImage = imageID;
     }
 
     public interface PlaneCatchListener {
@@ -80,6 +92,11 @@ public class PlaneCatchFragment extends DialogFragment {
         // Get references to TextViews. Method setContents() places information into the TextViews
         this.nameTextView = dialogView.findViewById(R.id.plane_name);
         this.descriptionTextView = dialogView.findViewById(R.id.plane_description);
+
+        this.planeImageView = dialogView.findViewById(R.id.plane_card_image);
+
+
+
         //Set the color of border. Maybe we should have different types of with different colors for borders cards?
         ((GradientDrawable)dialogView.findViewById(R.id.plane_info_table).getBackground()).setStroke(10, Color.parseColor("#CCCCCC"));
 
@@ -89,6 +106,8 @@ public class PlaneCatchFragment extends DialogFragment {
 
         // Create the AlertDialog object and return it
         Dialog result = builder.create();
+
+        result.setCanceledOnTouchOutside(false);
 
         result.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return result;
@@ -100,6 +119,7 @@ public class PlaneCatchFragment extends DialogFragment {
         // By the time this is called, all private data must be available
         this.nameTextView.setText(this.planeName);
         this.descriptionTextView.setText(this.planeDescription);
+        this.planeImageView.setImageResource(this.planeImage);
 
     }
 

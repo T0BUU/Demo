@@ -117,6 +117,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             case upper: {
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                finish();
                 break;
             }
             case lower: {
@@ -126,6 +127,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             default: {
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                finish();
             }
         }
     }

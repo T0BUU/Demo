@@ -73,11 +73,7 @@
         </activity>
 
         <activity
-            android:name=".CardSelectionActivity"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+            android:name=".CardSelectionActivity">
         </activity>
 
         <service android:name=".GeofenceTransitionsIntentService" />

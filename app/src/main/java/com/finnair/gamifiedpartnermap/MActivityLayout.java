@@ -51,7 +51,7 @@ public class MActivityLayout implements View.OnClickListener {
 
     public MActivityLayout(){}
 
-    public void createUI(Activity act, FragmentManager fm, HashMap<String, String> profileInfo, Pair<String, String> caughtPlane){
+    public void createUI(Activity act, FragmentManager fm, HashMap<String, String> profileInfo){
 
         //Set activity, fragmentManager and create new MapsFragment.
         mActivity = (MainActivity) act;
@@ -90,11 +90,6 @@ public class MActivityLayout implements View.OnClickListener {
         catch (java.lang.NullPointerException e) {
 
         }
-
-        if (caughtPlane != null) {
-            mapFragment.savePlane(caughtPlane.first, caughtPlane.second);
-        }
-
 
 
     }
