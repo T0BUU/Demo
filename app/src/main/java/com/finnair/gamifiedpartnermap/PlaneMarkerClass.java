@@ -6,31 +6,18 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Display;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
-import android.widget.Button;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.maps.android.clustering.ClusterManager;
 
-
-import java.security.KeyStore;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.pow;
 
 
-/**
- * Created by huzla on 25.1.2018.
- */
 
 public class PlaneMarkerClass {
     Integer screenWidth;
@@ -41,12 +28,16 @@ public class PlaneMarkerClass {
     GoogleMap mMap;
 
     private Location userLocation;
+    private com.finnair.gamifiedpartnermap.ClusterManager clusterManager;
+    private MarkerRenderer markerRenderer;
 
     OpenSkyApi openSkyApi;
     OpenSkyStates openSkyStates;
 
 
-    public PlaneMarkerClass(Activity activity, GoogleMap mMap, Location userLocation) {
+    public PlaneMarkerClass(Activity activity, GoogleMap mMap, Location userLocation, final ClusterManager clusterManager, final MarkerRenderer markerRenderer) {
+        this.clusterManager = clusterManager;
+        this.markerRenderer = markerRenderer;
         this.userLocation = userLocation;
         this.activity = activity; // Activity is for example MapsActivity
         this.mMap = mMap;
@@ -58,7 +49,6 @@ public class PlaneMarkerClass {
         this.screenHeight = size.y;
 
         planeHashMap = new ConcurrentHashMap<>();
-
         openSkyApi = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
 
     }
@@ -84,24 +74,17 @@ public class PlaneMarkerClass {
             newPlane.setPosition(latitude, longitude);
             newPlane.setHeading(directionDegree);
             newPlane.setID(planeID);
-            newPlane.setCircleOptions();
             newPlane.setMarkerOptions();
-            newPlane.setMarkerImage(screenWidth);
-            newPlane.setMarker( this.mMap.addMarker( newPlane.getMarkerOptions() ) );
-            newPlane.setCircle( this.mMap.addCircle( newPlane.getCircleOptions() ) );
-            newPlane.setRadarArcPolyLine( this.mMap.addPolyline( newPlane.getRadarPolyLineOptions() ) );
-            newPlane.showRadarArcPolyline(false);
+            newPlane.setMarkerImage("not near/collected");
             planeHashMap.put(newPlane.getID(), newPlane);
+            this.clusterManager.addItem(newPlane);
+
 
         }
     }
 
     public void removePlaneFromMap(String planeID){
-        Plane plane = this.planeHashMap.get(planeID);
-        plane.deleteRadarPulseAnimation();
-        plane.deleteRadarArcAnimation();
-        plane.deleteCircle();
-        plane.deleteMarker();
+        this.clusterManager.removeItem(getPlaneByID(planeID));
     }
 
     public void removePlanesWhichHaveLanded(ArrayList<String> planesInAir){
@@ -115,12 +98,6 @@ public class PlaneMarkerClass {
 
     public void zoomListener(float zoom) {
 
-        for ( Plane plane : this.planeHashMap.values()) {
-            //zoom = 0 the entire world and zoom 20 is the closest the camera gets.
-            //zooming one level (0 -> 1 for example) halves the size of one map tile => zooming grows O(pow(2, zoom))
-            if (plane.getCircleRadius() < pow(2, 20-zoom)) plane.setCircleVisible(true);                                // HUOM !!!! KORJAA setCircleVisible(false) ///////////////////////////////////////
-            else plane.setCircleVisible(true);
-        }
     }
 
 
@@ -150,16 +127,20 @@ public class PlaneMarkerClass {
         @Override
         protected void onPostExecute(String result){
             super.onPostExecute(result);
-            Log.d("POOP", "Finished execution.");
-            // Collection<OpenSkyStateVector> states
+            Log.d("POOP", "Plane locations updated.");
 
             ArrayList<String> callSigns = new ArrayList<>();
 
-            for(OpenSkyStateVector openSkyStateVector : openSkyStates.getStates()){
-                updatePlanesWithStateVectors(openSkyStateVector);
-                callSigns.add(openSkyStateVector.getCallsign());
+            Collection<OpenSkyStateVector> states = openSkyStates.getStates();
+
+            if (states != null){
+                for(OpenSkyStateVector openSkyStateVector : states){
+                    updatePlanesWithStateVectors(openSkyStateVector);
+                    callSigns.add(openSkyStateVector.getCallsign());
+                }
+                removePlanesWhichHaveLanded(callSigns);
             }
-            removePlanesWhichHaveLanded(callSigns);
+
         }
     }
 
@@ -178,27 +159,34 @@ public class PlaneMarkerClass {
             float distanceKM = userLocation.distanceTo(tempLocation) / 1000;
 
             if (planeHashMap.containsKey(callSign)) {
-                if (distanceKM > 100) {
+                if (distanceKM > 300) {
                     // An existing planeMarker has flown too far:
                     removePlaneFromMap(callSign);
                 } else {
                     // Animate the movement of an existing plane:
-                    if (heading != null)
-                        planeHashMap.get(callSign).animatePlaneMarker(new LatLng(latitude, longitude), Double.valueOf(heading).floatValue() - 90, userLocation);
-                    else
-                        planeHashMap.get(callSign).animatePlaneMarker(new LatLng(latitude, longitude), 0, userLocation);
+                    if (heading != null) {
+                        markerRenderer.animateMarkerMovement(planeHashMap.get(callSign), new LatLng(latitude, longitude), heading - 45);
+                        if ( planeHashMap.get(callSign).isWithinReach(userLocation) ){
+                            planeHashMap.get(callSign).setMarkerImage("near");
+                            markerRenderer.setMarkerImage(planeHashMap.get(callSign));
+                        } else {
+                            planeHashMap.get(callSign).setMarkerImage("not near/collected");
+                            markerRenderer.setMarkerImage(planeHashMap.get(callSign));
+                        }
+                    }
                 }
             }
 
-            else if (distanceKM < 100) {
+            else if (distanceKM < 300) {
                 // Add a new plane Marker on the map:
                 if (heading != null) {
-                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 90);
+                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 45);
                     planeHashMap.get(callSign).setPlaneMiscellaneousInformation(
                             openSkyStateVector.getGeoAltitude(),
                             openSkyStateVector.getVelocity(),
                             openSkyStateVector.getIcao24(),
                             openSkyStateVector.getOriginCountry());
+
                 } else {
                     addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), 0.0);
                 }

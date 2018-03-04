@@ -1,40 +1,24 @@
 package com.finnair.gamifiedpartnermap;
 
-import android.*;
-import android.Manifest;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Criteria;
+import android.hardware.SensorManager;
 import android.location.Location;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
 
@@ -57,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String planesListing = "";
 
+    SensorActivity sensorActivity;
+
+
 
     //Constants.
     final static int locationPermission = 100;
@@ -70,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         createUI();
+
+
+
     }
 
     public void createUI(){
@@ -128,6 +118,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Handle button click events here.
     @Override
     public void onClick(View view){
+
+        sensorActivity.updateOrientationAngles();
+
         switch(view.getId()){
             case R.id.button_settings:
                 fragmentManager.beginTransaction()
@@ -161,6 +154,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.toolbar_partners_button:
                 Toast.makeText(MainActivity.this, "Open partner list", Toast.LENGTH_SHORT).show();
+
+
             default: break;
         }
     }
