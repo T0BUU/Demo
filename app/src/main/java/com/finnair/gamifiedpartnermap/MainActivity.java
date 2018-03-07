@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         fragmentManager = getSupportFragmentManager();
 
         //Main layout class, this instanties whole UI.

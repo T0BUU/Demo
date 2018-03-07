@@ -420,7 +420,8 @@ public class MapsFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        planeMarkerClass.savePlanes(this.getContext());
+        //Might be null when the phone reorients.
+        if (planeMarkerClass != null) planeMarkerClass.savePlanes(this.getContext());
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
