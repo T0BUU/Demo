@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/plane_info_table"
+    android:id="@+id/partner_info_table"
     android:layout_width="150dp"
     android:layout_height="wrap_content"
     android:background="@drawable/card_border"
@@ -15,13 +15,12 @@
 
 
         <ImageView
-            android:id="@+id/partner_image"
+            android:id="@+id/partner_card_image"
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:scaleType="fitXY"
-            app:srcCompat="@drawable/finnair_a350_economy_class_cabin_general_view_cruise_111" />
+            app:srcCompat="@drawable/a350_card_image" />
     </TableRow>
-
 
     <TableRow
         android:layout_width="match_parent"
@@ -32,56 +31,71 @@
             android:id="@+id/company_name"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:textAlignment="center"
+            android:layout_gravity="center_horizontal"
             android:fontFamily="sans-serif-smallcaps"
             android:paddingBottom="5dp"
             android:text="Name"
-            android:textColor="#787878"
-            android:textSize="30sp" />
-    </TableRow>
+            android:textAlignment="center"
+            android:textColor="@color/nordicBlue"
+            android:textSize="18sp" />
 
-    <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
-
-        <TextView
-            android:id="@+id/field_of_business"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Field of Business"
-            android:textAlignment="center" />
     </TableRow>
 
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal">
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/field_of_business"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="15dp"
+            android:text="Locations"
+            android:textColor="@color/nordicBlue"
+            android:textSize="10sp" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
 
         <TextView
             android:id="@+id/visiting_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Visiting Address"
-            android:textAlignment="center" />
-
+            android:paddingStart="15dp"
+            android:text="Locations"
+            android:textColor="@color/nordicBlue"
+            android:textSize="10sp" />
     </TableRow>
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_weight="20"
+        android:gravity="center"
+        android:paddingBottom="10dp">
 
 
         <TextView
             android:id="@+id/company_description"
-            android:layout_width="193dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingBottom="7dp"
-            android:paddingLeft="3dp"
-            android:paddingTop="15dp"
-            android:text="Company description" />
+            android:isScrollContainer="false"
+            android:maxHeight="50dp"
+            android:nestedScrollingEnabled="false"
+            android:paddingStart="18dp"
+            android:scrollHorizontally="false"
+            android:text="TextView"
+            android:textSize="8sp"
+
+            android:maxLines = "3"
+
+            android:scrollbars = "vertical"/>
 
     </TableRow>
+
 
 </TableLayout>
