@@ -77,7 +77,10 @@ public class SplashActivity extends AppCompatActivity implements LocationPermiss
 
                     Log.i("assert", "Denied");
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                        Log.d("Permission dialog", "Made it here");
+                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) || shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                            Log.d("Permission dialog", "Should show permission dialog.");
                             LocationPermissionDialog dialog = new LocationPermissionDialog();
                             dialog.show(this.getFragmentManager(), "permissionInfo");
 
@@ -106,7 +109,7 @@ public class SplashActivity extends AppCompatActivity implements LocationPermiss
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
     }
 
 }

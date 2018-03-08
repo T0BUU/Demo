@@ -8,16 +8,21 @@
 
     <Button
         android:id="@+id/card_button_upper"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onCardButtonClick"
         android:text="Map" />
 
-    <include layout="@layout/card_layout"/>
+    <include
+        layout="@layout/card_layout"
+        android:layout_width="200dp"
+        android:layout_height="250dp" />
 
 
     <Button
         android:id="@+id/card_button_lower"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onCardButtonClick"

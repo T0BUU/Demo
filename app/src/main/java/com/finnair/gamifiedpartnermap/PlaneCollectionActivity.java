@@ -22,6 +22,7 @@ import android.widget.Toast;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -102,9 +103,14 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
         LinearLayout parentLayout = (LinearLayout) v.getParent();
         String planeModel = "" + ((TextView) parentLayout.findViewById(R.id.plane_model_text)).getText();
-        String randomCountry = collectionHashMap.get(planeModel).iterator().next();
+        Iterator<String> countriesIterator = collectionHashMap.get(planeModel).iterator();
+        String collectedCountries = "";
 
-        caught.setAllFragmentData(planeModel, randomCountry);
+        while (countriesIterator.hasNext()) {
+            collectedCountries += countriesIterator.next() + "\n";
+        }
+
+        caught.setAllFragmentData(planeModel, collectedCountries, modelsToImages.get(planeModel));
 
 
     }

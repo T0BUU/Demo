@@ -9,13 +9,18 @@ import android.graphics.drawable.GradientDrawable;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -26,26 +31,26 @@ public class PlaneCatchFragment extends DialogFragment {
 
     private String planeName = "ERROR";
     private int planeLevel = -1; //This could be used to indicated different kinds of cards(gold, silver etc.)
-    private String planeDescription = "ERROR";
+    private String locations = "ERROR";
     private int planeImage;
 
     private TextView nameTextView;
-    private TextView descriptionTextView;
+    private TextView countriesTextView;
     private ImageView planeImageView;
 
 
     public PlaneCatchFragment(){}  // This default constructor should be left alone
 
-    public void setAllFragmentData(String planeName, String planeDescription){
+    public void setAllFragmentData(String planeName, String locations){
         // All private data should be set before calling onCreateView:
         this.planeName = planeName;
-        this.planeDescription = planeDescription;
+        this.locations = locations;
     }
 
-    public void setAllFragmentData(String planeName, String planeDescription, int imageID){
+    public void setAllFragmentData(String planeName, String locations, int imageID){
         // All private data should be set before calling onCreateView:
         this.planeName = planeName;
-        this.planeDescription = planeDescription;
+        this.locations = locations;
         this.planeImage = imageID;
     }
 
@@ -75,14 +80,10 @@ public class PlaneCatchFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
 
-        /*TODO: Currently this fragment is used to show a pop up of a card when a plane is collected.
-         This class is to be replaced by a separate activity.
-        */
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        //fragment_plane_info will become useless once the activity is implemented.
         View dialogView = inflater.inflate(R.layout.fragment_plane_info, null);
 
         // Inflate and set the layout for the dialog
@@ -91,7 +92,9 @@ public class PlaneCatchFragment extends DialogFragment {
 
         // Get references to TextViews. Method setContents() places information into the TextViews
         this.nameTextView = dialogView.findViewById(R.id.plane_name);
-        this.descriptionTextView = dialogView.findViewById(R.id.plane_description);
+        this.countriesTextView = dialogView.findViewById(R.id.location_list);
+
+        this.countriesTextView.setMovementMethod(new ScrollingMovementMethod());
 
         this.planeImageView = dialogView.findViewById(R.id.plane_card_image);
 
@@ -118,8 +121,13 @@ public class PlaneCatchFragment extends DialogFragment {
         // This method should be private and only called in onCreateView() after the view has been inflated
         // By the time this is called, all private data must be available
         this.nameTextView.setText(this.planeName);
-        this.descriptionTextView.setText(this.planeDescription);
+
+        this.countriesTextView.setText(locations);
+
         this.planeImageView.setImageResource(this.planeImage);
+
+        this.planeImageView.setMaxHeight(120);
+        this.planeImageView.setMaxWidth(120);
 
     }
 

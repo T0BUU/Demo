@@ -84,7 +84,8 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         View rightCard = (View)findViewById(R.id.card_right);
 
         ((TextView)leftCard.findViewById(R.id.plane_name)).setText(caughtPlaneType);
-        ((TextView)leftCard.findViewById(R.id.plane_description)).setText(caughtCountry);
+
+        ((TextView)leftCard.findViewById(R.id.location_list)).setText(caughtCountry);
 
         ((ImageView)leftCard.findViewById(R.id.plane_card_image)).setImageResource(modelsToImages.get(caughtPlaneType));
 
@@ -97,7 +98,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(caughtPlaneType, caughtCountry, modelsToImages.get(caughtPlaneType));
+                caught.setAllFragmentData(caughtPlaneType,caughtCountry, modelsToImages.get(caughtPlaneType));
                 Log.d("POOP", "TEST");
 
 

@@ -227,12 +227,12 @@ public class MapsFragment extends Fragment {
                             if (plane.isWithinReach(userLocation)) {
                                 Log.d("POOP", "You can collect this plane!");
 
-                                planeMarkerClass.savePlane(getContext(), plane);
+                                /*planeMarkerClass.savePlane(getContext(), plane);
 
                                 PlaneCatchFragment caught = new PlaneCatchFragment();
                                 caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
 
-                                caught.setAllFragmentData(plane.getID(), plane.getOriginCountry());
+                                //caught.setAllFragmentData(plane.getID(), plane.getOriginCountry());*/
 
                             } else{
                                 //planeMarkerClass.savePlane(getContext(), plane  );
@@ -244,7 +244,16 @@ public class MapsFragment extends Fragment {
                         } else if (partnerMarkerClass.containsMarker(marker)) {
 
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-                            marker.showInfoWindow();
+
+                            // User clicked something else than an airplane (company marker):
+                            // Instantiate PartnerInfoFragment:
+                            PartnerInfoFragment p = new PartnerInfoFragment();
+                            p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
+                            // Find Partner for the Marker clicked recently. Find correct by reading markerID:
+                            Partner currentPartner = partnerMarkerClass.getPartnerByID(marker.getTitle());
+                            // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
+                            p.setAllFragmentData(currentPartner.getID(), currentPartner.getFieldOfBusiness(), currentPartner.getAddress(), currentPartner.getDescription());
+
                         } else {
                             Log.d("POOP", "You most likely clicked a cluster. Nothing should happen.");
                         }
@@ -257,20 +266,6 @@ public class MapsFragment extends Fragment {
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(final Marker marker) {
-
-                        if (planeMarkerClass.containsMarker(marker)){
-
-
-                        } else {
-                            // User clicked something else than an airplane (company marker):
-                            // Instantiate PartnerInfoFragment:
-                            PartnerInfoFragment p = new PartnerInfoFragment();
-                            p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
-                            // Find Partner for the Marker clicked recently. Find correct by reading markerID:
-                            Partner currentPartner = partnerMarkerClass.getPartnerByID(marker.getTitle());
-                            // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
-                            p.setAllFragmentData(currentPartner.getID(), currentPartner.getFieldOfBusiness(), currentPartner.getAddress(), currentPartner.getDescription());
-                        }
                     }
                 });
 
