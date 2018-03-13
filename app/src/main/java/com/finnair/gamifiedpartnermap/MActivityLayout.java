@@ -131,8 +131,11 @@ public class MActivityLayout implements View.OnClickListener {
         }
     }
 
-    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
-        return mapFragment.getCollection();
+    public ConcurrentHashMap<String, HashSet<String>> getPlaneCollection() {
+        return mapFragment.getPlaneCollection();
     }
 
+    public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
+        return mapFragment.getPartnerCollection();
+    }
 }

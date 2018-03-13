@@ -54,7 +54,7 @@ public class PlaneMarkerClass {
     GoogleMap mMap;
 
     private Location userLocation;
-    public static String USER_DATA_LOCATION = "myCollection";
+    public static String USER_DATA_LOCATION_PLANES = "myPlanes";
 
     private List<String> PLANE_TYPES = Arrays.asList("AIRBUS A350-900", "AIRBUS A330-300",
             "AIRBUS A321", "AIRBUS A321-231",
@@ -189,7 +189,7 @@ public class PlaneMarkerClass {
         }
     }
 
-    public void savePlane(Context context, Plane saveMe){
+    /*public void savePlane(Context context, Plane saveMe){
         // All apps (root or not) have a default data directory, which is /data/data/<package_name>
 
         try {
@@ -237,7 +237,7 @@ public class PlaneMarkerClass {
         }
 
         Log.d("Plane Saving", result);
-    }
+    }*/
 
     public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return this.collectionHashMap;
@@ -258,7 +258,7 @@ public class PlaneMarkerClass {
         ConcurrentHashMap<String, HashSet<String>> result = new ConcurrentHashMap<>();
 
         try {
-            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION);
+            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION_PLANES);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

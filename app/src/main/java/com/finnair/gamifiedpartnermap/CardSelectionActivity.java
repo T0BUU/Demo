@@ -16,18 +16,23 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.finnair.gamifiedpartnermap.MainActivity.planeCatchMessage;
+import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
+import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
+import static com.finnair.gamifiedpartnermap.MainActivity.partnersCaught;
 import static com.finnair.gamifiedpartnermap.MainActivity.planesCaught;
-import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION;
+import static com.finnair.gamifiedpartnermap.PartnerMarkerClass.USER_DATA_LOCATION_PARTNERS;
+import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION_PLANES;
 
 /**
  * Created by huzla on 1.3.2018.
@@ -55,6 +60,26 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
 
     }
 
+    private int matchCategoryToImage(String category) {
+        switch (category) {
+            case "Restaurant": return R.drawable.ic_restaurants;
+            case "Car rental": return R.drawable.ic_car_rental;
+            case "Charity": return R.drawable.ic_charity;
+            case "Entertainment": return R.drawable.ic_entertainment;
+            case "Finance and insurance": return R.drawable.ic_finance;
+            case "Helsinki Airport": return R.drawable.ic_helsinki_vantaa;
+            case "Golf and leisure time": return R.drawable.ic_hobbies;
+            case "Hotel": return R.drawable.ic_hotels_spas;
+            case "Shopping": return R.drawable.ic_shopping;
+            case "Tour operators and cruise lines": return R.drawable.ic_travel;
+            case "Services and Wellness": return R.drawable.ic_services_healthcare;
+            default: return  R.raw.aalto_logo;
+        }
+    }
+
+
+    public static String whichWasCaughtMessage = "com.finnair.gamifiedpartnermap.whichCaught";
+    private boolean whichCaught;
 
     private String caughtPlaneType;
     private String caughtCountry;
@@ -62,18 +87,47 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
     private String randomPlaneType;
     private String randomCountry;
 
-    private HashMap<String, HashSet<String>> collectionHashMap;
+    private String caughtPartnerField;
+    private String caughtPartnerID;
+    private String caughtPartnerAddress;
+    private String caughtPartnerDescript;
+
+    private String randomPartnerField;
+    private String randomPartnerID;
+    private String randomPartnerAddress;
+    private String randomPartnerDescript;
+
+    private HashMap<String, HashSet<String>> planeCollectionHashMap;
+    private HashMap<String, HashSet<String>> partnerCollectionHashMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.card_choose_layout);
+
 
         Intent intent = getIntent();
         final ArrayList<String> planes = (ArrayList<String>) intent.getSerializableExtra(planesCaught);
+        final ArrayList<String> partners = (ArrayList<String>) intent.getSerializableExtra(partnersCaught);
 
-       collectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(planeCatchMessage);
+        planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
+        partnerCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePartners);
 
+        if (planes != null) {
+            setContentView(R.layout.plane_card_choose_layout);
+            whichCaught = true;
+            buildPlanePicking(planes);
+        }
+        else {
+            setContentView(R.layout.partner_card_choose_layout);
+            whichCaught = false;
+            buildPartnersPicking(partners);
+        }
+
+
+    }
+
+
+    void buildPlanePicking(ArrayList<String> planes) {
         caughtPlaneType = planes.get(0);
         caughtCountry = planes.get(1);
 
@@ -93,7 +147,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
 
             @Override
             public void onClick(View v) {
-               savePlane(caughtPlaneType, caughtCountry);
+                savePlane(caughtPlaneType, caughtCountry);
 
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
@@ -117,8 +171,60 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                 Log.d("POOP", "TEST");
             }
         });
+    }
+
+    void buildPartnersPicking(ArrayList<String> partners) {
+        caughtPartnerField = partners.get(0);
+        caughtPartnerID = partners.get(1);
+        caughtPartnerAddress = partners.get(2);
+        caughtPartnerDescript = partners.get(3);
+
+        randomPartnerField = partners.get(4);
+        randomPartnerID = partners.get(5);
+        randomPartnerAddress = partners.get(6);
+        randomPartnerDescript = partners.get(7);
+
+        View leftCard = (View)findViewById(R.id.card_left);
+        View rightCard = (View)findViewById(R.id.card_right);
+
+        ((TextView)leftCard.findViewById(R.id.company_name)).setText(caughtPartnerID);
+        ((TextView)leftCard.findViewById(R.id.field_of_business)).setText(caughtPartnerField);
+        ((TextView)leftCard.findViewById(R.id.visiting_address)).setText(caughtPartnerAddress);
+        ((TextView)leftCard.findViewById(R.id.company_description)).setText(caughtPartnerDescript);
+
+        ((ImageView)leftCard.findViewById(R.id.partner_card_image)).setImageResource(matchCategoryToImage(caughtPartnerField));
+
+        leftCard.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                savePartner(caughtPartnerField, caughtPartnerID, Calendar.getInstance().getTime().toString());
+
+                PartnerInfoFragment caught = new PartnerInfoFragment();
+                caught.setCancelable(false);
+                caught.show(getFragmentManager().beginTransaction(), "Caught partner");
+                caught.setAllFragmentData(caughtPartnerID, caughtPartnerField, caughtPartnerAddress,
+                                            caughtPartnerDescript, matchCategoryToImage(caughtPartnerField));
+                Log.d("POOP", "TEST");
 
 
+            }
+        });
+
+        rightCard.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                savePartner(randomPartnerField, randomPartnerID, Calendar.getInstance().getTime().toString());
+
+                PartnerInfoFragment caught = new PartnerInfoFragment();
+                caught.setCancelable(false);
+                caught.show(getFragmentManager().beginTransaction(), "Caught partner");
+                caught.setAllFragmentData(randomPartnerID, randomPartnerField, randomPartnerAddress,
+                        randomPartnerDescript, matchCategoryToImage(randomPartnerField));
+                Log.d("POOP", "TEST");
+            }
+        });
     }
 
     public void onCardButtonClick(View v) {
@@ -126,6 +232,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         final int lower = R.id.card_button_lower;
 
        savePlanes(this);
+       savePartners(this);
 
         switch (v.getId()) {
             case upper: {
@@ -136,15 +243,15 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
             }
             case lower: {
                 Intent intent = new Intent(this, PlaneCollectionActivity.class);
-                intent.putExtra(planeCatchMessage, collectionHashMap);
+                intent.putExtra(whichWasCaughtMessage, whichCaught);
+                intent.putExtra(catchMessagePartners, partnerCollectionHashMap);
+                intent.putExtra(catchMessagePlanes, planeCollectionHashMap);
                 startActivity(intent);
                 finish();
                 break;
             }
             default: {
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                Log.d("Card button click", "Something went wrong!");
             }
         }
     }
@@ -152,26 +259,60 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
     public void savePlane(String planeType, String country) {
 
         try {
-            collectionHashMap.get(planeType).add(country);
+            planeCollectionHashMap.get(planeType).add(country);
         }
         catch (java.lang.NullPointerException nil) {
             HashSet<String> addMe = new HashSet<>();
             addMe.add(country);
 
-            collectionHashMap.put(planeType, addMe);
+            planeCollectionHashMap.put(planeType, addMe);
         }
 
-        Log.d("Plane saving: ", collectionHashMap.toString());
+        Log.d("Plane saving: ", planeCollectionHashMap.toString());
 
+    }
+
+    public void savePartner(String field, String name, String time){
+        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
+
+        try {
+            partnerCollectionHashMap.get(field).add(String.format("%s %s", time, name));
+        }
+        catch (java.lang.NullPointerException nil) {
+            HashSet<String> addMe = new HashSet<>();
+            addMe.add(String.format("%s %s", time, name));
+
+            partnerCollectionHashMap.put(field, addMe);
+        }
+
+        Log.d("Partner saving: ", partnerCollectionHashMap.toString());
     }
 
     private String formatPlanes() {
         String result = "";
 
-        for (String planeType : collectionHashMap.keySet()) {
-            Iterator<String> row = collectionHashMap.get(planeType).iterator();
+        for (String planeType : planeCollectionHashMap.keySet()) {
+            Iterator<String> row = planeCollectionHashMap.get(planeType).iterator();
 
             result += planeType;
+
+            while (row.hasNext()) {
+                result += String.format("#%s", row.next());
+            }
+
+            result += "\n";
+
+        }
+        return result;
+    }
+
+    private String formatPartners() {
+        String result = "";
+
+        for (String  category : partnerCollectionHashMap.keySet()) {
+            Iterator<String> row = partnerCollectionHashMap.get(category).iterator();
+
+            result += category;
 
             while (row.hasNext()) {
                 result += String.format("#%s", row.next());
@@ -188,7 +329,22 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         String result = formatPlanes();
 
         try {
-            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION, Context.MODE_PRIVATE);
+            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION_PLANES, Context.MODE_PRIVATE);
+            outputStream.write(result.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.d("Plane Saving", result);
+    }
+
+    public void savePartners(Context context){
+
+        String result = formatPartners();
+
+        try {
+            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION_PARTNERS, Context.MODE_PRIVATE);
             outputStream.write(result.getBytes());
             outputStream.close();
         } catch (Exception e) {

@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -23,21 +24,23 @@ public class PartnerInfoFragment extends DialogFragment {
     private String fieldOfBusiness = "ERROR";
     private String visitingAddress = "ERROR";
     private String companyDescription = "ERROR";
+    private int image = -1;
     private TextView nameTextView;
     private TextView businessTextView;
     private TextView addressTextView;
     private TextView descriptionTextView;
+    private ImageView imageView;
 
 
     public PartnerInfoFragment(){}  // This default constructor should be left alone
 
-    public void setAllFragmentData(String companyName, String fieldOfBusiness, String visitingAddress, String companyDescription){
+    public void setAllFragmentData(String companyName, String fieldOfBusiness, String visitingAddress, String companyDescription, int image){
         // All private data should be set before calling onCreateView:
         this.companyName = companyName;
         this.fieldOfBusiness = fieldOfBusiness;
         this.visitingAddress = visitingAddress;
         this.companyDescription = companyDescription;
-
+        this.image = image;
         Log.d("Partner description", companyDescription);
 
     }
@@ -60,6 +63,7 @@ public class PartnerInfoFragment extends DialogFragment {
         this.businessTextView = dialogView.findViewById(R.id.field_of_business);
         this.addressTextView = dialogView.findViewById(R.id.visiting_address);
         this.descriptionTextView = dialogView.findViewById(R.id.company_description);
+        this.imageView = dialogView.findViewById(R.id.partner_card_image);
 
         descriptionTextView.setMovementMethod(new ScrollingMovementMethod());
 
@@ -87,6 +91,7 @@ public class PartnerInfoFragment extends DialogFragment {
         this.businessTextView.setText(this.fieldOfBusiness);
         this.addressTextView.setText(this.visitingAddress);
         this.descriptionTextView.setText(this.companyDescription);
+        this.imageView.setImageResource(this.image);
 
     }
 

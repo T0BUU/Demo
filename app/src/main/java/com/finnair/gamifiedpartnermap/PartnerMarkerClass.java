@@ -22,12 +22,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Calendar;
 
-import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION;
 
 /**
  * Created by noctuaPC on 5.12.2017.
@@ -39,7 +41,9 @@ public class PartnerMarkerClass {
     Integer screenHeight;
     Activity activity;
     ConcurrentHashMap<String, Partner> partnerHashMap = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, Integer> collectionHashMap;
+    private ConcurrentHashMap<String, HashSet<String>> collectionHashMap;
+
+    public static String USER_DATA_LOCATION_PARTNERS = "myPartners";
 
     GoogleMap mMap;
     private static final String TAG = PartnerMarkerClass.class.getSimpleName();
@@ -57,6 +61,7 @@ public class PartnerMarkerClass {
         this.screenWidth = size.x;
         this.screenHeight = size.y;
 
+        readCollectedPartners(activity);
     }
 
     public void fetchFromFirebase(final ClusterManager clusterManager, final MarkerRenderer markerRenderer){
@@ -91,30 +96,30 @@ public class PartnerMarkerClass {
 
 
 
-    public void savePartner(Context context, Plane saveMe){
+   /* public void savePartner(Context context, Partner saveMe){
         // All apps (root or not) have a default data directory, which is /data/data/<package_name>
 
         try {
-            collectionHashMap.get(saveMe.getPlaneType()).add(saveMe.getOriginCountry());
+            collectionHashMap.get(saveMe.getFieldOfBusiness()).add(saveMe.getAddress());
         }
         catch (java.lang.NullPointerException nil) {
             HashSet<String> addMe = new HashSet<>();
-            addMe.add(saveMe.getOriginCountry());
+            addMe.add(String.format("%s %s", Calendar.getInstance().getTime().toString(), saveMe.getID()));
 
-            collectionHashMap.put(saveMe.getPlaneType(), addMe);
+            collectionHashMap.put(saveMe.getFieldOfBusiness(), addMe);
         }
 
         Log.d("Plane saving: ", collectionHashMap.toString());
     }
 
 
-    private String formatPlanes() {
+    private String formatPartners() {
         String result = "";
 
-        for (String planeType : collectionHashMap.keySet()) {
-            Iterator<String> row = collectionHashMap.get(planeType).iterator();
+        for (String  category : collectionHashMap.keySet()) {
+            Iterator<String> row = collectionHashMap.get(category).iterator();
 
-            result += planeType;
+            result += category;
 
             while (row.hasNext()) {
                 result += String.format("#%s", row.next());
@@ -126,9 +131,9 @@ public class PartnerMarkerClass {
         return result;
     }
 
-    public void savePlanes(Context context){
+    public void savePartners(Context context){
 
-        String result = formatPlanes();
+        String result = formatPartners();
 
         try {
             FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION, Context.MODE_PRIVATE);
@@ -139,28 +144,28 @@ public class PartnerMarkerClass {
         }
 
         Log.d("Plane Saving", result);
-    }
+    }*/
 
     public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return this.collectionHashMap;
     }
 
-    public Plane getRandomPlane() {
+    public Partner getRandomPartner() {
         Random generator = new Random();
-        ArrayList<Plane> entries = new ArrayList();
+        ArrayList<Partner> entries = new ArrayList();
 
-        entries.addAll(planeHashMap.values());
+        entries.addAll(partnerHashMap.values());
 
         return entries.get(generator.nextInt(entries.size()));
     }
 
 
-    public void readCollectedPlanes(Context context) {
+    public void readCollectedPartners(Context context) {
 
         ConcurrentHashMap<String, HashSet<String>> result = new ConcurrentHashMap<>();
 
         try {
-            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION);
+            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION_PARTNERS);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

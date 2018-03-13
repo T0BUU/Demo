@@ -26,7 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.finnair.gamifiedpartnermap.MainActivity.planeCatchMessage;
+import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
+
 
 /**
  * Created by ala-hazla on 8.2.2018.
@@ -64,7 +65,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         setContentView(R.layout.plane_collection_layout);
 
         Intent intent = getIntent();
-        collectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(planeCatchMessage);
+        collectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
 
         LinearLayout collection = findViewById(R.id.my_collection);
         LayoutInflater inflater = getLayoutInflater();
