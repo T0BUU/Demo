@@ -52,6 +52,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
+
 
 /**
  * Created by ala-hazla on 16.12.2017.
@@ -177,6 +179,17 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
     }
 
+    public void onCardButtonClick(View v) {
+
+                Intent intent = new Intent(this, PlaneCollectionActivity.class);
+                intent.putExtra(whichWasCaughtMessage, true);
+                intent.putExtra(catchMessagePartners,  this.myMainLayout.getPartnerCollection());
+                intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+                startActivity(intent);
+                finish();
+
+    }
+
     public void onPlaneCatch(Plane caughtPlane, Plane randomPlane) {
         Intent intent = new Intent(this, CardSelectionActivity.class);
 
@@ -188,8 +201,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         caughtPlanes.add(randomPlane.getOriginCountry());
 
         intent.putExtra(planesCaught, caughtPlanes);
-        intent.putExtra(catchMessagePartners, this.myMainLayout.getPlaneCollection());
-        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPartnerCollection());
+        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+        intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
         startActivity(intent);
         finish();
     }
@@ -210,8 +223,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         caughtPartners.add(randomPartner.getDescription());
 
         intent.putExtra(partnersCaught, caughtPartners);
-        intent.putExtra(catchMessagePartners, this.myMainLayout.getPlaneCollection());
-        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPartnerCollection());
+        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+        intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
         startActivity(intent);
         finish();
     }

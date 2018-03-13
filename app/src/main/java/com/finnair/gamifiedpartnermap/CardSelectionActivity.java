@@ -19,9 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -110,7 +112,10 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         final ArrayList<String> partners = (ArrayList<String>) intent.getSerializableExtra(partnersCaught);
 
         planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
+
         partnerCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePartners);
+
+        Log.d("Collections: ", (planeCollectionHashMap == null) + " " + (partnerCollectionHashMap == null));
 
         if (planes != null) {
             setContentView(R.layout.plane_card_choose_layout);
@@ -187,10 +192,8 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         View leftCard = (View)findViewById(R.id.card_left);
         View rightCard = (View)findViewById(R.id.card_right);
 
-        ((TextView)leftCard.findViewById(R.id.company_name)).setText(caughtPartnerID);
+        ((TextView)leftCard.findViewById(R.id.company_info)).setText(caughtPartnerID + ", " + caughtPartnerAddress);
         ((TextView)leftCard.findViewById(R.id.field_of_business)).setText(caughtPartnerField);
-        ((TextView)leftCard.findViewById(R.id.visiting_address)).setText(caughtPartnerAddress);
-        ((TextView)leftCard.findViewById(R.id.company_description)).setText(caughtPartnerDescript);
 
         ((ImageView)leftCard.findViewById(R.id.partner_card_image)).setImageResource(matchCategoryToImage(caughtPartnerField));
 
@@ -198,13 +201,15 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
 
             @Override
             public void onClick(View v) {
-                savePartner(caughtPartnerField, caughtPartnerID, Calendar.getInstance().getTime().toString());
+                String currentTime = getCurrentTimeStamp();
+                savePartner(caughtPartnerField, caughtPartnerID, currentTime);
 
                 PartnerInfoFragment caught = new PartnerInfoFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
-                caught.setAllFragmentData(caughtPartnerID, caughtPartnerField, caughtPartnerAddress,
-                                            caughtPartnerDescript, matchCategoryToImage(caughtPartnerField));
+                String partnerInfo = String.format("%s\t%s, %s", currentTime, caughtPartnerID, caughtPartnerAddress);
+
+                caught.setAllFragmentData(partnerInfo, caughtPartnerField, matchCategoryToImage(caughtPartnerField));
                 Log.d("POOP", "TEST");
 
 
@@ -215,16 +220,26 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
 
             @Override
             public void onClick(View v) {
-                savePartner(randomPartnerField, randomPartnerID, Calendar.getInstance().getTime().toString());
+               String currentTime = getCurrentTimeStamp();
+
+                savePartner(randomPartnerField, randomPartnerID, currentTime);
 
                 PartnerInfoFragment caught = new PartnerInfoFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
-                caught.setAllFragmentData(randomPartnerID, randomPartnerField, randomPartnerAddress,
-                        randomPartnerDescript, matchCategoryToImage(randomPartnerField));
+                String partnerInfo = String.format("%s\t%s, %s", currentTime, randomPartnerID, randomPartnerAddress);
+
+                caught.setAllFragmentData(partnerInfo, randomPartnerField, matchCategoryToImage(randomPartnerField));
                 Log.d("POOP", "TEST");
             }
         });
+    }
+
+    public static String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
     }
 
     public void onCardButtonClick(View v) {
@@ -351,7 +366,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
             e.printStackTrace();
         }
 
-        Log.d("Plane Saving", result);
+        Log.d("Partner Saving", result);
     }
 
     @Override
