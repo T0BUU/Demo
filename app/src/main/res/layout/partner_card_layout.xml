@@ -51,9 +51,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="15dp"
-            android:text="Locations"
+            android:text="Field of business"
             android:textColor="@color/nordicBlue"
-            android:textSize="10sp" />
+            android:textSize="12sp" />
     </TableRow>
 
     <TableRow
@@ -66,9 +66,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="15dp"
-            android:text="Locations"
+            android:text="Visiting address"
             android:textColor="@color/nordicBlue"
-            android:textSize="10sp" />
+            android:textSize="12sp" />
     </TableRow>
 
     <TableRow
@@ -85,15 +85,18 @@
             android:layout_height="wrap_content"
             android:isScrollContainer="false"
             android:maxHeight="50dp"
+            android:maxLines="2"
+            android:maxWidth="50dp"
             android:nestedScrollingEnabled="false"
             android:paddingStart="18dp"
             android:scrollHorizontally="false"
-            android:text="TextView"
-            android:textSize="8sp"
 
-            android:maxLines = "3"
+            android:scrollIndicators="top|bottom"
 
-            android:scrollbars = "vertical"/>
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:scrollbars="vertical"
+            android:text="Description"
+            android:textSize="10sp" />
 
     </TableRow>
 

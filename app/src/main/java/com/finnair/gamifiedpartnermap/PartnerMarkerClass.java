@@ -1,6 +1,7 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
 import android.view.Display;
@@ -14,7 +15,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION;
 
 /**
  * Created by noctuaPC on 5.12.2017.
@@ -26,6 +39,8 @@ public class PartnerMarkerClass {
     Integer screenHeight;
     Activity activity;
     ConcurrentHashMap<String, Partner> partnerHashMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Integer> collectionHashMap;
+
     GoogleMap mMap;
     private static final String TAG = PartnerMarkerClass.class.getSimpleName();
 
@@ -72,6 +87,109 @@ public class PartnerMarkerClass {
 
         });
 
+    }
+
+
+
+    public void savePartner(Context context, Plane saveMe){
+        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
+
+        try {
+            collectionHashMap.get(saveMe.getPlaneType()).add(saveMe.getOriginCountry());
+        }
+        catch (java.lang.NullPointerException nil) {
+            HashSet<String> addMe = new HashSet<>();
+            addMe.add(saveMe.getOriginCountry());
+
+            collectionHashMap.put(saveMe.getPlaneType(), addMe);
+        }
+
+        Log.d("Plane saving: ", collectionHashMap.toString());
+    }
+
+
+    private String formatPlanes() {
+        String result = "";
+
+        for (String planeType : collectionHashMap.keySet()) {
+            Iterator<String> row = collectionHashMap.get(planeType).iterator();
+
+            result += planeType;
+
+            while (row.hasNext()) {
+                result += String.format("#%s", row.next());
+            }
+
+            result += "\n";
+
+        }
+        return result;
+    }
+
+    public void savePlanes(Context context){
+
+        String result = formatPlanes();
+
+        try {
+            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION, Context.MODE_PRIVATE);
+            outputStream.write(result.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.d("Plane Saving", result);
+    }
+
+    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
+        return this.collectionHashMap;
+    }
+
+    public Plane getRandomPlane() {
+        Random generator = new Random();
+        ArrayList<Plane> entries = new ArrayList();
+
+        entries.addAll(planeHashMap.values());
+
+        return entries.get(generator.nextInt(entries.size()));
+    }
+
+
+    public void readCollectedPlanes(Context context) {
+
+        ConcurrentHashMap<String, HashSet<String>> result = new ConcurrentHashMap<>();
+
+        try {
+            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION);
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+
+                    String[] firstSplit = receiveString.split("#");
+                    HashSet<String> planes = new HashSet<>();
+
+                    for (int i = 1; i < firstSplit.length; ++i) {
+                        planes.add(firstSplit[i]);
+                    }
+
+                    result.put(firstSplit[0], planes);
+
+                }
+
+                inputStream.close();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        collectionHashMap = result;
     }
 
 

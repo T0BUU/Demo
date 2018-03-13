@@ -227,17 +227,13 @@ public class MapsFragment extends Fragment {
                             if (plane.isWithinReach(userLocation)) {
                                 Log.d("POOP", "You can collect this plane!");
 
-                                /*planeMarkerClass.savePlane(getContext(), plane);
-
-                                PlaneCatchFragment caught = new PlaneCatchFragment();
-                                caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
-
-                                //caught.setAllFragmentData(plane.getID(), plane.getOriginCountry());*/
+                                planeMarkerClass.savePlane(getContext(), plane);
+                                ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
 
                             } else{
-                                //planeMarkerClass.savePlane(getContext(), plane  );
 
-                                ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
+
+
 
                             }
 
