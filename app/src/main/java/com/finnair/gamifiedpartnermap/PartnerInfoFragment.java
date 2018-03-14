@@ -20,28 +20,21 @@ import android.widget.TextView;
  */
 
 public class PartnerInfoFragment extends DialogFragment {
-    private String companyName = "ERROR";
+    private String companyInfo = "ERROR";
     private String fieldOfBusiness = "ERROR";
-    private String visitingAddress = "ERROR";
-    private String companyDescription = "ERROR";
     private int image = -1;
     private TextView nameTextView;
     private TextView businessTextView;
-    private TextView addressTextView;
-    private TextView descriptionTextView;
     private ImageView imageView;
 
 
     public PartnerInfoFragment(){}  // This default constructor should be left alone
 
-    public void setAllFragmentData(String companyName, String fieldOfBusiness, String visitingAddress, String companyDescription, int image){
+    public void setAllFragmentData(String companyInfo, String fieldOfBusiness, int image){
         // All private data should be set before calling onCreateView:
-        this.companyName = companyName;
+        this.companyInfo = companyInfo;
         this.fieldOfBusiness = fieldOfBusiness;
-        this.visitingAddress = visitingAddress;
-        this.companyDescription = companyDescription;
         this.image = image;
-        Log.d("Partner description", companyDescription);
 
     }
 
@@ -59,13 +52,11 @@ public class PartnerInfoFragment extends DialogFragment {
         builder.setView(dialogView);
 
         // Get references to TextViews. Method setContents() places information into the TextViews
-        this.nameTextView = dialogView.findViewById(R.id.company_name);
+        this.nameTextView = dialogView.findViewById(R.id.company_info);
         this.businessTextView = dialogView.findViewById(R.id.field_of_business);
-        this.addressTextView = dialogView.findViewById(R.id.visiting_address);
-        this.descriptionTextView = dialogView.findViewById(R.id.company_description);
         this.imageView = dialogView.findViewById(R.id.partner_card_image);
 
-        descriptionTextView.setMovementMethod(new ScrollingMovementMethod());
+        nameTextView.setMovementMethod(new ScrollingMovementMethod());
 
 
         //Set the color of border. Maybe we should have different types of cards with different colored borders?
@@ -87,10 +78,8 @@ public class PartnerInfoFragment extends DialogFragment {
     private void setContent(){
         // This method should be private and only called in onCreateView() after the view has been inflated
         // By the time this is called, all private data must be available
-        this.nameTextView.setText(this.companyName);
+        this.nameTextView.setText(this.companyInfo);
         this.businessTextView.setText(this.fieldOfBusiness);
-        this.addressTextView.setText(this.visitingAddress);
-        this.descriptionTextView.setText(this.companyDescription);
         this.imageView.setImageResource(this.image);
 
     }
