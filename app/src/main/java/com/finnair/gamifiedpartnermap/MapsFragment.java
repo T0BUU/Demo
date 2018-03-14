@@ -227,26 +227,25 @@ public class MapsFragment extends Fragment {
                             if (plane.isWithinReach(userLocation)) {
                                 Log.d("POOP", "You can collect this plane!");
 
-                                planeMarkerClass.savePlane(getContext(), plane);
-
-                                PlaneCatchFragment caught = new PlaneCatchFragment();
-                                caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
-
-                                caught.setAllFragmentData(plane.getID(), plane.getOriginCountry());
+                                ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
 
                             } else{
-                                planeMarkerClass.savePlane(getContext(), plane  );
 
-                                PlaneCatchFragment caught = new PlaneCatchFragment();
-                                caught.show(getActivity().getFragmentManager().beginTransaction(), "Caught plane");
-                                caught.setAllFragmentData(plane.getIcao24(), plane.getOriginCountry());
-                                Log.d("POOP", plane.getOriginCountry());
+
                             }
 
                         } else if (partnerMarkerClass.containsMarker(marker)) {
 
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
-                            marker.showInfoWindow();
+                            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15.0f));
+
+                            Partner partner = partnerMarkerClass.getPartnerByID(marker.getTitle());
+                            if (partner.isWithinReach(userLocation)) {
+                                Log.d("POOP", "You can collect this plane!");
+
+                                ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
+                            }
+                            ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
+
                         } else {
                             Log.d("POOP", "You most likely clicked a cluster. Nothing should happen.");
                         }
@@ -259,20 +258,6 @@ public class MapsFragment extends Fragment {
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(final Marker marker) {
-
-                        if (planeMarkerClass.containsMarker(marker)){
-
-
-                        } else {
-                            // User clicked something else than an airplane (company marker):
-                            // Instantiate PartnerInfoFragment:
-                            PartnerInfoFragment p = new PartnerInfoFragment();
-                            p.show(getActivity().getFragmentManager().beginTransaction(), "Add data");
-                            // Find Partner for the Marker clicked recently. Find correct by reading markerID:
-                            Partner currentPartner = partnerMarkerClass.getPartnerByID(marker.getTitle());
-                            // Before displaying the PartnerInfoFragment set necessary variables for the PartnerInfoFragment instance:
-                            p.setAllFragmentData(currentPartner.getID(), currentPartner.getFieldOfBusiness(), currentPartner.getAddress(), currentPartner.getDescription());
-                        }
                     }
                 });
 
@@ -340,9 +325,14 @@ public class MapsFragment extends Fragment {
         return rootView;
     }
 
-    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
+    public ConcurrentHashMap<String, HashSet<String>> getPlaneCollection() {
         return planeMarkerClass.getCollection();
     }
+
+    public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
+        return partnerMarkerClass.getCollection();
+    }
+
 
     private GeofencingRequest getGeofencingRequest() {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
@@ -412,16 +402,12 @@ public class MapsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        planeMarkerClass.savePlanes(this.getContext());
         mMapView.onPause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        //Might be null when the phone reorients.
-        if (planeMarkerClass != null) planeMarkerClass.savePlanes(this.getContext());
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

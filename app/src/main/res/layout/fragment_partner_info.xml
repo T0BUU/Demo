@@ -1,105 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="vertical">
 
-
-    <TableLayout
-        android:id="@+id/info_table"
+    <Button
+        android:id="@+id/card_button_upper"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="fill_horizontal"
-        android:padding="7dp">
+        android:onClick="onCardButtonClick"
+        android:text="Map" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:gravity="center_horizontal">
-
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:srcCompat="@drawable/finnair_logo_round_24dp" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal">
-
-            <TextView
-                android:id="@+id/company_name"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textAlignment="center"
-                android:fontFamily="sans-serif-smallcaps"
-                android:paddingBottom="5dp"
-                android:text="Name"
-                android:textColor="#787878"
-                android:textSize="30sp" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal">
-
-            <TextView
-                android:id="@+id/field_of_business"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Field of Business"
-                android:textAlignment="center" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal">
-
-            <TextView
-                android:id="@+id/visiting_address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Visiting Address"
-                android:textAlignment="center" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <include
+        layout="@layout/partner_card_layout"
+        android:layout_width="200dp"
+        android:layout_height="250dp" />
 
 
-            <TextView
-                android:id="@+id/company_description"
-                android:layout_width="193dp"
-                android:layout_height="wrap_content"
-                android:paddingBottom="7dp"
-                android:paddingLeft="3dp"
-                android:paddingTop="15dp"
-                android:text="Company description" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Take a quiz" />
-        </TableRow>
-
-
-
-
-    </TableLayout>
+    <Button
+        android:id="@+id/card_button_lower"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onCardButtonClick"
+        android:text="Collection" />
 </LinearLayout>

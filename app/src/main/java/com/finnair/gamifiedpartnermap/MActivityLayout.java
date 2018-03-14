@@ -14,6 +14,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -90,8 +91,6 @@ public class MActivityLayout implements View.OnClickListener {
 
         }
 
-        //mActivity.test();
-
 
     }
 
@@ -132,8 +131,11 @@ public class MActivityLayout implements View.OnClickListener {
         }
     }
 
-    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
-        return mapFragment.getCollection();
+    public ConcurrentHashMap<String, HashSet<String>> getPlaneCollection() {
+        return mapFragment.getPlaneCollection();
     }
 
+    public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
+        return mapFragment.getPartnerCollection();
+    }
 }

@@ -22,10 +22,12 @@ import android.widget.Toast;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.finnair.gamifiedpartnermap.MainActivity.planeCatchMessage;
+import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
+
 
 /**
  * Created by ala-hazla on 8.2.2018.
@@ -63,7 +65,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         setContentView(R.layout.plane_collection_layout);
 
         Intent intent = getIntent();
-        collectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(planeCatchMessage);
+        collectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
 
         LinearLayout collection = findViewById(R.id.my_collection);
         LayoutInflater inflater = getLayoutInflater();
@@ -91,11 +93,6 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             collection.addView(row);
         }
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-
-        myToolbar.setTitle("Your collection");
-        setSupportActionBar(myToolbar);
-       getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
@@ -107,9 +104,14 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
         LinearLayout parentLayout = (LinearLayout) v.getParent();
         String planeModel = "" + ((TextView) parentLayout.findViewById(R.id.plane_model_text)).getText();
-        String randomCountry = collectionHashMap.get(planeModel).iterator().next();
+        Iterator<String> countriesIterator = collectionHashMap.get(planeModel).iterator();
+        String collectedCountries = "";
 
-        caught.setAllFragmentData(planeModel, randomCountry);
+        while (countriesIterator.hasNext()) {
+            collectedCountries += countriesIterator.next() + "\n";
+        }
+
+        caught.setAllFragmentData(planeModel, collectedCountries, modelsToImages.get(planeModel));
 
 
     }
@@ -122,6 +124,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             case upper: {
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                finish();
                 break;
             }
             case lower: {
@@ -131,6 +134,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             default: {
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                finish();
             }
         }
     }

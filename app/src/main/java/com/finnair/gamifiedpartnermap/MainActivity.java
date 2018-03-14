@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -48,6 +49,7 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -55,8 +57,7 @@ import java.util.HashMap;
  * Created by ala-hazla on 16.12.2017.
  */
 
-public class MainActivity extends AppCompatActivity implements PlaneCatchFragment.PlaneCatchListener,
-                                                                ProfileResponseHandler{
+public class MainActivity extends AppCompatActivity implements ProfileResponseHandler{
 
     private MActivityLayout myMainLayout;
 
@@ -65,8 +66,11 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
 
     //Constants.
     final static int locationPermission = 100;
-    final static String planeCatchMessage = "com.finnair.gamifiedpartnermap.planeCaught";
+    final static String catchMessagePlanes = "com.finnair.gamifiedpartnermap.planeCollection";
+    final static String catchMessagePartners = "com.finnair.gamifiedpartnermap.partnerCollection";
     final static String profileInfoStartUp = "com.finnair.gamifiedpartnermap.profileInfo";
+    final static String planesCaught = "com.finnair.gamifiedpartnermap.planesCaught";
+    final static String partnersCaught = "com.finnair.gamifiedpartnermap.partnersCaught";
 
 
     @Override
@@ -77,7 +81,8 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
 
         //Main layout class, this instanties whole UI.
         myMainLayout = new MActivityLayout();
-        myMainLayout.createUI(this, fragmentManager, (HashMap<String, String>) getIntent().getSerializableExtra(profileInfoStartUp));
+        myMainLayout.createUI(this, fragmentManager,
+                                (HashMap<String, String>) getIntent().getSerializableExtra(profileInfoStartUp));
 
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Auth",Context.MODE_PRIVATE);
@@ -173,36 +178,43 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
 
     }
 
-    public void onCardButtonClick(View v) {
-        final int upper = R.id.card_button_upper;
-        final int lower = R.id.card_button_lower;
+    public void onPlaneCatch(Plane caughtPlane, Plane randomPlane) {
+        Intent intent = new Intent(this, CardSelectionActivity.class);
 
-        switch (v.getId()) {
-            case upper: {
-                ((DialogFragment) this.getFragmentManager().findFragmentByTag("Caught plane")).dismiss();
-                break;
-            }
-            case lower: {
-                Intent intent = new Intent(this, PlaneCollectionActivity.class);
-                intent.putExtra(planeCatchMessage, this.myMainLayout.getCollection());
-                startActivity(intent);
-                break;
-            }
-            default: {
-                Intent intent = new Intent(this, PlaneCollectionActivity.class);
-                intent.putExtra(planeCatchMessage, this.myMainLayout.getCollection());
-                startActivity(intent);
-            }
-        }
+        ArrayList<String> caughtPlanes = new ArrayList<>();
+
+        caughtPlanes.add(caughtPlane.getPlaneType());
+        caughtPlanes.add(caughtPlane.getOriginCountry());
+        caughtPlanes.add(randomPlane.getPlaneType());
+        caughtPlanes.add(randomPlane.getOriginCountry());
+
+        intent.putExtra(planesCaught, caughtPlanes);
+        intent.putExtra(catchMessagePartners, this.myMainLayout.getPlaneCollection());
+        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPartnerCollection());
+        startActivity(intent);
+        finish();
     }
 
+    public void onPartnerCatch(Partner caughtPartner, Partner randomPartner) {
+        Intent intent = new Intent(this, CardSelectionActivity.class);
 
-    @Override
-    public void onPlaneDialogPositiveClick(DialogFragment dialog) {
-        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
-        Intent intent = new Intent(this, PlaneCollectionActivity.class);
-        intent.putExtra(planeCatchMessage ,this.myMainLayout.getCollection());
+        ArrayList<String> caughtPartners = new ArrayList<>();
+
+        caughtPartners.add(caughtPartner.getFieldOfBusiness());
+        caughtPartners.add(caughtPartner.getID());
+        caughtPartners.add(caughtPartner.getAddress());
+        caughtPartners.add(caughtPartner.getDescription());
+
+        caughtPartners.add(randomPartner.getFieldOfBusiness());
+        caughtPartners.add(randomPartner.getID());
+        caughtPartners.add(randomPartner.getAddress());
+        caughtPartners.add(randomPartner.getDescription());
+
+        intent.putExtra(partnersCaught, caughtPartners);
+        intent.putExtra(catchMessagePartners, this.myMainLayout.getPlaneCollection());
+        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPartnerCollection());
         startActivity(intent);
+        finish();
     }
 
 }

@@ -72,6 +72,10 @@
                     android:value=".MainActivity" />
         </activity>
 
+        <activity
+            android:name=".CardSelectionActivity">
+        </activity>
+
         <service android:name=".GeofenceTransitionsIntentService" />
 
         <activity android:name=".LoginActivity">
