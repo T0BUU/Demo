@@ -230,7 +230,7 @@ public class MapsFragment extends Fragment {
                                 ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
 
                             } else{
-
+                                ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
 
                             }
 
@@ -244,7 +244,10 @@ public class MapsFragment extends Fragment {
 
                                 ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                             }
-                            ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
+                            else {
+                                marker.showInfoWindow();
+                            }
+
 
                         } else {
                             Log.d("POOP", "You most likely clicked a cluster. Nothing should happen.");
@@ -258,6 +261,8 @@ public class MapsFragment extends Fragment {
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(final Marker marker) {
+                        Partner partner = partnerMarkerClass.getPartnerByID(marker.getTitle());
+                        ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                     }
                 });
 
