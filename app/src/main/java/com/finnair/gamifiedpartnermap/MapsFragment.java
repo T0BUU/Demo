@@ -109,6 +109,9 @@ public class MapsFragment extends Fragment {
 
                 mMap = googleMap;
 
+                PartnerInfoWindow customInfoWindow = new PartnerInfoWindow(getActivity());
+                mMap.setInfoWindowAdapter(customInfoWindow);
+
                 // Customize the styling of the base map using a JSON object defined in a raw resource file
                 try {
                     boolean success = mMap.setMapStyle(
@@ -245,6 +248,10 @@ public class MapsFragment extends Fragment {
                                 ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                             }
                             else {
+                                InfoWindowData info = new InfoWindowData();
+                                info.setData(partner.getID(), partner.getAddress(), partner.getDescription());
+
+                                marker.setTag(info);
                                 marker.showInfoWindow();
                             }
 
