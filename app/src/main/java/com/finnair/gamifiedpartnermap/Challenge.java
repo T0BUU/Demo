@@ -59,6 +59,10 @@ public class Challenge {
         return amount;
     }
 
+    public int getProgress() {
+        return progress;
+    }
+
     public int getReward() {
         return reward;
     }

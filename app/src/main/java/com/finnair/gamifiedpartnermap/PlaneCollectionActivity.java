@@ -1,14 +1,11 @@
 package com.finnair.gamifiedpartnermap;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,19 +13,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.fasterxml.jackson.databind.JsonSerializer;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
@@ -157,7 +150,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             TextView collectedOutOf = (TextView) card.findViewById(R.id.routes_collected_counter);
             collectedOutOf.setText(this.planeCollectionHashMap.get(planeType).size() + "/50");
 
-            ProgressBar collectedProgress = (ProgressBar) card.findViewById(R.id.routes_collected_progress);
+            ProgressBar collectedProgress = (ProgressBar) card.findViewById(R.id.challenge_collected_progress);
             collectedProgress.setProgress(this.planeCollectionHashMap.get(planeType).size());
             row.addView(card);
 
@@ -181,7 +174,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             TextView collectedOutOf = (TextView) card.findViewById(R.id.routes_collected_counter);
             collectedOutOf.setText(partnerCollectionHashMap.get(category).size() + "/50");
 
-            ProgressBar collectedProgress = (ProgressBar) card.findViewById(R.id.routes_collected_progress);
+            ProgressBar collectedProgress = (ProgressBar) card.findViewById(R.id.challenge_collected_progress);
             collectedProgress.setProgress(partnerCollectionHashMap.get(category).size());
             row.addView(card);
 
