@@ -51,7 +51,7 @@ public class SplashActivity extends AppCompatActivity implements LocationPermiss
             startActivity(intent);
 
         finish();
-        } else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+        } else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
 
 
     }
@@ -109,7 +109,7 @@ public class SplashActivity extends AppCompatActivity implements LocationPermiss
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT);
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, locationPermission);
     }
 
 }
