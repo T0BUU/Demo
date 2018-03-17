@@ -103,9 +103,6 @@ public class MapsFragment extends Fragment {
     private PendingIntent mGeofencePendingIntent;
     private Marker geoFenceMarker;
 
-    private int CHALLENGE_LIMIT = 5;
-    private ArrayList<Challenge> activeChallenges;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
@@ -118,71 +115,7 @@ public class MapsFragment extends Fragment {
 
         mMapView.onResume();
 
-        //TODO: Replace this with a call to firebase.
-        InputStream is = getResources().openRawResource(R.raw.sample_challenges);
-        Writer writer = new StringWriter();
-        char[] buffer = new char[1024];
-        try {
-            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            int n;
-            while ((n = reader.read(buffer)) != -1) {
-                writer.write(buffer, 0, n);
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
-        JSONArray json = null;
-
-        try {
-            json = new JSONArray(writer.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        activeChallenges = new ArrayList<>();
-
-        for (int i = 0; i < json.length() && i < CHALLENGE_LIMIT; ++i) {
-            try {
-                activeChallenges.add(new Challenge((JSONObject) json.get(i)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-
-        LinearLayout challenges = getActivity().findViewById(R.id.challenge_list);
-        for (Challenge challenge : activeChallenges)
-        {
-            TableRow row = new TableRow(getContext());
-
-            ConstraintLayout item = (ConstraintLayout) inflater.inflate(R.layout.challenge_list_item, row, false);
-
-            TextView name = (TextView) item.findViewById(R.id.challenge_description);
-            name.setText(challenge.getDescription());
-
-            TextView collectedOutOf = (TextView) item.findViewById(R.id.challenge_counter);
-            collectedOutOf.setText(String.format("%d/%d", challenge.getProgress(), challenge.getAmount()));
-
-            ProgressBar collectedProgress = (ProgressBar) item.findViewById(R.id.challenge_collected_progress);
-            collectedProgress.setMax(challenge.getAmount());
-            collectedProgress.setProgress(challenge.getProgress());
-            row.addView(item);
-
-            challenges.addView(row);
-
-        }
-
-        //-------
 
 
         try {

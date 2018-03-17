@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="140dp"
+    android:background="@drawable/common_google_signin_btn_text_light_normal_background"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/header_padding"
+    android:theme="@style/AppTheme">
+
+    <!-- This contains profile picture in navigation drawer -->
+
+    <!-- Profile name and maybe some other crucial information here -->
+    <LinearLayout
+        android:id="@+id/header_profile_name_layout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical|center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/nav_challenges_text_top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/fab_margin"
+            android:gravity="center"
+            android:text="Active Challenges"
+            android:textSize="24sp" />
+
+        <!--    <TextView
+            android:id="@+id/nav_profile_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/header_padding"
+            android:paddingTop="@dimen/header_padding"
+            android:text="@string/header_profile_nickname" />  -->
+    </LinearLayout>
+
+</LinearLayout>

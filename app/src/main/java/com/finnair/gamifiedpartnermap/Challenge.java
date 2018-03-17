@@ -1,5 +1,7 @@
 package com.finnair.gamifiedpartnermap;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +23,7 @@ public class Challenge {
     private ArrayList<String> planeModels = new ArrayList<>();
     private ArrayList<String> planeDestinations = new ArrayList<>();
     private ArrayList<String> partnerNames = new ArrayList<>();
+    private String prettyDescription;
 
 
 
@@ -32,10 +35,10 @@ public class Challenge {
             reward = json.getInt("reward");
             description = json.getString("description");
 
-            parseJsonArray(json.getJSONArray("partner_field"), this.partnerFields);
-            parseJsonArray(json.getJSONArray("plane_model"), this.planeModels);
-            parseJsonArray(json.getJSONArray("plane_destination"), this.planeDestinations);
-            parseJsonArray(json.getJSONArray("partner_name"), this.partnerNames);
+            if (!json.get("partner_field").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("partner_field"), this.partnerFields); }
+            if (!json.get("plane_model").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("plane_model"), this.planeModels); }
+            if (!json.get("plane_destination").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("plane_destination"), this.planeDestinations); }
+            if (!json.get("partner_name").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("partner_name"), this.partnerNames); }
 
 
         } catch (JSONException e) {
@@ -48,12 +51,33 @@ public class Challenge {
             } catch (JSONException e) {
                 progress = 0;
             }
+
+
+        String result = description;
+        String nordicBlue = "#FF0B1560";
+
+        Log.d("Challenges", "" + id + ": " + planeModels.toString());
+
+        result = result.replaceAll("#AMOUNT", String.format("<u><b><font color=%s>%d</font></b></u>", nordicBlue, amount));
+        result = result.replaceAll("#PLANE_MODEL", String.format("<u><b><font color=%s>%s</font></b></u>", nordicBlue, planeModels.toString()));
+        result = result.replaceAll("#PLANE_DESTINATION", String.format("<u><b><font color=%s>%s</font></b></u>", nordicBlue, planeDestinations.toString()));
+        result = result.replaceAll("#PARTNER_FIELD", String.format("<u><b><font color=%s>%s</font></b></u>", nordicBlue, partnerFields.toString()));
+        result = result.replaceAll("#PARTNER_NAME", String.format("<u><b><font color=%s>%s</font></b></u>", nordicBlue, partnerNames.toString()));
+
+           prettyDescription = result;
+    }
+
+    Challenge() {
+        //Used to create "EMPTY" challenges.
+        id = -1;
+        amount = -1;
+        reward = -1;
+        description = "EMPTY";
+        prettyDescription = "CHALLENGES CAN BE OBTAINED FROM LEVELING UP CARDS OR AS A DAILY GIFT.";
     }
 
     //Getters
-    public String getDescription() {
-        return description;
-    }
+    public String getDescription() { return prettyDescription; }
 
     public int getAmount() {
         return amount;

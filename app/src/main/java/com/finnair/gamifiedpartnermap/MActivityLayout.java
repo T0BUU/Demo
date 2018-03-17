@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,9 +16,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +37,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.Inflater;
 
 import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
 
@@ -48,6 +52,8 @@ public class MActivityLayout implements View.OnClickListener {
     private MapsFragment mapFragment;
     private MainActivity mActivity;
     private FragmentManager fragmentManager;
+
+    private DrawerLayout profileView;
 
     public MActivityLayout(){}
 
@@ -64,6 +70,7 @@ public class MActivityLayout implements View.OnClickListener {
         mActivity.setContentView(R.layout.activity_main);
         drawerLayout = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
 
+
         partnerListWindow = new PartnerListWindow(mActivity);
 
         //Navigation buttons
@@ -71,12 +78,16 @@ public class MActivityLayout implements View.OnClickListener {
         ImageButton settingsButton = (ImageButton) mActivity.findViewById(R.id.button_settings);
         Button partnersButton = (Button) mActivity.findViewById(R.id.toolbar_partners_button);
         Button drawerToggle = (Button) mActivity.findViewById(R.id.open_drawer_button);
+        Button challengesToggle = (Button) mActivity.findViewById(R.id.challenges_button);
+        ImageButton challengesBackButton = (ImageButton) mActivity.findViewById(R.id.challenge_list_button_back);
 
         //Set click listeners to all buttons
         loginButton.setOnClickListener(this);
         settingsButton.setOnClickListener(this);
         partnersButton.setOnClickListener(this);
         drawerToggle.setOnClickListener(this);
+        challengesToggle.setOnClickListener(this);
+        challengesBackButton.setOnClickListener(this);
 
         fragmentManager.beginTransaction()
                 .replace(R.id.main_content, mapFragment)
@@ -87,7 +98,7 @@ public class MActivityLayout implements View.OnClickListener {
             profileNameField.setText(profileInfo.get("id"));
             loginButton.setText("Logout");
         }
-        catch (java.lang.NullPointerException e) {
+        catch (NullPointerException e) {
 
         }
 
@@ -97,6 +108,9 @@ public class MActivityLayout implements View.OnClickListener {
     //Handle button click events here.
     @Override
     public void onClick(View view){
+        LinearLayout profileBasis = mActivity.findViewById(R.id.profile_basis);
+        LinearLayout challengesBasis = mActivity.findViewById(R.id.challenges_basis);
+        Log.d("BUTTON", "clicked");
         switch(view.getId()){
             case R.id.button_settings:
                 fragmentManager.beginTransaction()
@@ -125,8 +139,30 @@ public class MActivityLayout implements View.OnClickListener {
                 partnerListWindow.printPartners();
                 partnerListWindow.createPopupWindow();
                 break;
-            case R.id.open_drawer_button:                        //Open drawer, (Profile icon)
+            case R.id.open_drawer_button: //Open drawer, (Profile icon)
+                profileBasis.setVisibility(View.VISIBLE);
+                challengesBasis.setVisibility(View.GONE);
                 drawerLayout.openDrawer(GravityCompat.START);
+                break;
+
+            case R.id.challenges_button:
+
+                profileBasis.setVisibility(View.GONE);
+                challengesBasis.setVisibility(View.VISIBLE);
+                LinearLayout challengeList = challengesBasis.findViewById(R.id.challenge_list);
+                challengeList.removeAllViews();
+                mActivity.fillChallengeView(challengeList);
+
+                break;
+
+            case R.id.challenge_list_button_back:
+
+                profileBasis.setVisibility(View.VISIBLE);
+                challengesBasis.setVisibility(View.GONE);
+
+                break;
+
+
             default: break;
         }
     }
