@@ -13,7 +13,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -31,9 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Calendar;
 
 
-/**
- * Created by noctuaPC on 5.12.2017.
- */
+
 
 public class PartnerMarkerClass {
 
@@ -208,12 +205,10 @@ public class PartnerMarkerClass {
         newPartner.setSnippet(description);
         newPartner.setAddress(address);
         newPartner.setID(companyName);
-        newPartner.setCircleOptions();
         newPartner.setMarkerOptions();
         newPartner.setMarkerImage(screenWidth);
 
         partnerHashMap.put(newPartner.getID(), newPartner);
-        markerRenderer.setIcon( newPartner.getID(), newPartner.getIcon() ); // Here you can set the Marker Image for the specific Partner
         clusterManager.addItem(newPartner);
     }
 

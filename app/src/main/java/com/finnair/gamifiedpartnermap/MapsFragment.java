@@ -7,19 +7,16 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import android.content.res.Resources;
-import android.graphics.Point;
 import android.location.Criteria;
 import android.location.Location;
 
 import android.location.LocationManager;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,14 +42,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.android.MarkerManager;
 import com.google.maps.android.clustering.Cluster;
-import com.google.maps.android.clustering.ClusterManager;
 
 
-import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapsFragment extends Fragment {
@@ -69,7 +61,8 @@ public class MapsFragment extends Fragment {
     private PartnerMarkerClass partnerMarkerClass;
     private PlaneMarkerClass planeMarkerClass;
     private MapView mMapView;
-    private ClusterManager<ClusterMarker> clusterManager;
+    private com.finnair.gamifiedpartnermap.ClusterManager<ClusterMarker> partnerClusterManager;
+    private com.finnair.gamifiedpartnermap.ClusterManager<ClusterMarker> planeClusterManager;
 
     //These are used to get the users current userLocation.
     private LocationManager locationManager;
@@ -137,12 +130,13 @@ public class MapsFragment extends Fragment {
                         // Kamppi (good for testing firms): 60.167497, 24.934739
                         // Espoo (good for plane spotting): 60.2055, 24.6559
                         userLocation = new Location("");
-                        userLocation.setLatitude(60.167497);
-                        userLocation.setLongitude(24.934739);
+                        userLocation.setLatitude(60.2055); // 60.320850 hki-vantaa
+                        userLocation.setLongitude(24.6559); // 24.952630
+                    }
 
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
 
-                    }
+                } // If permission granted
 
 
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
@@ -151,53 +145,47 @@ public class MapsFragment extends Fragment {
                         mMap.setMyLocationEnabled(true);
 
 
-                }
 
-                if (userLocation == null) {
-                    // Location not available so center manually . Location provider set to <"">
-                    // Kamppi (good for testing firms): 60.167497, 24.934739
-                    // Espoo (good for plane spotting): 60.2055, 24.6559
-                    userLocation = new Location("");
-                    userLocation.setLatitude(60.167497);
-                    userLocation.setLongitude(24.934739);
 
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
-
-                }
-
+                partnerClusterManager = new com.finnair.gamifiedpartnermap.ClusterManager<ClusterMarker>(getContext(), mMap, new MarkerManager(mMap));
+                planeClusterManager = new com.finnair.gamifiedpartnermap.ClusterManager<ClusterMarker>(getContext(), mMap, new MarkerManager(mMap));
                 partnerMarkerClass = new PartnerMarkerClass(getActivity(), mMap);
-                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, userLocation);
-                clusterManager = new ClusterManager<ClusterMarker>(getContext(), mMap, new MarkerManager(mMap));
-
-                /*
-                Display display = getActivity().getWindowManager().getDefaultDisplay();
-                Point size = new Point();
-                display.getSize(size);
-                Integer screenWidth = size.x;
-                */
 
 
-                MarkerRenderer markerRenderer = new MarkerRenderer(getContext(), mMap, clusterManager);
 
-                partnerMarkerClass.fetchFromFirebase(clusterManager, markerRenderer);
-                clusterManager.setRenderer(markerRenderer);
+                MarkerRenderer partnerMarkerRenderer = new com.finnair.gamifiedpartnermap.MarkerRenderer(getContext(), mMap, partnerClusterManager, false);
+                final MarkerRenderer planeMarkerRenderer = new com.finnair.gamifiedpartnermap.MarkerRenderer(getContext(), mMap, planeClusterManager, true);
+                planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, userLocation, planeClusterManager, planeMarkerRenderer);
 
-                mMap.setOnCameraIdleListener(clusterManager);
-                clusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<ClusterMarker>() {
+                partnerMarkerClass.fetchFromFirebase(partnerClusterManager, partnerMarkerRenderer);
+                partnerClusterManager.setRenderer(partnerMarkerRenderer);
+                planeClusterManager.setRenderer(planeMarkerRenderer);
+
+                mMap.setOnCameraIdleListener(partnerClusterManager);
+                // mMap.setOnCameraIdleListener(planeClusterManager);
+                partnerClusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<ClusterMarker>() {
                     @Override
                     public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
-                        Log.d("POOP", "Cluster clicked"); // Never called. Unclear why
+                        Log.d("POOP", "Partner cluster clicked"); // Never called. Unclear why
                         return false;
                     }
                 });
 
+                planeClusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<ClusterMarker>() {
+                    @Override
+                    public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
+                        Log.d("POOP", "Plane cluster clicked"); // Never called. Unclear why
+                        return false;
+                    }
+                });
 
                 mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
                     @Override
                     public void onCameraMove() {
                         CameraPosition cameraPosition = mMap.getCameraPosition();
                         planeMarkerClass.zoomListener(cameraPosition.zoom);
-                        clusterManager.cluster();
+                        partnerClusterManager.cluster();
+                        planeClusterManager.cluster();
                     }
                 });
 
@@ -276,7 +264,7 @@ public class MapsFragment extends Fragment {
                 // First call to OpenSky (AsyncTask):
                 planeMarkerClass.refreshOpenSkyPlanes();
                 // Timed call to OpenSky (AsyncTask):
-                final long INTERVAL = 1000 * 30; // 30 seconds
+                final long INTERVAL = 1000 * 15; // 30 seconds
                 final Handler handler = new Handler();
                 Runnable runnable = new Runnable() {
 
@@ -409,6 +397,7 @@ public class MapsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mMapView.onResume();
+
     }
 
     @Override

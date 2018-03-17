@@ -374,6 +374,4 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
 
     }
 
-
-
 }
