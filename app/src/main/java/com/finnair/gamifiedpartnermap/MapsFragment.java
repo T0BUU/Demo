@@ -13,7 +13,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -45,11 +44,7 @@ import com.google.maps.android.MarkerManager;
 import com.google.maps.android.clustering.Cluster;
 
 
-import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapsFragment extends Fragment {
@@ -141,7 +136,7 @@ public class MapsFragment extends Fragment {
 
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
 
-                    }
+                } // If permission granted
 
 
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
@@ -150,19 +145,7 @@ public class MapsFragment extends Fragment {
                         mMap.setMyLocationEnabled(true);
 
 
-                }
 
-                if (userLocation == null) {
-                    // Location not available so center manually . Location provider set to <"">
-                    // Kamppi (good for testing firms): 60.167497, 24.934739
-                    // Espoo (good for plane spotting): 60.2055, 24.6559
-                    userLocation = new Location("");
-                    userLocation.setLatitude(60.167497);
-                    userLocation.setLongitude(24.934739);
-
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()), 13));
-
-                }
 
                 partnerClusterManager = new com.finnair.gamifiedpartnermap.ClusterManager<ClusterMarker>(getContext(), mMap, new MarkerManager(mMap));
                 planeClusterManager = new com.finnair.gamifiedpartnermap.ClusterManager<ClusterMarker>(getContext(), mMap, new MarkerManager(mMap));

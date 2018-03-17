@@ -55,6 +55,7 @@ public class Plane extends ClusterMarker {
 
     public void setMarkerImage(Integer screenWidth){
         setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane, 2));
+    }
     public void setMarkerImage(String status){
         if (status.equalsIgnoreCase("near"))
             setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane_near, 1));
@@ -72,10 +73,6 @@ public class Plane extends ClusterMarker {
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
-
-
-
-
 
 
     public void savePlane(Context context){
@@ -121,7 +118,6 @@ public class Plane extends ClusterMarker {
             Log.e("login activity", "Can not read file: " + e.toString());
         }
 
-        ((MainActivity) this.activity).setPlanesListing(ret);
         return ret;
     }
 }

@@ -78,7 +78,7 @@ public class PlaneMarkerClass {
 
         openSkyApi = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
 
-        readCollectedPlanes(activity);
+        // readCollectedPlanes(activity);
 
     }
 
@@ -105,15 +105,12 @@ public class PlaneMarkerClass {
             newPlane.setID(planeID);
             newPlane.setMarkerOptions();
             newPlane.setMarkerImage(screenWidth);
-            newPlane.setMarker( this.mMap.addMarker( newPlane.getMarkerOptions() ) );
-            newPlane.setCircle( this.mMap.addCircle( newPlane.getCircleOptions() ) );
-            newPlane.setRadarArcPolyLine( this.mMap.addPolyline( newPlane.getRadarPolyLineOptions() ) );
             newPlane.setPlaneType( planeType );
-            newPlane.showRadarArcPolyline(false);
             newPlane.setMarkerImage("not near/collected");
             planeHashMap.put(newPlane.getID(), newPlane);
             this.clusterManager.addItem(newPlane);
 
+            readCollectedPlanes(activity);
 
         }
     }
@@ -218,7 +215,7 @@ public class PlaneMarkerClass {
                 // Add a new plane Marker on the map:
                 if (heading != null) {
                     addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 90, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
-                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 45);
+                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 45, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
                     planeHashMap.get(callSign).setPlaneMiscellaneousInformation(
                             openSkyStateVector.getGeoAltitude(),
                             openSkyStateVector.getVelocity(),
@@ -233,5 +230,59 @@ public class PlaneMarkerClass {
 
         }
     }
+
+
+    public ConcurrentHashMap<String, HashSet<String>> getCollection() {
+        return this.collectionHashMap;
+    }
+
+    public Plane getRandomPlane() {
+        Random generator = new Random();
+        ArrayList<Plane> entries = new ArrayList();
+
+        entries.addAll(planeHashMap.values());
+
+        return entries.get(generator.nextInt(entries.size()));
+    }
+
+
+    public void readCollectedPlanes(Context context) {
+
+        ConcurrentHashMap<String, HashSet<String>> result = new ConcurrentHashMap<>();
+
+        try {
+            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION_PLANES);
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+
+                    String[] firstSplit = receiveString.split("#");
+                    HashSet<String> planes = new HashSet<>();
+
+                    for (int i = 1; i < firstSplit.length; ++i) {
+                        planes.add(firstSplit[i]);
+                    }
+
+                    result.put(firstSplit[0], planes);
+
+                }
+
+                inputStream.close();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        collectionHashMap = result;
+    }
+
+
 }
 
