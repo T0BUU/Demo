@@ -81,6 +81,13 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     }
 
 
+    //Method to notify partnerListWindow when PartnerMarkerClass fetches partner data.
+    public void notifyDataChange(){
+        System.out.println("!!!!!!!Main Actitvity notifyDatachange called!!!!!!!");
+        myMainLayout.notifyPartnerDataChanged();
+    }
+
+
 
     // Logs the user out
     protected void logout() {

@@ -24,8 +24,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import org.apache.http.io.SessionOutputBuffer;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Calendar;
 
@@ -41,7 +46,7 @@ public class PartnerMarkerClass {
     private ConcurrentHashMap<String, HashSet<String>> collectionHashMap;
 
     public static String USER_DATA_LOCATION_PARTNERS = "myPartners";
-
+    private List<Partner> showingPartners;
     GoogleMap mMap;
     private static final String TAG = PartnerMarkerClass.class.getSimpleName();
 
@@ -80,6 +85,16 @@ public class PartnerMarkerClass {
                     addOneMarkerOnMap(lat, lng, companyName, business, description, address, clusterManager, markerRenderer);
 
                 }
+
+                //At after fetching data add all partners to showingPartners list.
+                showingPartners = new ArrayList<>(partnerHashMap.values());
+
+                //Notify MainActivity that data is ready, it forwards notify to partnerListWindow
+                if(partnerHashMap != null) {
+                    MainActivity act = (MainActivity) activity;
+                    act.notifyDataChange();
+                }
+
             }
 
             @Override
@@ -91,6 +106,25 @@ public class PartnerMarkerClass {
 
     }
 
+    /*
+     * This updates showingMarkers list based on given parameter field_of_business.
+     * If showingPartners contain partners under field_of_business, this method removes them from list.
+     * If showingPartners doesn't contain that field_of_business, it adds those to list.
+     * Returns updated list.
+     */
+    public List<Partner> filterFieldOfBusiness(String fob){
+        for(Partner partner : partnerHashMap.values()) {
+            if (partner.getFieldOfBusiness().equals(fob)) {
+                if(showingPartners.contains(partner)){
+                    showingPartners.remove(partner);
+                } else {
+                    showingPartners.add(partner);
+                }
+            }
+        }
+        return showingPartners;
+
+    }
 
 
    /* public void savePartner(Context context, Partner saveMe){
@@ -222,6 +256,15 @@ public class PartnerMarkerClass {
         return partnerHashMap.containsKey(partnerMarker.getTitle());
     }
 
+    //Getter for partnerHashMap.
+    public ConcurrentHashMap<String, Partner> getPartnerHashMap() {
+        if (partnerHashMap == null) {
+            System.out.println("!!!!partnerHashMap was null!!!!");
+            return null;
+        } else {
+            return this.partnerHashMap;
+        }
+    }
 
 
 }

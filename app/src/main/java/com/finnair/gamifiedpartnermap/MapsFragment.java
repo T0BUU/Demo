@@ -325,6 +325,14 @@ public class MapsFragment extends Fragment {
         return rootView;
     }
 
+
+
+    //MainActivity calls this method after partnerMarkerClass has fetched data.
+    //Calls partnerListWindows method createPopupWindow which sets data and recreates the window.
+    public void notifyPartnerDataChanged(){
+        partnerListWindow.createPopupWindow();
+    }
+
     public ConcurrentHashMap<String, HashSet<String>> getPlaneCollection() {
         return planeMarkerClass.getCollection();
     }

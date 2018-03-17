@@ -18,6 +18,7 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +41,9 @@ import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
 /**
  * Created by Otto on 12.2.2018.
  */
-
+/*
+ * This class is responsible for instantiating the whole UI.
+ */
 public class MActivityLayout implements View.OnClickListener {
 
     private DrawerLayout drawerLayout;
@@ -64,8 +67,6 @@ public class MActivityLayout implements View.OnClickListener {
         mActivity.setContentView(R.layout.activity_main);
         drawerLayout = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
 
-        partnerListWindow = new PartnerListWindow(mActivity);
-
         //Navigation buttons
         Button loginButton = (Button) mActivity.findViewById(R.id.button_login);
         ImageButton settingsButton = (ImageButton) mActivity.findViewById(R.id.button_settings);
@@ -78,6 +79,7 @@ public class MActivityLayout implements View.OnClickListener {
         partnersButton.setOnClickListener(this);
         drawerToggle.setOnClickListener(this);
 
+        //Insert mapFragment to main_content FrameLayout
         fragmentManager.beginTransaction()
                 .replace(R.id.main_content, mapFragment)
                 .commit();
@@ -90,6 +92,9 @@ public class MActivityLayout implements View.OnClickListener {
         catch (java.lang.NullPointerException e) {
 
         }
+
+        //Initialize new partnerListWindow, pass MainActivity and mapFragment as parameters.
+        partnerListWindow = new PartnerListWindow(mActivity, mapFragment);
 
 
     }
@@ -122,13 +127,20 @@ public class MActivityLayout implements View.OnClickListener {
                         .commit();
                 break;
             case R.id.toolbar_partners_button:                   //Open partner popup window.
-                partnerListWindow.printPartners();
-                partnerListWindow.createPopupWindow();
+                partnerListWindow.showPopupWindow();
                 break;
             case R.id.open_drawer_button:                        //Open drawer, (Profile icon)
                 drawerLayout.openDrawer(GravityCompat.START);
             default: break;
         }
+    }
+
+
+
+    //MainActivity calls this method after partnerMarkerClass has fetched data.
+    //Calls partnerListWindows method createPopupWindow which sets data and recreates the window.
+    public void notifyPartnerDataChanged(){
+        partnerListWindow.createPopupWindow();
     }
 
     public ConcurrentHashMap<String, HashSet<String>> getPlaneCollection() {

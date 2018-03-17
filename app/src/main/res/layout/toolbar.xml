@@ -22,19 +22,6 @@
             android:background="@drawable/ic_person_blue"
             android:paddingEnd="12dp"
             android:paddingStart="12dp" />
-        <!--    <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:gravity="center"
-                android:paddingStart="48dp">
-
-                <View
-                    android:layout_width="2dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/divider_horizontal"
-                    android:padding="@dimen/toolbar_divider_margin_pos"
-                    android:layout_gravity="start|center_vertical"/>   -->
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -61,28 +48,6 @@
             android:text="@string/toolbar_partners_text"
             android:textColor="?attr/colorAccent"
             android:textSize="@dimen/toolbar_text_size" />
-
-
-        <!--      <TextView
-                android:id="@+id/toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="@string/toolbar_map_text"
-                android:textSize="@dimen/toolbar_text_size"
-                android:textColor="?attr/colorAccent"
-                android:layout_marginEnd="@dimen/toolbar_divider_margin"
-                android:textAppearance="@android:style/TextAppearance.WindowTitle"
-                android:gravity="center_vertical"/>
-
-            <TextView
-                android:id="@+id/toolbar_list"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="@string/toolbar_list_text"
-                android:textSize="@dimen/toolbar_text_size"
-                android:textColor="?attr/colorAccent"
-                android:layout_marginStart="@dimen/toolbar_divider_margin"
-                android:gravity="center_vertical"/>  -->
 
     </RelativeLayout>
 </android.support.v7.widget.Toolbar>
