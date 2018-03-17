@@ -44,7 +44,9 @@ import com.google.maps.android.MarkerManager;
 import com.google.maps.android.clustering.Cluster;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapsFragment extends Fragment {
@@ -326,12 +328,41 @@ public class MapsFragment extends Fragment {
     }
 
 
+    /*
+    * This method moves camera to given partner and opens its infowindow.
+    * Called from partnerListWindow when user clicks on partner name.
+    */
+    public void moveCameraToPartner(Partner partner){
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(partner.getPosition(), 15.0f));
+        List<Marker> partnerMarkers = new ArrayList<>(partnerClusterManager.getMarkerCollection().getMarkers());
+        for(Marker marker : partnerMarkers) {
+            if(marker.getPosition().equals(partner.getPosition())){
+                InfoWindowData info = new InfoWindowData();
+                info.setData(partner.getID(), partner.getAddress(), partner.getDescription());
 
-    //MainActivity calls this method after partnerMarkerClass has fetched data.
-    //Calls partnerListWindows method createPopupWindow which sets data and recreates the window.
-    public void notifyPartnerDataChanged(){
-        partnerListWindow.createPopupWindow();
+                marker.setTag(info);
+                marker.showInfoWindow();
+            }
+        }
     }
+
+    /*
+     * This method filters markers shown on map.
+     * It gets partners we want to show as parameter List<Partner>.
+     * First it clears all items from clusterManager (which manages our markers)
+     * Then it adds all partners we want to show to clusterManager.  /Note: Partner extends ClusterMarker
+     * And at last it clusters markers again.
+     */
+    public void filterPartners(List<Partner> partnersToShow){
+        partnerClusterManager.clearItems();
+        for(Partner p : partnersToShow){
+            partnerClusterManager.addItem(p);
+        }
+        partnerClusterManager.cluster();
+    }
+
+
+
 
     public ConcurrentHashMap<String, HashSet<String>> getPlaneCollection() {
         return planeMarkerClass.getCollection();
@@ -339,6 +370,10 @@ public class MapsFragment extends Fragment {
 
     public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
         return partnerMarkerClass.getCollection();
+    }
+
+    public PartnerMarkerClass getPartners() {
+        return partnerMarkerClass;
     }
 
 
