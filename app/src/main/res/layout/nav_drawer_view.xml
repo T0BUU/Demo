@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/nav_drawer_container">
 
     <!-- This is contains profile pic, name, etc. -->
     <include
@@ -46,7 +47,8 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/drawer_item_height"
             android:orientation="horizontal"
-            android:layout_below="@id/drawer_points_item">
+            android:layout_below="@id/drawer_points_item"
+            android:id="@+id/linearLayout">
 
             <ImageView
                 android:layout_width="@dimen/drawer_item_icon_size"
@@ -90,5 +92,6 @@
                 android:background="@drawable/header_background"
                 android:text="Login" />
         </LinearLayout>
+
     </RelativeLayout>
 </LinearLayout>

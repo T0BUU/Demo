@@ -2,7 +2,9 @@ package com.finnair.gamifiedpartnermap;
 
 import android.app.Activity;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.v4.app.Fragment;
 import android.util.Pair;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -30,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Otto on 5.2.2018.
@@ -37,114 +43,128 @@ import java.util.HashMap;
 
 public class PartnerListWindow extends PopupWindow {
 
-    //Reference to FirebaseDatabase
-    private DatabaseReference databaseReference;
-    private ArrayList<String> partners;                              //Arraylist which we populate with partner names.
-    private HashMap<String, String> partnersUnderBusiness;           //HashMap which keys are fields_of_business and values are partner names.
-    private HashMap<String, Pair<Double, Double>> partnerLocations;  //HashMap which keys are partner names and values are partner locations.
-    private ArrayList<String> testList;          //Just a very long test list
+    private List<String> partners;                                    //Arraylist which we populate with partner names.
+    private HashMap<String, List<String>> partnersUnderBusiness;      //HashMap which keys are fields_of_business and values are partner names.
+    private List<String> fieldsOfBusinesses;                          //List containing all fields_of_business.
 
     private Activity mActivity;
+    private MapsFragment myMap;
+    private PartnerMarkerClass partnerMarkerClass;
 
-    private RelativeLayout myLinearLayout;
-    private ListView myListView;
-    private ArrayAdapter<String> adapter;
     private PopupWindow popup;
 
-    public PartnerListWindow(Activity act){
 
-        testList = new ArrayList<String>();
-        for(int i = 0; i<100; i++) {
-            testList.add("Peruna");
-        }
+    public PartnerListWindow(Activity act, MapsFragment mMap){
+
         mActivity = act;
-        partners = new ArrayList<String>();
-        partnerLocations = new HashMap<>();
-        partnersUnderBusiness = new HashMap<>();
-        databaseReference = FirebaseDatabase.getInstance().getReference();
-        setData();
-
+        myMap = mMap;
     }
 
-    //This function is called every time we want to show popup window.
+    /*
+     * This function is called from MActivityLayout on partners button click.
+     * Shows popupwindow on top of mainLayout at the center of screen.
+     */
+    public void showPopupWindow() {
+        popup.showAtLocation(mActivity.findViewById(R.id.main_content), Gravity.CENTER, 0, 0);
+    }
+
+    /*
+     * Creates popup window, this method gets called when partnerMarkerClass fetches data, so this must update too.
+     * First calls setdata() method which gets data from partnerMarkerClass and initializes required Lists etc.
+     * Then create new PopupWindow and inflate linearlayout containing expandable list view.
+     * After that set values to popupwindow (width, height, contentview,...).
+     * At last finds expandablelistview, initializes and sets its adapter and sets onClickListeners for it.
+     */
     public void createPopupWindow(){
 
-        myLinearLayout = (RelativeLayout) mActivity.findViewById(R.id.popup_partner_window);
+        this.setData();
+        popup = new PopupWindow(mActivity);
+
+        RelativeLayout myLinearLayout = (RelativeLayout) mActivity.findViewById(R.id.popup_partner_window);
 
         LayoutInflater inf = mActivity.getLayoutInflater();
         final View myPopupView = inf.inflate(R.layout.partner_list_view, myLinearLayout);
 
-        popup = new PopupWindow(mActivity);
+        Display display = mActivity.getWindowManager().getDefaultDisplay();
+        int width = (int)((double)display.getWidth() * 0.8);
+        int height = (int)((double)display.getHeight() * 0.8);
+        popup.setWidth(width);
+        popup.setHeight(height);
         popup.setFocusable(true);
         popup.setContentView(myPopupView);
-
         popup.setBackgroundDrawable(new BitmapDrawable());
-        popup.showAtLocation(mActivity.findViewById(R.id.main_content), Gravity.CENTER, 0, 0);
-        popup.setWidth(200);
-        popup.setHeight(400);
 
-        myListView = (ListView) popup.getContentView().findViewById(R.id.popup_list_view);
+        ExpandableListView myExpandableList = (ExpandableListView) myPopupView.findViewById(R.id.popup_expandable_list_view);
+        if(myExpandableList == null) {
+            System.out.println("!!!null expandableList!!!");
+        }
+        ExpandableListAdapter expandingListAdapter = new PartnerPopupExpandableListAdapter(mActivity, partnersUnderBusiness, partnerMarkerClass, myMap);
+        myExpandableList.setAdapter(expandingListAdapter);
 
-        adapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_list_item_1, partners);
-        myListView.setAdapter(adapter);
-
-        myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*myExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String clicked = ((TextView)view).getText().toString();
-             /**   if(myMap != null) {
-                    Pair<Double, Double> newLoc = partnerLocations.get(((TextView)view).getText().toString());
-                    LatLng newLatLng = new LatLng(newLoc.first, newLoc.second);
-                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 15.0f));
-                } else  {System.out.println("map was null");}   */
-                System.out.println("Clicked: " + clicked + "LatLng: " + partnerLocations.get(clicked));
+            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
+                expandableListView.expandGroup(i);
+                return false;
+            }
+        });*/
+
+        myExpandableList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            @Override
+            public void onGroupExpand(int i) {
+
             }
         });
 
-
-        Button closeButton = (Button) myPopupView.findViewById(R.id.popup_close_button);
-        closeButton.setOnClickListener(new View.OnClickListener() {
+        myExpandableList.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
             @Override
-            public void onClick(View view) {
-                popup.dismiss();
+            public void onGroupCollapse(int i) {
+
+            }
+        });
+
+        myExpandableList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
+                //Partner p = partnerMarkerClass.getPartnerByID(partners.get(i1));
+                //myMap.moveCameraToPartner(p);
+                return false;
             }
         });
     }
 
+    /*
+     * This method gets partnerHashMap from partnerMarkerClass,
+     * parses received data to partnersUnderBusiness HashMap<field_of_business, partner.name>
+     * and partners List<partner.name>
+     */
     public void setData(){
+        partnerMarkerClass = myMap.getPartners();
+        ConcurrentHashMap<String, Partner> partnerHashMap = partnerMarkerClass.getPartnerHashMap();
+        partners = new ArrayList<>();
 
-        DatabaseReference ref = databaseReference.child("locations");
-
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot singleSnapShot : dataSnapshot.getChildren()) {
-                    String companyName = singleSnapShot.child("name").getValue().toString();
-                    String business = singleSnapShot.child("field_of_business").getValue().toString();
-                    Double lat = Double.parseDouble(singleSnapShot.child("lat").getValue().toString());
-                    Double lng = Double.parseDouble(singleSnapShot.child("lng").getValue().toString());
-
-                    partnersUnderBusiness.put(business, companyName);
-                    partners.add(companyName);
-                    partnerLocations.put(companyName, new Pair<Double, Double>(lat, lng));
-                    System.out.println(companyName + "LatLng" + lat +  " : " + lng);
-                }
-                Collections.sort(partners);
+        partnersUnderBusiness = new HashMap<>();
+        ArrayList<String> partnerNames = new ArrayList<>(partnerHashMap.keySet());
+        for(int i = 0; i < partnerNames.size(); i++){
+            Partner current = partnerHashMap.get(partnerNames.get(i));
+            System.out.println("current partner: " + current.getID());
+            if(!partnersUnderBusiness.containsKey(current.getFieldOfBusiness())){
+                ArrayList<String> newArray = new ArrayList<>();
+                newArray.add(current.getID());
+                partnersUnderBusiness.put(current.getFieldOfBusiness(), newArray);
+            } else if(current.getID() != null){
+                List<String> addArray = partnersUnderBusiness.get(current.getFieldOfBusiness());
+                addArray.add(current.getID());
+                partnersUnderBusiness.put(current.getFieldOfBusiness(), addArray);
+            } else {
+                System.out.println("----current partner was null");
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-    }
-
-
-    public void printPartners(){
-        for(String single : partners){
-            System.out.println(single);
+        }
+        List<String> pUBKeys = new ArrayList<>(partnersUnderBusiness.keySet());
+        for(int j = 0; j < pUBKeys.size(); j++){
+            List<String> temp = partnersUnderBusiness.get(pUBKeys.get(j));
+            partners.addAll(temp);
         }
     }
+
 }

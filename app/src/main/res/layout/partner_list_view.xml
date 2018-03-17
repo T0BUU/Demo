@@ -15,16 +15,16 @@
         android:background="@drawable/header_background"
         android:id="@+id/popup_header_view">    -->
 
-        <Button
+       <!-- <Button
             android:id="@+id/popup_close_button"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="@drawable/ic_close_button_blue_8dp"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"/>   -->
 
-        <ListView
+        <ExpandableListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/popup_list_view"/>
+            android:id="@+id/popup_expandable_list_view"/>
 
     </RelativeLayout>

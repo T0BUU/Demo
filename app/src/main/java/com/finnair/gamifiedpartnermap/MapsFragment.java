@@ -49,6 +49,8 @@ import com.google.maps.android.clustering.ClusterManager;
 
 
 import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -340,8 +342,41 @@ public class MapsFragment extends Fragment {
         return rootView;
     }
 
+    /*
+     * This method moves camera to given partner and opens its infowindow.
+     * Called from partnerListWindow when user clicks on partner name.
+     */
+    public void moveCameraToPartner(Partner partner){
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(partner.getPosition(), 15.0f));
+        List<Marker> partnerMarkers = new ArrayList<>(clusterManager.getMarkerCollection().getMarkers());
+        for(Marker marker : partnerMarkers) {
+            if(marker.getPosition().equals(partner.getPosition())){
+                marker.showInfoWindow();
+            }
+        }
+    }
+
+    /*
+     * This method filters markers shown on map.
+     * It gets partners we want to show as parameter List<Partner>.
+     * First it clears all items from clusterManager (which manages our markers)
+     * Then it adds all partners we want to show to clusterManager.  /Note: Partner extends ClusterMarker
+     * And at last it clusters markers again.
+     */
+    public void filterPartners(List<Partner> partnersToShow){
+        clusterManager.clearItems();
+        for(Partner p : partnersToShow){
+            clusterManager.addItem(p);
+        }
+        clusterManager.cluster();
+    }
+
     public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return planeMarkerClass.getCollection();
+    }
+
+    public PartnerMarkerClass getPartners() {
+        return partnerMarkerClass;
     }
 
     private GeofencingRequest getGeofencingRequest() {
