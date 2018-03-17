@@ -1,6 +1,7 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -11,7 +12,23 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,10 +41,18 @@ public class PlaneMarkerClass {
     Integer screenHeight;
     Activity activity;
     private ConcurrentHashMap<String, Plane> planeHashMap; // to avoid ConcurrentModificationException with HashMap
+    private ConcurrentHashMap<String, HashSet<String>> collectionHashMap; // to avoid ConcurrentModificationException with HashMap
     private Location tempLocation = new Location("");
     GoogleMap mMap;
 
     private Location userLocation;
+    public static String USER_DATA_LOCATION_PLANES = "myPlanes";
+
+    private List<String> PLANE_TYPES = Arrays.asList("AIRBUS A350-900", "AIRBUS A330-300",
+            "AIRBUS A321", "AIRBUS A321-231",
+            "AIRBUS A320", "AIRBUS A319",
+            "AIRBUS A319", "EMBRAER 190",
+            "ATR 72-212A");
     private com.finnair.gamifiedpartnermap.ClusterManager clusterManager;
     private MarkerRenderer markerRenderer;
 
@@ -49,7 +74,11 @@ public class PlaneMarkerClass {
         this.screenHeight = size.y;
 
         planeHashMap = new ConcurrentHashMap<>();
+        collectionHashMap = new ConcurrentHashMap<>();
+
         openSkyApi = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
+
+        readCollectedPlanes(activity);
 
     }
 
@@ -67,7 +96,7 @@ public class PlaneMarkerClass {
         return planeHashMap.containsKey(planeMarker.getTitle());
     }
 
-    public void addPlaneOnMap(String planeID, Double latitude, Double longitude, Double directionDegree){
+    public void addPlaneOnMap(String planeID, Double latitude, Double longitude, Double directionDegree, String planeType){
 
         if ( !this.planeHashMap.containsKey(planeID) ){
             Plane newPlane = new Plane(activity);
@@ -75,6 +104,12 @@ public class PlaneMarkerClass {
             newPlane.setHeading(directionDegree);
             newPlane.setID(planeID);
             newPlane.setMarkerOptions();
+            newPlane.setMarkerImage(screenWidth);
+            newPlane.setMarker( this.mMap.addMarker( newPlane.getMarkerOptions() ) );
+            newPlane.setCircle( this.mMap.addCircle( newPlane.getCircleOptions() ) );
+            newPlane.setRadarArcPolyLine( this.mMap.addPolyline( newPlane.getRadarPolyLineOptions() ) );
+            newPlane.setPlaneType( planeType );
+            newPlane.showRadarArcPolyline(false);
             newPlane.setMarkerImage("not near/collected");
             planeHashMap.put(newPlane.getID(), newPlane);
             this.clusterManager.addItem(newPlane);
@@ -82,6 +117,8 @@ public class PlaneMarkerClass {
 
         }
     }
+
+
 
     public void removePlaneFromMap(String planeID){
         this.clusterManager.removeItem(getPlaneByID(planeID));
@@ -180,6 +217,7 @@ public class PlaneMarkerClass {
             else if (distanceKM < 300) {
                 // Add a new plane Marker on the map:
                 if (heading != null) {
+                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 90, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
                     addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), openSkyStateVector.getHeading() - 45);
                     planeHashMap.get(callSign).setPlaneMiscellaneousInformation(
                             openSkyStateVector.getGeoAltitude(),
@@ -188,7 +226,7 @@ public class PlaneMarkerClass {
                             openSkyStateVector.getOriginCountry());
 
                 } else {
-                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), 0.0);
+                    addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), 0.0, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
                 }
 
             }

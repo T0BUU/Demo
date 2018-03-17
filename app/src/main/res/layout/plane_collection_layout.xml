@@ -1,32 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:scrollbars="none"
     android:layout_weight="1"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-<LinearLayout
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Your collection"
-        android:textSize="24sp" />
-
-    <TableLayout
-        android:id="@+id/collection_table"
+    <LinearLayout
+        android:id="@+id/my_collection"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:columnCount="3"
-        android:gravity="center">
+        android:orientation="vertical">
 
+        <include layout="@layout/toolbar"/>
 
-    </TableLayout>
-</LinearLayout>
+        <android.support.design.widget.TabLayout
+            android:id="@+id/collection_tab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tab_planes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planes" />
+
+            <android.support.design.widget.TabItem
+                android:id="@+id/tab_partners"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Partners" />
+
+        </android.support.design.widget.TabLayout>
+
+        <LinearLayout
+            android:id="@+id/collected_items"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"></LinearLayout>
+
+    </LinearLayout>
 </ScrollView>

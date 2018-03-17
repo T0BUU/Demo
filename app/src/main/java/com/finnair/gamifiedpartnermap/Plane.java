@@ -25,6 +25,7 @@ public class Plane extends ClusterMarker {
     private Double velocityKmph;
     private String originCountry;
     private String icao24;
+    private String planeType;
 
     public Plane(Activity activity){
         super(activity);
@@ -40,6 +41,20 @@ public class Plane extends ClusterMarker {
         if (originCountry != null) this.originCountry = originCountry;
     }
 
+
+
+    public void setPlaneType(String type) { this.planeType = type; }
+
+    // GET:
+    public Double getVelocityKmph(){ return this.velocityKmph; }
+    public String getOriginCountry(){ return this.originCountry; }
+    public String getIcao24(){ return this.icao24; }
+    public Double getGeoAltitude(){ return this.geoAltitude; }
+    public String getPlaneType() { return this.planeType; }
+
+
+    public void setMarkerImage(Integer screenWidth){
+        setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane, 2));
     public void setMarkerImage(String status){
         if (status.equalsIgnoreCase("near"))
             setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane_near, 1));
@@ -58,11 +73,6 @@ public class Plane extends ClusterMarker {
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
-    // GET:
-    public Double getVelocityKmph(){ return this.velocityKmph; }
-    public String getOriginCountry(){ return this.originCountry; }
-    public String getIcao24(){ return this.icao24; }
-    public Double getGeoAltitude(){ return this.geoAltitude; }
 
 
 

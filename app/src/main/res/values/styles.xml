@@ -17,8 +17,23 @@
         <item name="colorAccent">@color/royalBlue</item>
     </style>
 
+    <!-- Custom theme for splash screen. -->
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+
+        <item name="android:windowBackground">@drawable/splash_background</item>
+
+    </style>
+
     <style name="AppTheme.FloatingActionButtonOverlay">
         <item name="colorAccent">@color/lightGray</item>
+    </style>
+
+    <style name="MyProgressBarTwo" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="colorButtonNormal">#f50057</item>
+        <item name="colorControlActivated">#33691e</item>
+        <item name="colorControlHighlight">#ff6d00</item>
+        <item name="android:progressDrawable">@drawable/collection_progress_bar</item>
+        <item name="android:minWidth">200dp</item>
     </style>
 
 </resources>

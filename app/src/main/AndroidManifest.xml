@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.finnair.gamifiedpartnermap">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -31,13 +32,37 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MainActivity"
-            android:label="@string/title_activity_maps">
+
+            android:name=".SplashActivity"
+
+            android:theme="@style/SplashTheme">
+
             <intent-filter>
+
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.finnair.gamifiedpartnermap.AUTHORIZATION_FAILED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.finnair.gamifiedpartnermap.PROFILE_REQUEST_SUCCESSFUL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+
+            </intent-filter>
+
+
+        </activity>
+
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_maps">
+
         </activity>
 
         <activity
@@ -48,7 +73,34 @@
                     android:value=".MainActivity" />
         </activity>
 
-        <service android:name=".GeofenceTransitionsIntentService"/>
+        <activity
+            android:name=".CardSelectionActivity">
+        </activity>
+
+        <service android:name=".GeofenceTransitionsIntentService" />
+
+        <activity android:name=".LoginActivity">
+            <intent-filter>
+                <action android:name="com.finnair.gamifiedpartnermap.HANDLE_AUTHORIZATION_RESPONSE" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="net.openid.appauth.RedirectUriReceiverActivity"
+            tools:node="replace">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="datademo-2a85f.firebaseapp.com"
+                    android:path="/auth/finnair/login"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
     </application>
 
 

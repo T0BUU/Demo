@@ -16,18 +16,22 @@
     <string name="actionbar_drawer_close">Close</string>
 
     <string name="header_profile_pic_text">Profile picture</string>
-    <string name="header_profile_name">Insert name here!</string>
+    <string name="header_profile_name">Not logged in</string>
     <string name="header_profile_nickname">Insert your nickname here!</string>
 
     <string name="toolbar_image_description">Finnair logo</string>
     <string name="toolbar_map_text">Map</string>
-    <string name="toolbar_list_text">Partners</string>
+    <string name="toolbar_partners_text">Partners</string>
 
     <string name="drawer_points_image_description">Points logo here</string>
     <string name="drawer_points_text">Points</string>
     <string name="dwawer_cards_image_description">Cards image here</string>
     <string name="drawer_cards_text">Cards</string>
     <string name="drawer_settings_button_text">Settings button here</string>
+
+
+    <string name="collection_progress_bar_text">ROUTES COLLECTED</string>
+    <string name="collection_more_info"><u>View details</u></string>
 
     <string name="button_login">Login</string>
     <string name="button_logout">Logout</string>
