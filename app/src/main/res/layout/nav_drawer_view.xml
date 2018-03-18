@@ -16,7 +16,7 @@
         android:animateLayoutChanges="false"
         android:background="@drawable/challenge_item_background"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="gone">
 
 
         <include
