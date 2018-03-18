@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             collectedOutOf.setText(String.format("%d/%d", challenge.getProgress(), challenge.getAmount()));
 
             TextView rewardText = (TextView) item.findViewById(R.id.reward);
-            rewardText.setText(String.format("The reward is %d cards.", challenge.getReward()));
+            rewardText.setText(Html.fromHtml(String.format("The reward is <u><b><font color=#000B1560>%d</font></b></u> cards.", challenge.getReward())));
 
 
             ProgressBar collectedProgress = (ProgressBar) item.findViewById(R.id.challenge_collected_progress);

@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
 
     <!-- This is contains profile pic, name, etc. -->
 
@@ -12,6 +13,8 @@
         android:id="@+id/challenges_basis"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:animateLayoutChanges="false"
+        android:background="@drawable/challenge_item_background"
         android:orientation="vertical"
         android:visibility="gone">
 
@@ -88,6 +91,7 @@
         android:id="@+id/profile_basis"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/challenge_item_background"
         android:orientation="vertical"
         android:visibility="visible">
 
@@ -178,11 +182,11 @@
                 android:text="View Active Challenges" />
 
             <LinearLayout
+                android:id="@+id/linearLayout3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:background="?attr/colorAccent"
-                android:id="@+id/linearLayout3">
+                android:background="?attr/colorAccent">
 
                 <ImageButton
                     android:id="@+id/button_settings"

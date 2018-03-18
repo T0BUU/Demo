@@ -64,6 +64,8 @@ public class Challenge {
         result = result.replaceAll("#PARTNER_FIELD", String.format("<u><b><font color=%s>%s</font></b></u>", nordicBlue, partnerFields.toString()));
         result = result.replaceAll("#PARTNER_NAME", String.format("<u><b><font color=%s>%s</font></b></u>", nordicBlue, partnerNames.toString()));
 
+        result = result.replaceAll("[\\[\\](){}]","");
+
            prettyDescription = result;
     }
 
