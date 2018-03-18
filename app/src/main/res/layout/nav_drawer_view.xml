@@ -16,7 +16,7 @@
         android:animateLayoutChanges="false"
         android:background="@drawable/challenge_item_background"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="visible">
 
 
         <include
@@ -93,7 +93,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/challenge_item_background"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <include
             layout="@layout/nav_drawer_header"
