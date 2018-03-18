@@ -126,57 +126,6 @@ public class PartnerMarkerClass {
 
     }
 
-
-   /* public void savePartner(Context context, Partner saveMe){
-        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
-
-        try {
-            collectionHashMap.get(saveMe.getFieldOfBusiness()).add(saveMe.getAddress());
-        }
-        catch (java.lang.NullPointerException nil) {
-            HashSet<String> addMe = new HashSet<>();
-            addMe.add(String.format("%s %s", Calendar.getInstance().getTime().toString(), saveMe.getID()));
-
-            collectionHashMap.put(saveMe.getFieldOfBusiness(), addMe);
-        }
-
-        Log.d("Plane saving: ", collectionHashMap.toString());
-    }
-
-
-    private String formatPartners() {
-        String result = "";
-
-        for (String  category : collectionHashMap.keySet()) {
-            Iterator<String> row = collectionHashMap.get(category).iterator();
-
-            result += category;
-
-            while (row.hasNext()) {
-                result += String.format("#%s", row.next());
-            }
-
-            result += "\n";
-
-        }
-        return result;
-    }
-
-    public void savePartners(Context context){
-
-        String result = formatPartners();
-
-        try {
-            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION, Context.MODE_PRIVATE);
-            outputStream.write(result.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Log.d("Plane Saving", result);
-    }*/
-
     public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return this.collectionHashMap;
     }

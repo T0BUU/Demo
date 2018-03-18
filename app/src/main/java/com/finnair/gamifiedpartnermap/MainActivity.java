@@ -7,10 +7,24 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.FragmentManager;
+import android.text.Html;
+import android.util.Log;
+import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -19,9 +33,18 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.ResponseTypeValues;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     final static String planesCaught = "com.finnair.gamifiedpartnermap.planesCaught";
     final static String partnersCaught = "com.finnair.gamifiedpartnermap.partnersCaught";
 
+    private int CHALLENGE_LIMIT = 5;
+    private ArrayList<Challenge> activeChallenges;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +101,80 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             makeProfileRequest(sharedPreferences.getString("Access Token", ""));
         }
 
+        //TODO: Replace this with a call to firebase.
+        InputStream is = getResources().openRawResource(R.raw.sample_challenges);
+        Writer writer = new StringWriter();
+        char[] buffer = new char[1024];
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        JSONArray json = null;
+
+        try {
+            json = new JSONArray(writer.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        activeChallenges = new ArrayList<>();
+
+        for (int i = 0; i < json.length() && i < CHALLENGE_LIMIT; ++i) {
+            try {
+                activeChallenges.add(new Challenge((JSONObject) json.get(i)));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //-------
+
+    }
 
 
+    public View fillChallengeView(LinearLayout challenges) {
+
+        LayoutInflater inflater = getLayoutInflater();
+
+        for (Challenge challenge : activeChallenges)
+        {
+            TableRow row = new TableRow(this);
+
+            ConstraintLayout item = (ConstraintLayout) inflater.inflate(R.layout.challenge_list_item, row, false);
+
+            TextView name = (TextView) item.findViewById(R.id.challenge_description);
+            name.setText(Html.fromHtml(challenge.getDescription()));
+
+            TextView collectedOutOf = (TextView) item.findViewById(R.id.challenge_counter);
+            collectedOutOf.setText(String.format("%d/%d", challenge.getProgress(), challenge.getAmount()));
+
+            TextView rewardText = (TextView) item.findViewById(R.id.reward);
+            rewardText.setText(Html.fromHtml(String.format("The reward is <u><b><font color=#000B1560>%d</font></b></u> cards.", challenge.getReward())));
+
+
+            ProgressBar collectedProgress = (ProgressBar) item.findViewById(R.id.challenge_collected_progress);
+            collectedProgress.setMax(challenge.getAmount());
+            collectedProgress.setProgress(challenge.getProgress());
+            row.addView(item);
+
+            challenges.addView(row);
+        }
+
+        return challenges;
 
     }
 

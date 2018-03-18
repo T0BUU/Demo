@@ -13,6 +13,8 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -20,6 +22,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -45,8 +53,26 @@ import com.google.maps.android.clustering.Cluster;
 
 
 import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapsFragment extends Fragment {
@@ -87,6 +113,9 @@ public class MapsFragment extends Fragment {
         mMapView.onCreate(savedInstanceState);
 
         mMapView.onResume();
+
+
+
 
         try {
             MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -319,6 +348,10 @@ public class MapsFragment extends Fragment {
                         }
                     });
         }
+
+
+
+
 
         //-----------------------
 
