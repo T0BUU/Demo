@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import net.openid.appauth.AuthorizationRequest;
@@ -190,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     // Logs the user out
     protected void logout() {
 
+        Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+
         // Remove the token from memory
         SharedPreferences sp = getApplicationContext().getSharedPreferences("Auth", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -200,8 +203,15 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         TextView tw = findViewById(R.id.nav_profile_name);
         tw.setText("Not logged in");
 
-        Button login = findViewById(R.id.button_login);
-        login.setText("Login");
+        Button login = findViewById(R.id.button_bottom);
+        LinearLayout registrationBox = findViewById(R.id.drawer_not_logged_in_points_item);
+        LinearLayout pointsBox = findViewById(R.id.drawer_login_points_item);
+        TextView profileLevel = findViewById(R.id.membership_level);
+
+        registrationBox.setVisibility(View.VISIBLE);
+        pointsBox.setVisibility(View.GONE);
+        profileLevel.setVisibility(View.GONE);
+        login.setText(getString(R.string.button_login));
 
 
     }
@@ -252,10 +262,18 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         try {
 
             JSONObject json = new JSONObject(profileResponse);
+
             TextView profileName = findViewById(R.id.nav_profile_name);
             profileName.setText(json.getString("id"));
-            Button login = findViewById(R.id.button_login);
-            login.setText("Logout");
+            Button login = findViewById(R.id.button_bottom);
+            LinearLayout registrationBox = findViewById(R.id.drawer_not_logged_in_points_item);
+            LinearLayout pointsBox = findViewById(R.id.drawer_login_points_item);
+            TextView profileLevel = findViewById(R.id.membership_level);
+
+            registrationBox.setVisibility(View.GONE);
+            pointsBox.setVisibility(View.VISIBLE);
+            profileLevel.setVisibility(View.VISIBLE);
+            login.setText(getString(R.string.button_logout));
         } catch (JSONException e) {
             // If the field 'id' not available in the response, the token is invalid, e.g. expired
             SharedPreferences sp = getApplicationContext().getSharedPreferences("Auth", Context.MODE_PRIVATE);

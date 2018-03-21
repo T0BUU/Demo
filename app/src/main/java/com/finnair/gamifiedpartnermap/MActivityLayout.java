@@ -54,6 +54,7 @@ public class MActivityLayout implements View.OnClickListener {
     private MapsFragment mapFragment;
     private MainActivity mActivity;
     private FragmentManager fragmentManager;
+    private String logInButtonText;
 
     public MActivityLayout(){}
 
@@ -64,6 +65,8 @@ public class MActivityLayout implements View.OnClickListener {
         fragmentManager = fm;
         mapFragment = new MapsFragment();
 
+        logInButtonText = mActivity.getString(R.string.button_login);
+
         /* Set content view to MainActivity;
          * activity_main contains drawerLayout which has toolbar and FrameLayout(main_content) as its main view,
          * and user profile as its drawer view.  */
@@ -71,20 +74,18 @@ public class MActivityLayout implements View.OnClickListener {
         drawerLayout = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
 
         //Navigation buttons
-        Button loginButton = (Button) mActivity.findViewById(R.id.button_login);
-        ImageButton settingsButton = (ImageButton) mActivity.findViewById(R.id.button_settings);
+        Button loginButton = (Button) mActivity.findViewById(R.id.button_bottom);
         Button partnersButton = (Button) mActivity.findViewById(R.id.toolbar_partners_button);
         Button drawerToggle = (Button) mActivity.findViewById(R.id.open_drawer_button);
         Button challengesToggle = (Button) mActivity.findViewById(R.id.challenges_button);
-        ImageButton challengesBackButton = (ImageButton) mActivity.findViewById(R.id.challenge_list_button_back);
+        Button registrationButton = (Button) mActivity.findViewById(R.id.drawer_sing_up_button);
 
         //Set click listeners to all buttons
         loginButton.setOnClickListener(this);
-        settingsButton.setOnClickListener(this);
         partnersButton.setOnClickListener(this);
         drawerToggle.setOnClickListener(this);
         challengesToggle.setOnClickListener(this);
-        challengesBackButton.setOnClickListener(this);
+        registrationButton.setOnClickListener(this);
 
         //Insert mapFragment to main_content FrameLayout
         fragmentManager.beginTransaction()
@@ -93,8 +94,21 @@ public class MActivityLayout implements View.OnClickListener {
 
         try {
             TextView profileNameField = mActivity.findViewById(R.id.nav_profile_name);
-            profileNameField.setText(profileInfo.get("id"));
-            loginButton.setText("Logout");
+            String profileName = profileInfo.get("id");
+
+            if (profileName.trim() != "") {
+                LinearLayout registrationBox = mActivity.findViewById(R.id.drawer_not_logged_in_points_item);
+                LinearLayout pointsBox = mActivity.findViewById(R.id.drawer_login_points_item);
+                TextView profileLevel = mActivity.findViewById(R.id.membership_level);
+
+
+                registrationBox.setVisibility(View.GONE);
+                pointsBox.setVisibility(View.VISIBLE);
+                profileLevel.setVisibility(View.VISIBLE);
+                profileNameField.setText(profileInfo.get("id"));
+                loginButton.setText(R.string.button_logout);
+            }
+
         }
         catch (java.lang.NullPointerException e) {
 
@@ -112,23 +126,23 @@ public class MActivityLayout implements View.OnClickListener {
         LinearLayout profileBasis = mActivity.findViewById(R.id.profile_basis);
         LinearLayout challengesBasis = mActivity.findViewById(R.id.challenges_basis);
         Log.d("BUTTON", "clicked");
+
         switch(view.getId()){
-            case R.id.button_settings:
-                fragmentManager.beginTransaction()
-                        .replace(R.id.main_content, mapFragment)
-                        .commit();
-                drawerLayout.closeDrawer(GravityCompat.START);
-                break;
-            case R.id.button_login:
-                drawerLayout.closeDrawer(GravityCompat.START);
+            case R.id.button_bottom:
                 Button login = (Button) view;
-                if(login.getText().equals("Login")){
-                    Log.d("Login", "Hurraa");
-                    login.setText("Logout");
+
+                if(login.getText().equals(mActivity.getString(R.string.button_login))){
+
                    mActivity.makeAuthorizationRequest();
-                }else if(login.getText().equals("Logout")){
-                    login.setText("Login");
+
+                }else if(login.getText().equals(mActivity.getString(R.string.button_logout))){
+                    drawerLayout.closeDrawer(GravityCompat.START);
                     mActivity.logout();
+                }
+                else {
+                    login.setText(logInButtonText);
+                    profileBasis.setVisibility(View.VISIBLE);
+                    challengesBasis.setVisibility(View.GONE);
                 }
                 break;
             case R.id.finnair_logo_button:
@@ -146,6 +160,9 @@ public class MActivityLayout implements View.OnClickListener {
                 break;
 
             case R.id.challenges_button:
+                login = (Button) mActivity.findViewById(R.id.button_bottom);
+                logInButtonText = login.getText().toString();
+                login.setText(mActivity.getString(R.string.drawer_active_challenges_list_go_back_button));
 
                 profileBasis.setVisibility(View.GONE);
                 challengesBasis.setVisibility(View.VISIBLE);
@@ -155,13 +172,8 @@ public class MActivityLayout implements View.OnClickListener {
 
                 break;
 
-            case R.id.challenge_list_button_back:
-
-                profileBasis.setVisibility(View.VISIBLE);
-                challengesBasis.setVisibility(View.GONE);
-
-                break;
-
+            case R.id.drawer_sing_up_button:
+                mActivity.startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.finnair.com/int/gb/join")));
 
             default: break;
         }

@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="140dp"
-    android:background="@drawable/common_google_signin_btn_icon_light_normal_background"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="@dimen/header_padding"
@@ -15,7 +14,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:contentDescription="@string/header_profile_pic_text"
-        app:srcCompat="@drawable/finnair_logo_round_24dp" />
+        app:srcCompat="@mipmap/ic_profile_img" />
 
     <!-- Profile name and maybe some other crucial information here -->
     <LinearLayout
@@ -23,17 +22,34 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
-        android:gravity="center_vertical|center"
+        android:gravity="center_vertical"
         android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/fab_margin"
+            app:srcCompat="@drawable/f_emblem_blue" />
+
+        <TextView
+            android:id="@+id/membership_level"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/fab_margin"
+            android:layout_marginTop="@dimen/fab_margin"
+            android:text="Membership level"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/nav_profile_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_margin="@dimen/fab_margin"
-            android:gravity="center"
-            android:text="@string/header_profile_name" />
+            android:layout_marginStart="@dimen/fab_margin"
+            android:text="@string/header_profile_name"
+            android:textColor="@color/nordicBlue"
+            android:textSize="18sp" />
 
         <!--    <TextView
             android:id="@+id/nav_profile_info"
