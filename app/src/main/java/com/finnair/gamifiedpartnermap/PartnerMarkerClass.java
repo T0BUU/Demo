@@ -193,6 +193,7 @@ public class PartnerMarkerClass {
         newPartner.setMarkerImage(screenWidth);
 
         for (Challenge c : challenges) {
+            if (c == null) break;
             if (c.isRelated(newPartner)) newPartner.addRelatedChallenge(c);
         }
 

@@ -111,6 +111,7 @@ public class PlaneMarkerClass {
             this.clusterManager.addItem(newPlane);
 
             for (Challenge c : challenges) {
+                if (c == null) break;
                 if (c.isRelated(newPlane)) newPlane.addRelatedChallenge(c);
             }
 

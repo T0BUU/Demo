@@ -74,7 +74,7 @@ public class MActivityLayout implements View.OnClickListener {
         drawerLayout = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
 
         //Navigation buttons
-        Button loginButton = (Button) mActivity.findViewById(R.id.button_bottom);
+        final Button loginButton = (Button) mActivity.findViewById(R.id.button_bottom);
         Button partnersButton = (Button) mActivity.findViewById(R.id.toolbar_partners_button);
         Button drawerToggle = (Button) mActivity.findViewById(R.id.open_drawer_button);
         Button challengesToggle = (Button) mActivity.findViewById(R.id.challenges_button);
@@ -86,6 +86,34 @@ public class MActivityLayout implements View.OnClickListener {
         drawerToggle.setOnClickListener(this);
         challengesToggle.setOnClickListener(this);
         registrationButton.setOnClickListener(this);
+
+        drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                LinearLayout profileBasis = mActivity.findViewById(R.id.profile_basis);
+                LinearLayout challengesBasis = mActivity.findViewById(R.id.challenges_basis);
+
+                profileBasis.setVisibility(View.VISIBLE);
+                challengesBasis.setVisibility(View.GONE);
+
+                loginButton.setText(logInButtonText);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
 
         //Insert mapFragment to main_content FrameLayout
         fragmentManager.beginTransaction()
@@ -154,8 +182,6 @@ public class MActivityLayout implements View.OnClickListener {
                 partnerListWindow.showPopupWindow();
                 break;
             case R.id.open_drawer_button: //Open drawer, (Profile icon)
-                profileBasis.setVisibility(View.VISIBLE);
-                challengesBasis.setVisibility(View.GONE);
                 drawerLayout.openDrawer(GravityCompat.START);
                 break;
 

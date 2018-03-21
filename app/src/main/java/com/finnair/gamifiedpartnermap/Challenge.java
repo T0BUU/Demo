@@ -39,7 +39,7 @@ public class Challenge implements Parcelable {
             reward = json.getInt("reward");
             description = json.getString("description");
 
-            if (!json.get("partner_field").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("partner_field"), this.partnerFields); }
+            if (!json.get("partner_field").equals(JSONObject.NULL) ) { parseJsonArray(json.getJSONArray("partner_field"), this.partnerFields); }
             if (!json.get("plane_model").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("plane_model"), this.planeModels); }
             if (!json.get("plane_destination").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("plane_destination"), this.planeDestinations); }
             if (!json.get("partner_name").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("partner_name"), this.partnerNames); }
@@ -128,6 +128,24 @@ public class Challenge implements Parcelable {
 
     public int getIndex() { return index; }
 
+    public int getId() { return id; }
+
+    public ArrayList<String> getPlaneModels() {
+        return planeModels;
+    }
+
+    public ArrayList<String> getPartnerFields() {
+        return partnerFields;
+    }
+
+    public ArrayList<String> getPartnerNames() {
+        return partnerNames;
+    }
+
+    public ArrayList<String> getPlaneDestinations() {
+        return planeDestinations;
+    }
+
     public boolean isCompleted() { return completed; }
 
     //Setters
@@ -173,10 +191,10 @@ public class Challenge implements Parcelable {
             result.put("amount", this.amount);
             result.put("reward", this.reward);
             result.put("description", this.description);
-            result.put("partner_field", this.partnerFields);
-            result.put("partner_name", this.partnerNames);
-            result.put("plane_model", this.planeModels);
-            result.put("plane_destination", this.planeDestinations);
+            result.put("partner_field", new JSONArray(this.partnerFields));
+            result.put("partner_name", new JSONArray(this.partnerNames));
+            result.put("plane_model", new JSONArray(this.planeModels));
+            result.put("plane_destination", new JSONArray(this.planeDestinations));
             result.put("index", this.index);
 
         } catch (JSONException e) {

@@ -17,6 +17,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.FragmentManager;
 import android.text.Html;
+import android.util.JsonReader;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -39,6 +40,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,6 +53,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
 
@@ -91,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        readChallenges();
+
         fragmentManager = getSupportFragmentManager();
 
         // Main layout class, this instanties whole UI.
@@ -104,6 +111,10 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             makeProfileRequest(sharedPreferences.getString("Access Token", ""));
         }
 
+
+    }
+
+    private void readChallenges() {
         //TODO: Replace this with a call to firebase.
         InputStream is = getResources().openRawResource(R.raw.sample_challenges);
         Writer writer = new StringWriter();
@@ -136,19 +147,80 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
         activeChallenges = new ArrayList<>();
 
-        for (int i = 0; i < json.length() && i < CHALLENGE_LIMIT; ++i) {
+        for (int i = 0; i < CHALLENGE_LIMIT; ++i) {
+            activeChallenges.add(new Challenge());
+        }
+
+        //Read challenges from disk and then add additional once.
+
+       JSONArray readJson = readCollectedActiveChallenges(this);
+
+        for (int i = 0; i < readJson.length() && i < CHALLENGE_LIMIT; ++i) {
             try {
-                activeChallenges.add(new Challenge((JSONObject) json.get(i)));
+                Challenge current = new Challenge((JSONObject) readJson.get(i));
+                activeChallenges.set(current.getIndex(), current);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
 
-        for (int i = 0; i < 5; ++i) {
-            activeChallenges.get(i).setIndex(i);
-        }
+       /*for (int i = 0; i < json.length() && i < CHALLENGE_LIMIT; ++i) {
+            try {
+                if (activeChallenges.get(i).getId() == -1) {
+                    Log.d("Adding Challenges", "NEW ADD");
+                    Challenge current = new Challenge((JSONObject) json.get(i));
+                    current.setIndex(i);
+                    activeChallenges.set(i, current);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }*/
+
+
 
         //-------
+    }
+
+
+    public JSONArray readCollectedActiveChallenges(Context context) {
+
+        String ret = "";
+
+
+        try {
+            InputStream inputStream = context.openFileInput("activeChallenges");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+
+        Log.d("Collection", ret);
+
+        try {
+            return new JSONArray(ret);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return new JSONArray();
+        }
 
     }
 
@@ -184,6 +256,32 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         return challenges;
 
     }
+
+    private String formatChallenges() {
+        JSONArray result = new JSONArray();
+
+        for ( Challenge c : activeChallenges ) {
+            result.put(c.saveChallenge());
+        }
+
+        return result.toString();
+    }
+
+    private void saveChallenges(Context context) {
+        String result = formatChallenges();
+
+        try {
+            FileOutputStream outputStream = context.openFileOutput("activeChallenges", Context.MODE_PRIVATE);
+            outputStream.write(result.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.d("Challenge Saving", result);
+    }
+
+
 
     public ArrayList<Challenge> getActiveChallenges() {
         return activeChallenges;
@@ -316,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         caughtPlanes.add(randomPlane.getPlaneType());
         caughtPlanes.add(randomPlane.getOriginCountry());
 
-        intent.putExtra(activeChallengesMessage, this.activeChallenges);
+        intent.putParcelableArrayListExtra(activeChallengesMessage, this.activeChallenges);
         intent.putExtra(relatedChallengesToCaught, caughtPlane.getRelatedChallenges());
         intent.putExtra(relatedChallengesToRandom, randomPlane.getRelatedChallenges());
         intent.putExtra(planesCaught, caughtPlanes);
@@ -341,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         caughtPartners.add(randomPartner.getAddress());
         caughtPartners.add(randomPartner.getDescription());
 
-        intent.putExtra(activeChallengesMessage, this.activeChallenges);
+        intent.putParcelableArrayListExtra(activeChallengesMessage, this.activeChallenges);
         intent.putExtra(relatedChallengesToCaught, caughtPartner.getRelatedChallenges());
         intent.putExtra(relatedChallengesToRandom, randomPartner.getRelatedChallenges());
         intent.putExtra(partnersCaught, caughtPartners);
@@ -349,6 +447,12 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onPause() {
+        saveChallenges(this);
+        super.onPause();
     }
 
 }

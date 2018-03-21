@@ -121,12 +121,12 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         final ArrayList<String> planes = (ArrayList<String>) intent.getSerializableExtra(planesCaught);
         final ArrayList<String> partners = (ArrayList<String>) intent.getSerializableExtra(partnersCaught);
 
-        relatedChallengesCaught = (ArrayList<Challenge>) intent.getSerializableExtra(relatedChallengesToCaught);
-        relatedChallengesRandom = (ArrayList<Challenge>) intent.getSerializableExtra(relatedChallengesToRandom);
-        activeChallenges = (ArrayList<Challenge>) intent.getSerializableExtra(activeChallengesMessage);
+        relatedChallengesCaught =  intent.getParcelableArrayListExtra(relatedChallengesToCaught);
+        relatedChallengesRandom = intent.getParcelableArrayListExtra(relatedChallengesToRandom);
+        activeChallenges = intent.getParcelableArrayListExtra(activeChallengesMessage);
 
         for (Challenge c : activeChallenges) {
-            Log.d("Building", "" + c.getProgress());
+            Log.d("Building", "" + c.getPartnerFields() + " " + c.getPartnerNames() + " " + c.getPlaneDestinations() + " " + c.getPlaneModels());
         }
 
         planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
@@ -288,6 +288,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
 
        savePlanes(this);
        savePartners(this);
+       saveChallenges(this);
 
         switch (v.getId()) {
             case upper: {
