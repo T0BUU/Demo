@@ -252,7 +252,13 @@ public class MapsFragment extends Fragment {
                                 ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
 
                             } else{
-                                ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
+
+                                InfoWindowData info = new InfoWindowData();
+                                info.setData(plane.getPlaneType(), plane.getOriginCountry(), plane.getIcao24());
+
+                                marker.setTag(info);
+                                marker.showInfoWindow();
+
 
                             }
 
@@ -267,11 +273,12 @@ public class MapsFragment extends Fragment {
                                 ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                             }
                             else {
-                                InfoWindowData info = new InfoWindowData();
+                               /*InfoWindowData info = new InfoWindowData();
                                 info.setData(partner.getID(), partner.getAddress(), partner.getDescription());
 
                                 marker.setTag(info);
-                                marker.showInfoWindow();
+                                marker.showInfoWindow();*/
+                                ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                             }
 
 

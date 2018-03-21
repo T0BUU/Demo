@@ -14,6 +14,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterItem;
 
+import java.util.ArrayList;
+
 
 public class ClusterMarker implements ClusterItem {
 
@@ -29,6 +31,8 @@ public class ClusterMarker implements ClusterItem {
     private Double headingDegree = 0.0; // Plane overrides this. Partner doesn't
 
     private BitmapDescriptor bitmapIcon;
+
+    private ArrayList<Challenge> relatedChallenges = new ArrayList<>();
 
 
     public ClusterMarker(Activity activity){ this.activity = activity; }
@@ -83,6 +87,14 @@ public class ClusterMarker implements ClusterItem {
                 .flat(true);
     }
 
+    public void addRelatedChallenge(Challenge c) {
+        this.relatedChallenges.add(c);
+    }
+
+    public void removeRelatedChallenge(Challenge c) {
+        relatedChallenges.remove(c);
+    }
+
     // GET:
     public Location getLocation(){ return this.location; }
     public LatLng getLatLng(){ return this.latLng; }
@@ -90,6 +102,7 @@ public class ClusterMarker implements ClusterItem {
     public float getCircleRadius(){ return this.circleRadius; }
     public BitmapDescriptor getIcon(){ return this.bitmapIcon; }
     public String getID(){ return this.id; }
+    public ArrayList<Challenge> getRelatedChallenges() { return this.relatedChallenges; }
 
 
     protected int chooseMarkerImage(String imageType) {

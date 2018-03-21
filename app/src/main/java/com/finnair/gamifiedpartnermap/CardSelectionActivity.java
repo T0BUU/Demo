@@ -1,5 +1,6 @@
 package com.finnair.gamifiedpartnermap;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,10 +32,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.finnair.gamifiedpartnermap.MainActivity.activeChallengesMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
 import static com.finnair.gamifiedpartnermap.MainActivity.partnersCaught;
 import static com.finnair.gamifiedpartnermap.MainActivity.planesCaught;
+import static com.finnair.gamifiedpartnermap.MainActivity.relatedChallengesToCaught;
+import static com.finnair.gamifiedpartnermap.MainActivity.relatedChallengesToRandom;
 import static com.finnair.gamifiedpartnermap.PartnerMarkerClass.USER_DATA_LOCATION_PARTNERS;
 import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION_PLANES;
 
@@ -102,6 +108,10 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
     private HashMap<String, HashSet<String>> planeCollectionHashMap;
     private HashMap<String, HashSet<String>> partnerCollectionHashMap;
 
+    private ArrayList<Challenge> relatedChallengesCaught;
+    private ArrayList<Challenge> relatedChallengesRandom;
+    private ArrayList<Challenge> activeChallenges;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,6 +120,14 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         Intent intent = getIntent();
         final ArrayList<String> planes = (ArrayList<String>) intent.getSerializableExtra(planesCaught);
         final ArrayList<String> partners = (ArrayList<String>) intent.getSerializableExtra(partnersCaught);
+
+        relatedChallengesCaught = (ArrayList<Challenge>) intent.getSerializableExtra(relatedChallengesToCaught);
+        relatedChallengesRandom = (ArrayList<Challenge>) intent.getSerializableExtra(relatedChallengesToRandom);
+        activeChallenges = (ArrayList<Challenge>) intent.getSerializableExtra(activeChallengesMessage);
+
+        for (Challenge c : activeChallenges) {
+            Log.d("Building", "" + c.getProgress());
+        }
 
         planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
 
@@ -154,6 +172,11 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
             public void onClick(View v) {
                 savePlane(caughtPlaneType, caughtCountry);
 
+                for (Challenge challenge : relatedChallengesCaught ) {
+                    challenge.incrementProgress();
+                }
+
+
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
@@ -169,6 +192,11 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
             @Override
             public void onClick(View v) {
                 savePlane(randomPlaneType, randomCountry);
+
+                for (Challenge challenge : relatedChallengesRandom ) {
+                    challenge.incrementProgress();
+                }
+
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
@@ -204,6 +232,14 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                 String currentTime = getCurrentTimeStamp();
                 savePartner(caughtPartnerField, caughtPartnerID, currentTime);
 
+                for (Challenge challenge : relatedChallengesCaught ) {
+                    activeChallenges.get(challenge.getIndex()).incrementProgress();
+                }
+
+                for (Challenge c : activeChallenges) {
+                    Log.d("Collected", "" + c.getProgress());
+                }
+
                 PartnerInfoFragment caught = new PartnerInfoFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
@@ -221,6 +257,10 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
             @Override
             public void onClick(View v) {
                String currentTime = getCurrentTimeStamp();
+
+                for (Challenge challenge : relatedChallengesRandom ) {
+                    challenge.incrementProgress();
+                }
 
                 savePartner(randomPartnerField, randomPartnerID, currentTime);
 
@@ -339,6 +379,16 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         return result;
     }
 
+    private String formatChallenges() {
+        JSONArray result = new JSONArray();
+
+        for ( Challenge c : activeChallenges ) {
+            result.put(c.saveChallenge());
+        }
+
+        return result.toString();
+    }
+
     public void savePlanes(Context context){
 
         String result = formatPlanes();
@@ -367,6 +417,20 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         }
 
         Log.d("Partner Saving", result);
+    }
+
+    private void saveChallenges(Context context) {
+        String result = formatChallenges();
+
+        try {
+            FileOutputStream outputStream = context.openFileOutput("activeChallenges", Context.MODE_PRIVATE);
+            outputStream.write(result.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.d("Challenge Saving", result);
     }
 
     @Override

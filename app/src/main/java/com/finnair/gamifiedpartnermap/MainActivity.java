@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     private MapsFragment mapFragment;
     private GoogleMap gMap;
 
-    private String planesListing = "";
 
     SensorActivity sensorActivity;
 
@@ -80,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     final static String profileInfoStartUp = "com.finnair.gamifiedpartnermap.profileInfo";
     final static String planesCaught = "com.finnair.gamifiedpartnermap.planesCaught";
     final static String partnersCaught = "com.finnair.gamifiedpartnermap.partnersCaught";
+    final static String relatedChallengesToCaught = "com.finnair.gamifiedpartnermap.relatedChallengesCaught";
+    final static String relatedChallengesToRandom = "com.finnair.gamifiedpartnermap.relatedChallengesRandom";
+    final static String activeChallengesMessage = "com.finnair.gamifiedpartnermap.activeChallengesMessage";
 
     private int CHALLENGE_LIMIT = 5;
     private ArrayList<Challenge> activeChallenges;
@@ -142,6 +144,10 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             }
         }
 
+        for (int i = 0; i < 5; ++i) {
+            activeChallenges.get(i).setIndex(i);
+        }
+
         //-------
 
     }
@@ -179,6 +185,9 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
     }
 
+    public ArrayList<Challenge> getActiveChallenges() {
+        return activeChallenges;
+    }
 
     //Method to notify partnerListWindow when PartnerMarkerClass fetches partner data.
     public void notifyDataChange(){
@@ -307,6 +316,9 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         caughtPlanes.add(randomPlane.getPlaneType());
         caughtPlanes.add(randomPlane.getOriginCountry());
 
+        intent.putExtra(activeChallengesMessage, this.activeChallenges);
+        intent.putExtra(relatedChallengesToCaught, caughtPlane.getRelatedChallenges());
+        intent.putExtra(relatedChallengesToRandom, randomPlane.getRelatedChallenges());
         intent.putExtra(planesCaught, caughtPlanes);
         intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
         intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
@@ -329,6 +341,9 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         caughtPartners.add(randomPartner.getAddress());
         caughtPartners.add(randomPartner.getDescription());
 
+        intent.putExtra(activeChallengesMessage, this.activeChallenges);
+        intent.putExtra(relatedChallengesToCaught, caughtPartner.getRelatedChallenges());
+        intent.putExtra(relatedChallengesToRandom, randomPartner.getRelatedChallenges());
         intent.putExtra(partnersCaught, caughtPartners);
         intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
         intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());

@@ -1,5 +1,7 @@
 package com.finnair.gamifiedpartnermap;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -12,13 +14,15 @@ import java.util.ArrayList;
  * Created by huzla on 15.3.2018.
  */
 
-public class Challenge {
+public class Challenge implements Parcelable {
 
     private String description;
     private int amount;
     private int reward;
     private int progress;
     private int id;
+    private int index; //This is used to index the challenge in the list shown to users
+    private boolean completed;
     private ArrayList<String> partnerFields = new ArrayList<>();
     private ArrayList<String> planeModels = new ArrayList<>();
     private ArrayList<String> planeDestinations = new ArrayList<>();
@@ -48,8 +52,10 @@ public class Challenge {
 
         try {
                 progress = json.getInt("progress");
+                index = json.getInt("index");
             } catch (JSONException e) {
                 progress = 0;
+                index = -1;
             }
 
 
@@ -78,6 +84,33 @@ public class Challenge {
         prettyDescription = "CHALLENGES CAN BE OBTAINED FROM LEVELING UP CARDS OR AS A DAILY GIFT.";
     }
 
+    protected Challenge(Parcel in) {
+        description = in.readString();
+        amount = in.readInt();
+        reward = in.readInt();
+        progress = in.readInt();
+        id = in.readInt();
+        index = in.readInt();
+        completed = in.readByte() != 0;
+        partnerFields = in.createStringArrayList();
+        planeModels = in.createStringArrayList();
+        planeDestinations = in.createStringArrayList();
+        partnerNames = in.createStringArrayList();
+        prettyDescription = in.readString();
+    }
+
+    public static final Creator<Challenge> CREATOR = new Creator<Challenge>() {
+        @Override
+        public Challenge createFromParcel(Parcel in) {
+            return new Challenge(in);
+        }
+
+        @Override
+        public Challenge[] newArray(int size) {
+            return new Challenge[size];
+        }
+    };
+
     //Getters
     public String getDescription() { return prettyDescription; }
 
@@ -93,9 +126,24 @@ public class Challenge {
         return reward;
     }
 
+    public int getIndex() { return index; }
+
+    public boolean isCompleted() { return completed; }
+
     //Setters
-    public void setProgress(int progress) {
-        this.progress = progress;
+    public void setIndex(int index) { this.index = index; }
+
+    public boolean incrementProgress() {
+        if (this.completed) {
+            return false;
+        }
+        this.progress++;
+
+        if (this.progress == this.amount) {
+            this.completed = true;
+        }
+
+        return true;
     }
 
     public boolean isRelated(Plane plane) {
@@ -129,6 +177,7 @@ public class Challenge {
             result.put("partner_name", this.partnerNames);
             result.put("plane_model", this.planeModels);
             result.put("plane_destination", this.planeDestinations);
+            result.put("index", this.index);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -148,5 +197,26 @@ public class Challenge {
                 }
             }
         }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(description);
+        parcel.writeInt(amount);
+        parcel.writeInt(reward);
+        parcel.writeInt(progress);
+        parcel.writeInt(id);
+        parcel.writeInt(index);
+        parcel.writeByte((byte) (completed ? 1 : 0));
+        parcel.writeStringList(partnerFields);
+        parcel.writeStringList(planeModels);
+        parcel.writeStringList(planeDestinations);
+        parcel.writeStringList(partnerNames);
+        parcel.writeString(prettyDescription);
     }
 }
