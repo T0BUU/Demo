@@ -31,7 +31,7 @@
     <string name="drawer_collection_button">Go to collection \t\t></string>
     <string name="drawer_active_challenges_button">View Active Challenges \t\t ></string>
     <string name="drawer_active_challenges_list_go_back_button">&lt; \t\t Go back</string>
-    <string name="dwawer_cards_image_description">Cards image here</string>
+    <string name="drawer_cards_image_description">Cards image here</string>
     <string name="drawer_cards_text">Cards</string>
     <string name="drawer_settings_button_text">Settings button here</string>
 

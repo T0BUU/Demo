@@ -15,7 +15,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="false"
-        android:background="@drawable/challenge_item_background"
         android:elevation="2dp"
         android:orientation="vertical"
         android:visibility="gone">
@@ -109,8 +108,7 @@
                 <LinearLayout
                     android:id="@+id/drawer_not_logged_in_points_item"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@android:drawable/editbox_dropdown_light_frame"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <TextView
