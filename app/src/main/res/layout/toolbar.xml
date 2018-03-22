@@ -23,6 +23,18 @@
             android:paddingEnd="12dp"
             android:paddingStart="12dp" />
 
+        <ImageView
+            android:id="@+id/completed_challenges_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="37dp"
+            android:tint="@color/lime"
+            android:tintMode="src_in"
+            android:visibility="invisible"
+            app:srcCompat="@android:drawable/ic_dialog_alert" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

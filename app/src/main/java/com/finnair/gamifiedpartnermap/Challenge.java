@@ -146,7 +146,7 @@ public class Challenge implements Parcelable {
         return planeDestinations;
     }
 
-    public boolean isCompleted() { return completed; }
+    public boolean isCompleted() { return progress == amount; }
 
     //Setters
     public void setIndex(int index) { this.index = index; }

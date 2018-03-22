@@ -5,6 +5,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -54,6 +57,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
@@ -164,11 +169,13 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             }
         }
 
-       /*for (int i = 0; i < json.length() && i < CHALLENGE_LIMIT; ++i) {
+        Random generator = new Random();
+
+        for (int i = 0; i < json.length() && i < CHALLENGE_LIMIT; ++i) {
             try {
                 if (activeChallenges.get(i).getId() == -1) {
                     Log.d("Adding Challenges", "NEW ADD");
-                    Challenge current = new Challenge((JSONObject) json.get(i));
+                    Challenge current = new Challenge((JSONObject) json.get(generator.nextInt(json.length())));
                     current.setIndex(i);
                     activeChallenges.set(i, current);
                 }
@@ -176,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }*/
+        }
 
 
 
@@ -229,10 +236,56 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
         LayoutInflater inflater = getLayoutInflater();
 
-        for (Challenge challenge : activeChallenges)
+        for (int i = 0; i < challenges.getChildCount(); ++i)
         {
-            TableRow row = new TableRow(this);
+            Challenge challenge = activeChallenges.get(i);
+            TableRow row = (TableRow) challenges.getChildAt(i);
 
+            addChallengeToView(row, inflater, challenge);
+        }
+
+        return challenges;
+
+    }
+
+    public void onChallengeCancelClick(View v) {
+
+       TableRow row = (TableRow) v.getParent().getParent().getParent().getParent();
+       LinearLayout challengeList = (LinearLayout) row.getParent();
+       int index = challengeList.indexOfChild(row);
+       LayoutInflater inflater = getLayoutInflater();
+
+       Challenge emptyChallenge = new Challenge();
+       emptyChallenge.setIndex(index);
+
+       activeChallenges.set(index, emptyChallenge);
+
+       addChallengeToView(row, inflater, emptyChallenge);
+
+    }
+
+    public void onChallengeClick(View v) {
+
+        TableRow row = (TableRow) v.getParent().getParent();
+        LinearLayout challengeList = (LinearLayout) row.getParent();
+        int index = challengeList.indexOfChild(row);
+        LayoutInflater inflater = getLayoutInflater();
+
+        if (activeChallenges.get(index).isCompleted()) {
+            Challenge emptyChallenge = new Challenge();
+            emptyChallenge.setIndex(index);
+
+            activeChallenges.set(index, emptyChallenge);
+
+            addChallengeToView(row, inflater, emptyChallenge);
+        }
+
+    }
+
+    private void addChallengeToView(TableRow row, LayoutInflater inflater, Challenge challenge) {
+        row.removeAllViews();
+
+        if (challenge.getId() != -1) {
             ConstraintLayout item = (ConstraintLayout) inflater.inflate(R.layout.challenge_list_item, row, false);
 
             TextView name = (TextView) item.findViewById(R.id.challenge_description);
@@ -241,19 +294,22 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             TextView collectedOutOf = (TextView) item.findViewById(R.id.challenge_counter);
             collectedOutOf.setText(String.format("%d/%d", challenge.getProgress(), challenge.getAmount()));
 
-            TextView rewardText = (TextView) item.findViewById(R.id.reward);
-            rewardText.setText(Html.fromHtml(String.format("The reward is <u><b><font color=#000B1560>%d</font></b></u> cards.", challenge.getReward())));
-
-
             ProgressBar collectedProgress = (ProgressBar) item.findViewById(R.id.challenge_collected_progress);
             collectedProgress.setMax(challenge.getAmount());
             collectedProgress.setProgress(challenge.getProgress());
+
+            if (challenge.isCompleted()) {
+                collectedProgress.getProgressDrawable().setColorFilter(Color.argb(0xFF,0xb4, 0xcb, 0x66), PorterDuff.Mode.SRC_IN);
+                item.findViewById(R.id.challenge_container).getBackground().setColorFilter(Color.argb(0xCC,0xb4, 0xcb, 0x66), PorterDuff.Mode.ADD);
+            }
+
             row.addView(item);
-
-            challenges.addView(row);
         }
+        else {
+            ConstraintLayout item = (ConstraintLayout) inflater.inflate(R.layout.challenge_list_item_nonactive, row, false);
 
-        return challenges;
+            row.addView(item);
+        }
 
     }
 

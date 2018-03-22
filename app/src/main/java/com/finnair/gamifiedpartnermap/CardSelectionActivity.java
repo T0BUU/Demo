@@ -173,7 +173,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                 savePlane(caughtPlaneType, caughtCountry);
 
                 for (Challenge challenge : relatedChallengesCaught ) {
-                    challenge.incrementProgress();
+                    activeChallenges.get(challenge.getIndex()).incrementProgress();
                 }
 
 
@@ -194,7 +194,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                 savePlane(randomPlaneType, randomCountry);
 
                 for (Challenge challenge : relatedChallengesRandom ) {
-                    challenge.incrementProgress();
+                    activeChallenges.get(challenge.getIndex()).incrementProgress();
                 }
 
                 PlaneCatchFragment caught = new PlaneCatchFragment();
@@ -236,9 +236,6 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                     activeChallenges.get(challenge.getIndex()).incrementProgress();
                 }
 
-                for (Challenge c : activeChallenges) {
-                    Log.d("Collected", "" + c.getProgress());
-                }
 
                 PartnerInfoFragment caught = new PartnerInfoFragment();
                 caught.setCancelable(false);
@@ -259,7 +256,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                String currentTime = getCurrentTimeStamp();
 
                 for (Challenge challenge : relatedChallengesRandom ) {
-                    challenge.incrementProgress();
+                    activeChallenges.get(challenge.getIndex()).incrementProgress();
                 }
 
                 savePartner(randomPartnerField, randomPartnerID, currentTime);

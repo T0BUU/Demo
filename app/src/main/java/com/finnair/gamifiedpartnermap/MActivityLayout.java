@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,10 +22,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
@@ -55,6 +59,13 @@ public class MActivityLayout implements View.OnClickListener {
     private MainActivity mActivity;
     private FragmentManager fragmentManager;
     private String logInButtonText;
+    private int TEXT_NORMAL_COLOR;
+
+    private Button loginButton;
+    private Button partnersButton;
+    private Button drawerToggle;
+    private Button challengesToggle;
+    private Button registrationButton;
 
     public MActivityLayout(){}
 
@@ -73,12 +84,13 @@ public class MActivityLayout implements View.OnClickListener {
         mActivity.setContentView(R.layout.activity_main);
         drawerLayout = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
 
+
         //Navigation buttons
-        final Button loginButton = (Button) mActivity.findViewById(R.id.button_bottom);
-        Button partnersButton = (Button) mActivity.findViewById(R.id.toolbar_partners_button);
-        Button drawerToggle = (Button) mActivity.findViewById(R.id.open_drawer_button);
-        Button challengesToggle = (Button) mActivity.findViewById(R.id.challenges_button);
-        Button registrationButton = (Button) mActivity.findViewById(R.id.drawer_sing_up_button);
+        loginButton = (Button) mActivity.findViewById(R.id.button_bottom);
+        partnersButton = (Button) mActivity.findViewById(R.id.toolbar_partners_button);
+        drawerToggle = (Button) mActivity.findViewById(R.id.open_drawer_button);
+        challengesToggle = (Button) mActivity.findViewById(R.id.challenges_button);
+        registrationButton = (Button) mActivity.findViewById(R.id.drawer_sing_up_button);
 
         //Set click listeners to all buttons
         loginButton.setOnClickListener(this);
@@ -86,6 +98,16 @@ public class MActivityLayout implements View.OnClickListener {
         drawerToggle.setOnClickListener(this);
         challengesToggle.setOnClickListener(this);
         registrationButton.setOnClickListener(this);
+
+        //Set visuals
+
+        TextView completedChallengesTextView = mActivity.findViewById(R.id.drawer_active_challenges_text);
+        TEXT_NORMAL_COLOR = completedChallengesTextView.getCurrentTextColor();
+
+        //Handle look of challenge related items
+        setChallengeVisuals();
+
+
 
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -111,9 +133,10 @@ public class MActivityLayout implements View.OnClickListener {
 
             @Override
             public void onDrawerStateChanged(int newState) {
-
+               setChallengeVisuals();
             }
         });
+
 
         //Insert mapFragment to main_content FrameLayout
         fragmentManager.beginTransaction()
@@ -148,6 +171,42 @@ public class MActivityLayout implements View.OnClickListener {
 
     }
 
+
+    private void setChallengeVisuals() {
+        ImageView completedChallengesIndicator = mActivity.findViewById(R.id.toolbar).findViewById(R.id.completed_challenges_indicator);
+
+        completedChallengesIndicator.setVisibility(View.INVISIBLE);
+
+        int completedChallengesCounter = 0;
+
+        for (Challenge c : mActivity.getActiveChallenges()) {
+            if (c.isCompleted()) {
+                mActivity.findViewById(R.id.toolbar).findViewById(R.id.completed_challenges_indicator).setVisibility(View.VISIBLE);
+                ++completedChallengesCounter;
+            }
+        }
+
+        TextView completedChallengesTextView = mActivity.findViewById(R.id.drawer_active_challenges_text);
+        String completedChallengesText = String.format("You have %d completed challenge", completedChallengesCounter);
+
+        if (completedChallengesCounter > 0) {
+            if (completedChallengesCounter > 1) {
+                completedChallengesText = String.format("%ss!", completedChallengesText);
+            }
+            else {
+                completedChallengesText = String.format("%s!", completedChallengesText);
+            }
+            challengesToggle.getBackground().setColorFilter(Color.argb(0xFF,0xb4, 0xcb, 0x66), PorterDuff.Mode.SRC_IN);
+            completedChallengesTextView.setTextColor(mActivity.getResources().getColor(R.color.nordicBlue));
+        }
+        else {
+            completedChallengesText = String.format("%ss.", completedChallengesText);
+            completedChallengesTextView.setTextColor(TEXT_NORMAL_COLOR);
+            challengesToggle.getBackground().setColorFilter(Color.argb(0xFF, 0x0B, 0x15, 0x60), PorterDuff.Mode.SRC_IN);
+        }
+
+        completedChallengesTextView.setText(completedChallengesText);
+    }
     //Handle button click events here.
     @Override
     public void onClick(View view){
@@ -169,6 +228,7 @@ public class MActivityLayout implements View.OnClickListener {
                 }
                 else {
                     login.setText(logInButtonText);
+                    setChallengeVisuals();
                     profileBasis.setVisibility(View.VISIBLE);
                     challengesBasis.setVisibility(View.GONE);
                 }
@@ -193,7 +253,7 @@ public class MActivityLayout implements View.OnClickListener {
                 profileBasis.setVisibility(View.GONE);
                 challengesBasis.setVisibility(View.VISIBLE);
                 LinearLayout challengeList = challengesBasis.findViewById(R.id.challenge_list);
-                challengeList.removeAllViews();
+
                 mActivity.fillChallengeView(challengeList);
 
                 break;
