@@ -258,6 +258,8 @@ public class PlaneMarkerClass {
 
         entries.addAll(planeHashMap.values());
 
+        Log.d("Random Plane", "" + generator.nextInt(entries.size()));
+
         return entries.get(generator.nextInt(entries.size()));
     }
 

@@ -33,6 +33,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.gson.Gson;
+
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
@@ -92,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     final static String relatedChallengesToCaught = "com.finnair.gamifiedpartnermap.relatedChallengesCaught";
     final static String relatedChallengesToRandom = "com.finnair.gamifiedpartnermap.relatedChallengesRandom";
     final static String activeChallengesMessage = "com.finnair.gamifiedpartnermap.activeChallengesMessage";
+    final static String relatedChallengesToPlanes = "com.finnair.gamifiedpartnermap.relatedChallengesPlanes";
+    final static String relatedChallengesToPartners = "com.finnair.gamifiedpartnermap.relatedChallengesPartners";
 
     private int CHALLENGE_LIMIT = 5;
     private ArrayList<Challenge> activeChallenges;
@@ -272,12 +276,54 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         LayoutInflater inflater = getLayoutInflater();
 
         if (activeChallenges.get(index).isCompleted()) {
+            myMainLayout.closeDrawer();
+
             Challenge emptyChallenge = new Challenge();
             emptyChallenge.setIndex(index);
+            int reward = activeChallenges.get(index).getReward();
 
             activeChallenges.set(index, emptyChallenge);
 
             addChallengeToView(row, inflater, emptyChallenge);
+
+            //Open the card rewards activity
+
+            ArrayList<String> caughtPlanes = new ArrayList<>();
+            ArrayList<String> caughtPartners = new ArrayList<>();
+
+            ArrayList<ArrayList<Challenge>> relatedChallengesPlanes = new ArrayList<>();
+            ArrayList<ArrayList<Challenge>> relatedChallengesPartners = new ArrayList<>();
+
+            Pair<ArrayList<Plane>, ArrayList<Partner>> randomRewards = this.myMainLayout.getRandomRewards(reward);
+
+            for (Plane plane : randomRewards.first) {
+                caughtPlanes.add(plane.getPlaneType());
+                caughtPlanes.add(plane.getOriginCountry());
+
+                relatedChallengesPlanes.add(plane.getRelatedChallenges());
+            }
+
+            for (Partner partner : randomRewards.second) {
+                caughtPartners.add(partner.getFieldOfBusiness());
+                caughtPartners.add(partner.getID());
+                caughtPartners.add(partner.getAddress());
+                caughtPartners.add(partner.getDescription());
+
+                relatedChallengesPartners.add(partner.getRelatedChallenges());
+            }
+
+            Intent intent = new Intent(this,CardRewardActivity.class);
+
+
+            intent.putParcelableArrayListExtra(activeChallengesMessage, this.activeChallenges);
+            intent.putExtra(planesCaught, caughtPlanes);
+            intent.putExtra(partnersCaught, caughtPartners);
+            intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+            intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
+            intent.putExtra(relatedChallengesToPlanes, new Gson().toJson(relatedChallengesPlanes));
+            intent.putExtra(relatedChallengesToPartners, new Gson().toJson(relatedChallengesPartners));
+            startActivity(intent);
+
         }
 
     }
@@ -509,6 +555,12 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     public void onPause() {
         saveChallenges(this);
         super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        readChallenges();
     }
 
 }

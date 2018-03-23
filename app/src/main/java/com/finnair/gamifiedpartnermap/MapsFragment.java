@@ -19,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -253,11 +254,13 @@ public class MapsFragment extends Fragment {
 
                             } else{
 
-                                InfoWindowData info = new InfoWindowData();
+                                /*InfoWindowData info = new InfoWindowData();
                                 info.setData(plane.getPlaneType(), plane.getOriginCountry(), plane.getIcao24());
 
                                 marker.setTag(info);
-                                marker.showInfoWindow();
+                                marker.showInfoWindow();*/
+
+                                ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
 
 
                             }
@@ -410,6 +413,28 @@ public class MapsFragment extends Fragment {
 
     public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
         return partnerMarkerClass.getCollection();
+    }
+
+    public Pair<ArrayList<Plane>, ArrayList<Partner>> getRandomRewards(int amount) {
+        Random generator = new Random();
+        int planesAmount = generator.nextInt(amount+1);
+        int partnersAmount = generator.nextInt(amount - planesAmount + 1);
+
+        ArrayList<Plane> randomPlanes = new ArrayList<>();
+        ArrayList<Partner> randomPartners = new ArrayList<>();
+
+        while (planesAmount > 0) {
+            randomPlanes.add(planeMarkerClass.getRandomPlane());
+            planesAmount--;
+        }
+
+        while (partnersAmount > 0) {
+            randomPartners.add(partnerMarkerClass.getRandomPartner());
+            partnersAmount--;
+        }
+
+        return new Pair<>(randomPlanes, randomPartners);
+
     }
 
     public PartnerMarkerClass getPartners() {

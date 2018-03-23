@@ -134,6 +134,7 @@ public class MActivityLayout implements View.OnClickListener {
             @Override
             public void onDrawerStateChanged(int newState) {
                setChallengeVisuals();
+               setCollectionVisuals();
             }
         });
 
@@ -167,7 +168,6 @@ public class MActivityLayout implements View.OnClickListener {
 
         //Initialize new partnerListWindow, pass MainActivity and mapFragment as parameters.
         partnerListWindow = new PartnerListWindow(mActivity, mapFragment);
-
 
     }
 
@@ -207,6 +207,45 @@ public class MActivityLayout implements View.OnClickListener {
 
         completedChallengesTextView.setText(completedChallengesText);
     }
+
+    private void setCollectionVisuals() {
+        TextView collectedPlanesTextView = mActivity.findViewById(R.id.planes_collected);
+        TextView collectedPartnersTextView = mActivity.findViewById(R.id.partners_collected);
+
+        ConcurrentHashMap<String, HashSet<String>> planeCollection = getPlaneCollection();
+        ConcurrentHashMap<String, HashSet<String>> partnerCollection = getPartnerCollection();
+
+        int planesAmount = 0;
+        int partnersAmount = 0;
+
+        String collectedPlanesText;
+        String collectedPartnersText;
+
+        for (String plane : planeCollection.keySet()) {
+            planesAmount += planeCollection.get(plane).size();
+        }
+
+        for (String partner : partnerCollection.keySet()) {
+            partnersAmount += partnerCollection.get(partner).size();
+        }
+
+        if (planesAmount > 0) {
+            if (planesAmount > 1) collectedPlanesText = String.format("You have collected %d planes!", planesAmount);
+            else collectedPlanesText = "You have collected 1 plane!";
+        }
+        else collectedPlanesText = "You haven't collected any planes yet.";
+
+        if (partnersAmount > 0) {
+            if (partnersAmount > 1) collectedPartnersText = String.format("You have collected %d partners!", partnersAmount);
+            else collectedPartnersText = "You have collected 1 partner!";
+        }
+        else collectedPartnersText = "You haven't collected any partners yet.";
+
+        collectedPlanesTextView.setText(collectedPlanesText);
+        collectedPartnersTextView.setText(collectedPartnersText);
+    }
+
+
     //Handle button click events here.
     @Override
     public void onClick(View view){
@@ -229,6 +268,7 @@ public class MActivityLayout implements View.OnClickListener {
                 else {
                     login.setText(logInButtonText);
                     setChallengeVisuals();
+                    setCollectionVisuals();
                     profileBasis.setVisibility(View.VISIBLE);
                     challengesBasis.setVisibility(View.GONE);
                 }
@@ -279,5 +319,13 @@ public class MActivityLayout implements View.OnClickListener {
 
     public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
         return mapFragment.getPartnerCollection();
+    }
+
+    public Pair<ArrayList<Plane>, ArrayList<Partner>> getRandomRewards(int amount) {
+        return mapFragment.getRandomRewards(amount);
+    }
+
+    public void closeDrawer() {
+        drawerLayout.closeDrawer(GravityCompat.START);
     }
 }

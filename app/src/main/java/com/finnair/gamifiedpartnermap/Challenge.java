@@ -22,7 +22,6 @@ public class Challenge implements Parcelable {
     private int progress;
     private int id;
     private int index; //This is used to index the challenge in the list shown to users
-    private boolean completed;
     private ArrayList<String> partnerFields = new ArrayList<>();
     private ArrayList<String> planeModels = new ArrayList<>();
     private ArrayList<String> planeDestinations = new ArrayList<>();
@@ -91,7 +90,6 @@ public class Challenge implements Parcelable {
         progress = in.readInt();
         id = in.readInt();
         index = in.readInt();
-        completed = in.readByte() != 0;
         partnerFields = in.createStringArrayList();
         planeModels = in.createStringArrayList();
         planeDestinations = in.createStringArrayList();
@@ -152,14 +150,10 @@ public class Challenge implements Parcelable {
     public void setIndex(int index) { this.index = index; }
 
     public boolean incrementProgress() {
-        if (this.completed) {
+        if (this.isCompleted()) {
             return false;
         }
         this.progress++;
-
-        if (this.progress == this.amount) {
-            this.completed = true;
-        }
 
         return true;
     }
@@ -230,7 +224,6 @@ public class Challenge implements Parcelable {
         parcel.writeInt(progress);
         parcel.writeInt(id);
         parcel.writeInt(index);
-        parcel.writeByte((byte) (completed ? 1 : 0));
         parcel.writeStringList(partnerFields);
         parcel.writeStringList(planeModels);
         parcel.writeStringList(planeDestinations);

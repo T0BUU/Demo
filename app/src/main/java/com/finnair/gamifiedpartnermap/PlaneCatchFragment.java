@@ -110,8 +110,6 @@ public class PlaneCatchFragment extends DialogFragment {
         // Create the AlertDialog object and return it
         Dialog result = builder.create();
 
-        result.setCanceledOnTouchOutside(false);
-
         result.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return result;
     }
