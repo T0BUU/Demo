@@ -560,6 +560,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     @Override
     public void onResume() {
         super.onResume();
+        findViewById(R.id.toolbar).findViewById(R.id.open_drawer_button).getBackground().setColorFilter(getResources().getColor(R.color.nordicBlue), PorterDuff.Mode.SRC_IN);
+        ((Button) findViewById(R.id.toolbar).findViewById(R.id.toolbar_partners_button)).setTextColor(getResources().getColor(R.color.nordicBlue));
         readChallenges();
     }
 

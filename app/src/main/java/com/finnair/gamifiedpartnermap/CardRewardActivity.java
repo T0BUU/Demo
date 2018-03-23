@@ -7,7 +7,11 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -40,6 +44,9 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
     private ArrayList<ArrayList<String>> rewards = new ArrayList<>();
     private TextView cardsLeft;
     private ArrayList<Integer> indeces = new ArrayList<>();
+    private TableLayout cardBack;
+    private FrameLayout cardContainer;
+    private Button backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,8 +129,71 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
         cardsLeft = findViewById(R.id.card_reward_cards_left);
         cardsLeft.setText(String.format("%d cards left to redeem!", rewards.size()));
 
-        findViewById(R.id.toolbar).findViewById(R.id.toolbar_partners_button).getBackground().setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
-        //((Button) findViewById(R.id.toolbar).findViewById(R.id.open_drawer_button)).setTextColor(Color.GRAY);
+        findViewById(R.id.toolbar).findViewById(R.id.open_drawer_button).getBackground().setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
+        ((Button) findViewById(R.id.toolbar).findViewById(R.id.toolbar_partners_button)).setTextColor(Color.GRAY);
+
+
+        cardBack = findViewById(R.id.card_back);
+        cardContainer = findViewById(R.id.card_container);
+
+        backButton = findViewById(R.id.card_reward_back_button);
+
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+
+        final ScaleAnimation growAnim = new ScaleAnimation(1.0f, 1.15f, 1.0f, 1.15f);
+        final ScaleAnimation shrinkAnim = new ScaleAnimation(1.15f, 1.0f, 1.15f, 1.0f);
+
+        growAnim.setDuration(2000);
+        shrinkAnim.setDuration(2000);
+
+        cardContainer.setAnimation(growAnim);
+        growAnim.start();
+
+        growAnim.setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override
+            public void onAnimationStart(Animation animation){}
+
+            @Override
+            public void onAnimationRepeat(Animation animation){}
+
+            @Override
+            public void onAnimationEnd(Animation animation)
+            {
+                cardContainer.setAnimation(shrinkAnim);
+                shrinkAnim.start();
+            }
+        });
+        shrinkAnim.setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override
+            public void onAnimationStart(Animation animation){}
+
+            @Override
+            public void onAnimationRepeat(Animation animation){}
+
+            @Override
+            public void onAnimationEnd(Animation animation)
+            {
+                cardContainer.setAnimation(growAnim);
+                growAnim.start();
+            }
+        });
+    }
+
+    private void updateCardVisibility() {
+        if (indeces.size() == 0) {
+            cardContainer.setAnimation(null);
+            cardBack.setVisibility(View.GONE);
+            backButton.setVisibility(View.VISIBLE);
+
+        }
     }
 
     public void onRewardCardClick(View view) {
@@ -131,6 +201,8 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
         if (indeces.size() > 0) {
             int index = indeces.get(0);
             indeces.remove(0);
+
+            updateCardVisibility();
 
             cardsLeft.setText(String.format("%d cards left to redeem!", indeces.size()));
 
