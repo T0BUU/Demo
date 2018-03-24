@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,6 +27,13 @@ public class PartnerInfoFragment extends DialogFragment {
     private TextView nameTextView;
     private TextView businessTextView;
     private ImageView imageView;
+    private String upperButtonText;
+    private String lowerButtonText;
+    private int upperButtonVisibility;
+    private int lowerButtonVisibility;
+
+    private Button upper;
+    private Button lower;
 
 
     public PartnerInfoFragment(){}  // This default constructor should be left alone
@@ -35,6 +43,24 @@ public class PartnerInfoFragment extends DialogFragment {
         this.companyInfo = companyInfo;
         this.fieldOfBusiness = fieldOfBusiness;
         this.image = image;
+        upperButtonText = "Go To Map";
+        lowerButtonText = "Go To Collection";
+        this.upperButtonVisibility = 0;
+        this.lowerButtonVisibility = 0;
+
+    }
+
+    public void setAllFragmentData(String companyInfo, String fieldOfBusiness, int image,
+                                   String upperButtonText, String lowerButtonText,
+                                   int upperButtonVisibility, int lowerButtonVisibility){
+        // All private data should be set before calling onCreateView:
+        this.companyInfo = companyInfo;
+        this.fieldOfBusiness = fieldOfBusiness;
+        this.image = image;
+        this.upperButtonText = upperButtonText;
+        this.lowerButtonText = lowerButtonText;
+        this.upperButtonVisibility = upperButtonVisibility;
+        this.lowerButtonVisibility = lowerButtonVisibility;
 
     }
 
@@ -55,6 +81,8 @@ public class PartnerInfoFragment extends DialogFragment {
         this.nameTextView = dialogView.findViewById(R.id.company_info);
         this.businessTextView = dialogView.findViewById(R.id.field_of_business);
         this.imageView = dialogView.findViewById(R.id.partner_card_image);
+        this.upper = dialogView.findViewById(R.id.card_button_upper);
+        this.lower = dialogView.findViewById(R.id.card_button_lower);
 
         nameTextView.setMovementMethod(new ScrollingMovementMethod());
 
@@ -69,11 +97,11 @@ public class PartnerInfoFragment extends DialogFragment {
         // Create the AlertDialog object and return it
         Dialog result = builder.create();
 
-        //result.setCanceledOnTouchOutside(false);
 
         result.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return result;
     }
+
 
     private void setContent(){
         // This method should be private and only called in onCreateView() after the view has been inflated
@@ -81,6 +109,10 @@ public class PartnerInfoFragment extends DialogFragment {
         this.nameTextView.setText(this.companyInfo);
         this.businessTextView.setText(this.fieldOfBusiness);
         this.imageView.setImageResource(this.image);
+        this.upper.setText(this.upperButtonText);
+        this.lower.setText(this.lowerButtonText);
+        this.upper.setVisibility(this.upperButtonVisibility);
+        this.lower.setVisibility(this.lowerButtonVisibility);
 
     }
 

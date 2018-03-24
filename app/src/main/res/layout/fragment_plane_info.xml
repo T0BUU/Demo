@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onCardButtonClick"
-        android:text="Map" />
+        android:text="Go to Map" />
 
     <include
         layout="@layout/card_layout"
@@ -26,5 +26,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onCardButtonClick"
-        android:text="Collection" />
+        android:text="Go to Collection" />
 </LinearLayout>

@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static com.finnair.gamifiedpartnermap.MainActivity.activeChallengesMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
@@ -46,7 +48,7 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
     private ArrayList<Integer> indeces = new ArrayList<>();
     private TableLayout cardBack;
     private FrameLayout cardContainer;
-    private Button backButton;
+    private DialogFragment cardDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,16 +138,6 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
         cardBack = findViewById(R.id.card_back);
         cardContainer = findViewById(R.id.card_container);
 
-        backButton = findViewById(R.id.card_reward_back_button);
-
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-
-
         final ScaleAnimation growAnim = new ScaleAnimation(1.0f, 1.15f, 1.0f, 1.15f);
         final ScaleAnimation shrinkAnim = new ScaleAnimation(1.15f, 1.0f, 1.15f, 1.0f);
 
@@ -190,8 +182,7 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
     private void updateCardVisibility() {
         if (indeces.size() == 0) {
             cardContainer.setAnimation(null);
-            cardBack.setVisibility(View.GONE);
-            backButton.setVisibility(View.VISIBLE);
+            cardBack.setVisibility(GONE);
 
         }
     }
@@ -210,21 +201,31 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
 
             if (reward.size() == 2) {
                 PlaneCatchFragment caught = new PlaneCatchFragment();
-                //caught.setCancelable(false);
+
+                cardDialog = caught;
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(reward.get(0), reward.get(1),  modelsToImages.get(reward.get(0)));
+                caught.setAllFragmentData(reward.get(0), reward.get(1),  modelsToImages.get(reward.get(0)),  "", "OK", GONE, VISIBLE);
+
             }
             else {
                 PartnerInfoFragment caught = new PartnerInfoFragment();
-               // caught.setCancelable(false);
+
+                cardDialog = caught;
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
                 String partnerInfo = String.format("%s\t%s, %s", getCurrentTimeStamp(), reward.get(1), reward.get(2));
 
-                caught.setAllFragmentData(partnerInfo, reward.get(0), matchCategoryToImage(reward.get(0)));
+                caught.setAllFragmentData(partnerInfo, reward.get(0), matchCategoryToImage(reward.get(0)), "", "OK", GONE, VISIBLE);
             }
+
 
         }
 
+    }
+
+    public void onCardButtonClick(View v) {
+        cardDialog.dismiss();
+
+        if (indeces.size() == 0) finish();
     }
 
     @Override

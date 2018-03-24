@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.Image;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.method.ScrollingMovementMethod;
@@ -33,10 +34,17 @@ public class PlaneCatchFragment extends DialogFragment {
     private int planeLevel = -1; //This could be used to indicated different kinds of cards(gold, silver etc.)
     private String locations = "ERROR";
     private int planeImage;
+    private String upperButtonText;
+    private String lowerButtonText;
+    private int upperButtonVisibility;
+    private int lowerButtonVisibility;
 
     private TextView nameTextView;
     private TextView countriesTextView;
     private ImageView planeImageView;
+
+    private Button upper;
+    private Button lower;
 
 
     public PlaneCatchFragment(){}  // This default constructor should be left alone
@@ -52,6 +60,24 @@ public class PlaneCatchFragment extends DialogFragment {
         this.planeName = planeName;
         this.locations = locations;
         this.planeImage = imageID;
+        this.upperButtonText = "Go To Map";
+        this.lowerButtonText = "Go To Collection";
+        this.upperButtonVisibility = 0;
+        this.lowerButtonVisibility = 0;
+    }
+
+
+    public void setAllFragmentData(String planeName, String locations, int imageID,
+                                   String upperButtonText, String lowerButtonText,
+                                   int upperButtonVisibility, int lowerButtonVisibility){
+        // All private data should be set before calling onCreateView:
+        this.planeName = planeName;
+        this.locations = locations;
+        this.planeImage = imageID;
+        this.upperButtonText = upperButtonText;
+        this.lowerButtonText = lowerButtonText;
+        this.upperButtonVisibility = upperButtonVisibility;
+        this.lowerButtonVisibility = lowerButtonVisibility;
     }
 
     public interface PlaneCatchListener {
@@ -98,6 +124,9 @@ public class PlaneCatchFragment extends DialogFragment {
 
         this.planeImageView = dialogView.findViewById(R.id.plane_card_image);
 
+        this.upper = dialogView.findViewById(R.id.card_button_upper);
+
+        this.lower = dialogView.findViewById(R.id.card_button_lower);
 
 
         //Set the color of border. Maybe we should have different types of with different colors for borders cards?
@@ -115,6 +144,8 @@ public class PlaneCatchFragment extends DialogFragment {
     }
 
 
+
+
     private void setContent(){
         // This method should be private and only called in onCreateView() after the view has been inflated
         // By the time this is called, all private data must be available
@@ -126,6 +157,12 @@ public class PlaneCatchFragment extends DialogFragment {
 
         this.planeImageView.setMaxHeight(120);
         this.planeImageView.setMaxWidth(120);
+
+        this.upper.setText(this.upperButtonText);
+        this.lower.setText(this.lowerButtonText);
+        this.upper.setVisibility(this.upperButtonVisibility);
+        this.lower.setVisibility(this.lowerButtonVisibility);
+
 
     }
 

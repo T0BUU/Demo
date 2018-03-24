@@ -418,7 +418,7 @@ public class MapsFragment extends Fragment {
     public Pair<ArrayList<Plane>, ArrayList<Partner>> getRandomRewards(int amount) {
         Random generator = new Random();
         int planesAmount = generator.nextInt(amount+1);
-        int partnersAmount = generator.nextInt(amount - planesAmount + 1);
+        int partnersAmount = amount - planesAmount;
 
         ArrayList<Plane> randomPlanes = new ArrayList<>();
         ArrayList<Partner> randomPartners = new ArrayList<>();
