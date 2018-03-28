@@ -141,7 +141,7 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(caughtPlaneType,caughtCountry, modelsToImages.get(caughtPlaneType));
+                caught.setAllFragmentData(caughtPlaneType,caughtCountry, modelsToImages.get(caughtPlaneType), 1, 5);
                 Log.d("POOP", "TEST");
 
 
@@ -161,7 +161,7 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(randomPlaneType, randomCountry,  modelsToImages.get(randomPlaneType));
+                caught.setAllFragmentData(randomPlaneType, randomCountry,  modelsToImages.get(randomPlaneType), 1, 5);
                 Log.d("POOP", "TEST");
             }
         });

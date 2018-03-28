@@ -204,7 +204,7 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
 
                 cardDialog = caught;
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(reward.get(0), reward.get(1),  modelsToImages.get(reward.get(0)),  "", "OK", GONE, VISIBLE);
+                caught.setAllFragmentData(reward.get(0), reward.get(1),  modelsToImages.get(reward.get(0)),  "", "OK", GONE, VISIBLE, 1, 5);
 
             }
             else {

@@ -17,11 +17,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.BASIC;
 
 
 /**
@@ -29,19 +32,26 @@ import java.util.List;
  */
 
 public class PlaneCatchFragment extends DialogFragment {
+    public enum CardLevel {
+        BASIC, SILVER, GOLD, PLATINUM, LUMO
+    }
 
     private String planeName = "ERROR";
-    private int planeLevel = -1; //This could be used to indicated different kinds of cards(gold, silver etc.)
+    private CardLevel planeLevel = BASIC; //This could be used to indicated different kinds of cards(gold, silver etc.)
     private String locations = "ERROR";
     private int planeImage;
     private String upperButtonText;
     private String lowerButtonText;
     private int upperButtonVisibility;
     private int lowerButtonVisibility;
+    private int currentProgress;
+    private int currentMax;
 
     private TextView nameTextView;
     private TextView countriesTextView;
     private ImageView planeImageView;
+    private ProgressBar progressBar;
+    private View view;
 
     private Button upper;
     private Button lower;
@@ -55,7 +65,7 @@ public class PlaneCatchFragment extends DialogFragment {
         this.locations = locations;
     }
 
-    public void setAllFragmentData(String planeName, String locations, int imageID){
+    public void setAllFragmentData(String planeName, String locations, int imageID, int progress, int max){
         // All private data should be set before calling onCreateView:
         this.planeName = planeName;
         this.locations = locations;
@@ -64,12 +74,15 @@ public class PlaneCatchFragment extends DialogFragment {
         this.lowerButtonText = "Go To Collection";
         this.upperButtonVisibility = 0;
         this.lowerButtonVisibility = 0;
+        this.currentProgress = progress;
+        this.currentMax = max;
     }
 
 
     public void setAllFragmentData(String planeName, String locations, int imageID,
                                    String upperButtonText, String lowerButtonText,
-                                   int upperButtonVisibility, int lowerButtonVisibility){
+                                   int upperButtonVisibility, int lowerButtonVisibility,
+                                   int progress, int max){
         // All private data should be set before calling onCreateView:
         this.planeName = planeName;
         this.locations = locations;
@@ -78,6 +91,8 @@ public class PlaneCatchFragment extends DialogFragment {
         this.lowerButtonText = lowerButtonText;
         this.upperButtonVisibility = upperButtonVisibility;
         this.lowerButtonVisibility = lowerButtonVisibility;
+        this.currentProgress = progress;
+        this.currentMax = max;
     }
 
     public interface PlaneCatchListener {
@@ -128,12 +143,9 @@ public class PlaneCatchFragment extends DialogFragment {
 
         this.lower = dialogView.findViewById(R.id.card_button_lower);
 
-
-        //Set the color of border. Maybe we should have different types of with different colors for borders cards?
-        ((GradientDrawable)dialogView.findViewById(R.id.plane_info_table).getBackground()).setStroke(10, Color.parseColor("#CCCCCC"));
-
         this.setContent();
 
+       this.view = dialogView;
 
 
         // Create the AlertDialog object and return it
@@ -141,6 +153,32 @@ public class PlaneCatchFragment extends DialogFragment {
 
         result.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return result;
+    }
+
+
+    private void setBorderColor(View dialogView) {
+        String levelColor;
+
+        switch (this.planeLevel) {
+            case BASIC:
+                levelColor = "#FFe9e8e8";
+                break;
+            case SILVER:
+                levelColor = "FFC0C0C0";
+                break;
+            case GOLD:
+                levelColor = "#FFFFD700";
+                break;
+            case PLATINUM:
+                levelColor = "#FFA6C6EE";
+                break;
+            case LUMO:
+                levelColor = "#FF000000";
+                break;
+            default:
+                levelColor = "#CCCCCC";
+        }
+        ((GradientDrawable)dialogView.findViewById(R.id.plane_info_table).getBackground()).setStroke(10, Color.parseColor(levelColor));
     }
 
 
@@ -154,6 +192,9 @@ public class PlaneCatchFragment extends DialogFragment {
         this.countriesTextView.setText(locations);
 
         this.planeImageView.setImageResource(this.planeImage);
+
+        this.progressBar.setMax(currentMax);
+        this.progressBar.setProgress(currentProgress);
 
         this.planeImageView.setMaxHeight(120);
         this.planeImageView.setMaxWidth(120);
