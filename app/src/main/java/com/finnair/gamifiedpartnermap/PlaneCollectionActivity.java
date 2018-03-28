@@ -1,6 +1,7 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -21,11 +22,18 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
@@ -35,6 +43,7 @@ import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.GOLD;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.LUMO;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.PLATINUM;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.SILVER;
+import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION_PLANES;
 
 
 /**
@@ -47,6 +56,8 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
     private static final HashMap<String, Integer> modelsToImages;
     private HashMap<String, HashSet<String>> planeCollectionHashMap;
     private HashMap<String, HashSet<String>> partnerCollectionHashMap;
+    private HashMap<String, PlaneCatchFragment.CardLevel> cardLevelHashMap;
+    private String USER_DATA_LOCATION_CARD_LEVELS = "myCardLevels";
     private TabLayout collectionTabs;
     static
     {
@@ -295,7 +306,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
                 collectedCountries += countriesIterator.next() + "\n";
             }
 
-            caught.setAllFragmentData(planeModel, collectedCountries, modelsToImages.get(planeModel), 1, 5);
+            caught.setAllFragmentData(planeModel, collectedCountries, modelsToImages.get(planeModel), planeCollectionHashMap.get(planeModel).size());
         }
         else {
             PartnerInfoFragment caught = new PartnerInfoFragment();
@@ -310,7 +321,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
                 collectedPartners += partnersIterator.next() + "\n";
             }
 
-            caught.setAllFragmentData(collectedPartners, category, matchCategoryToImage(category));
+            caught.setAllFragmentData(collectedPartners, category, matchCategoryToImage(category), partnerCollectionHashMap.get(category).size());
         }
 
 
@@ -336,6 +347,83 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
                 startActivity(intent);
                 finish();
             }
+        }
+    }
+
+    private String formatCardLevels() {
+        String result = "";
+
+        for (String key : cardLevelHashMap.keySet()) {
+
+            result += String.format("%s#%s\n",key, cardLevelHashMap.get(key));
+
+        }
+        return result;
+    }
+
+    private void saveCardLevels(Context context){
+
+        String result = formatCardLevels();
+
+        try {
+            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION_CARD_LEVELS, Context.MODE_PRIVATE);
+            outputStream.write(result.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.d("Cards Saving", result);
+    }
+
+    private void readCollectedCardLevels(Context context) {
+
+        HashMap<String, PlaneCatchFragment.CardLevel> result = new HashMap<>();
+
+        try {
+            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION_CARD_LEVELS);
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+
+                    String[] firstSplit = receiveString.split("#");
+                    String cardLevel = firstSplit[1];
+
+                    result.put(firstSplit[0], matchCardLevel(cardLevel));
+
+                }
+
+                inputStream.close();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        this.cardLevelHashMap = result;
+    }
+
+
+    private PlaneCatchFragment.CardLevel matchCardLevel(String string) {
+        switch (string) {
+            case "BASIC":
+                return BASIC;
+            case "SILVER":
+                return SILVER;
+            case "GOLD":
+                return GOLD;
+            case "PLATINUM":
+                return PLATINUM;
+            case "LUMO":
+                return LUMO;
+            default:
+                return BASIC;
         }
     }
 

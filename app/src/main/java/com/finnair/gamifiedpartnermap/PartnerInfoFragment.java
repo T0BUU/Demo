@@ -16,6 +16,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.BASIC;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.GOLD;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.LUMO;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.PLATINUM;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.SILVER;
+
 /**
  * Created by axelv on 8.12.2017.
  */
@@ -24,13 +30,17 @@ public class PartnerInfoFragment extends DialogFragment {
     private String companyInfo = "ERROR";
     private String fieldOfBusiness = "ERROR";
     private int image = -1;
+    private PlaneCatchFragment.CardLevel partnerLevel = BASIC; //This could be used to indicated different kinds of cards(gold, silver etc.)
     private TextView nameTextView;
     private TextView businessTextView;
     private ImageView imageView;
+    private View view;
+
     private String upperButtonText;
     private String lowerButtonText;
     private int upperButtonVisibility;
     private int lowerButtonVisibility;
+    private int currentProgress;
 
     private Button upper;
     private Button lower;
@@ -38,7 +48,7 @@ public class PartnerInfoFragment extends DialogFragment {
 
     public PartnerInfoFragment(){}  // This default constructor should be left alone
 
-    public void setAllFragmentData(String companyInfo, String fieldOfBusiness, int image){
+    public void setAllFragmentData(String companyInfo, String fieldOfBusiness, int image, int progress){
         // All private data should be set before calling onCreateView:
         this.companyInfo = companyInfo;
         this.fieldOfBusiness = fieldOfBusiness;
@@ -47,12 +57,14 @@ public class PartnerInfoFragment extends DialogFragment {
         lowerButtonText = "Go To Collection";
         this.upperButtonVisibility = 0;
         this.lowerButtonVisibility = 0;
+        this.currentProgress = progress;
+        this.partnerLevel = setCardLevel(progress);
 
     }
 
     public void setAllFragmentData(String companyInfo, String fieldOfBusiness, int image,
                                    String upperButtonText, String lowerButtonText,
-                                   int upperButtonVisibility, int lowerButtonVisibility){
+                                   int upperButtonVisibility, int lowerButtonVisibility, int progress){
         // All private data should be set before calling onCreateView:
         this.companyInfo = companyInfo;
         this.fieldOfBusiness = fieldOfBusiness;
@@ -61,6 +73,8 @@ public class PartnerInfoFragment extends DialogFragment {
         this.lowerButtonText = lowerButtonText;
         this.upperButtonVisibility = upperButtonVisibility;
         this.lowerButtonVisibility = lowerButtonVisibility;
+        this.currentProgress = progress;
+        this.partnerLevel = setCardLevel(progress);
 
     }
 
@@ -87,8 +101,7 @@ public class PartnerInfoFragment extends DialogFragment {
         nameTextView.setMovementMethod(new ScrollingMovementMethod());
 
 
-        //Set the color of border. Maybe we should have different types of cards with different colored borders?
-        ((GradientDrawable)dialogView.findViewById(R.id.partner_info_table).getBackground()).setStroke(10, Color.parseColor("#CCCCCC"));
+        this.view = dialogView;
 
         this.setContent();
 
@@ -103,6 +116,46 @@ public class PartnerInfoFragment extends DialogFragment {
     }
 
 
+    private PlaneCatchFragment.CardLevel setCardLevel(int progress) {
+
+        if (progress > 166) return LUMO;
+
+        else if( progress > 66 ) return PLATINUM;
+
+        else if ( progress > 16 ) return GOLD;
+
+        else if ( progress > 6 ) return SILVER;
+
+        else return BASIC;
+    }
+
+
+    private void setBorderColor(View dialogView) {
+        String levelColor;
+
+        switch (this.partnerLevel) {
+            case BASIC:
+                levelColor = "#FFe9e8e8";
+                break;
+            case SILVER:
+                levelColor = "#FFC0C0C0";
+                break;
+            case GOLD:
+                levelColor = "#FFFFD700";
+                break;
+            case PLATINUM:
+                levelColor = "#FFA6C6EE";
+                break;
+            case LUMO:
+                levelColor = "#FF000000";
+                break;
+            default:
+                levelColor = "#CCCCCC";
+        }
+        ((GradientDrawable)dialogView.findViewById(R.id.partner_info_table).getBackground()).setStroke(10, Color.parseColor(levelColor));
+    }
+
+
     private void setContent(){
         // This method should be private and only called in onCreateView() after the view has been inflated
         // By the time this is called, all private data must be available
@@ -113,6 +166,7 @@ public class PartnerInfoFragment extends DialogFragment {
         this.lower.setText(this.lowerButtonText);
         this.upper.setVisibility(this.upperButtonVisibility);
         this.lower.setVisibility(this.lowerButtonVisibility);
+        setBorderColor(this.view);
 
     }
 

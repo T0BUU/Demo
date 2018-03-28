@@ -141,7 +141,7 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(caughtPlaneType,caughtCountry, modelsToImages.get(caughtPlaneType), 1, 5);
+                caught.setAllFragmentData(caughtPlaneType,caughtCountry, modelsToImages.get(caughtPlaneType), 1);
                 Log.d("POOP", "TEST");
 
 
@@ -161,7 +161,7 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(randomPlaneType, randomCountry,  modelsToImages.get(randomPlaneType), 1, 5);
+                caught.setAllFragmentData(randomPlaneType, randomCountry,  modelsToImages.get(randomPlaneType), 1);
                 Log.d("POOP", "TEST");
             }
         });
@@ -203,7 +203,7 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
                 String partnerInfo = String.format("%s\t%s, %s", currentTime, caughtPartnerID, caughtPartnerAddress);
 
-                caught.setAllFragmentData(partnerInfo, caughtPartnerField, matchCategoryToImage(caughtPartnerField));
+                caught.setAllFragmentData(partnerInfo, caughtPartnerField, matchCategoryToImage(caughtPartnerField), 1);
                 Log.d("POOP", "TEST");
 
 
@@ -227,7 +227,7 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
                 String partnerInfo = String.format("%s\t%s, %s", currentTime, randomPartnerID, randomPartnerAddress);
 
-                caught.setAllFragmentData(partnerInfo, randomPartnerField, matchCategoryToImage(randomPartnerField));
+                caught.setAllFragmentData(partnerInfo, randomPartnerField, matchCategoryToImage(randomPartnerField), 1);
                 Log.d("POOP", "TEST");
             }
         });

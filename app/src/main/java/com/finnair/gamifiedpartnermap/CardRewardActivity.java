@@ -204,7 +204,7 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
 
                 cardDialog = caught;
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(reward.get(0), reward.get(1),  modelsToImages.get(reward.get(0)),  "", "OK", GONE, VISIBLE, 1, 5);
+                caught.setAllFragmentData(reward.get(0), reward.get(1),  modelsToImages.get(reward.get(0)),  "", "OK", GONE, VISIBLE, 1);
 
             }
             else {
@@ -214,7 +214,7 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
                 String partnerInfo = String.format("%s\t%s, %s", getCurrentTimeStamp(), reward.get(1), reward.get(2));
 
-                caught.setAllFragmentData(partnerInfo, reward.get(0), matchCategoryToImage(reward.get(0)), "", "OK", GONE, VISIBLE);
+                caught.setAllFragmentData(partnerInfo, reward.get(0), matchCategoryToImage(reward.get(0)), "", "OK", GONE, VISIBLE, 1);
             }
 
 

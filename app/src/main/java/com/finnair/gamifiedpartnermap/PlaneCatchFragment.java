@@ -25,6 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.BASIC;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.GOLD;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.LUMO;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.PLATINUM;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.SILVER;
 
 
 /**
@@ -45,12 +49,10 @@ public class PlaneCatchFragment extends DialogFragment {
     private int upperButtonVisibility;
     private int lowerButtonVisibility;
     private int currentProgress;
-    private int currentMax;
 
     private TextView nameTextView;
     private TextView countriesTextView;
     private ImageView planeImageView;
-    private ProgressBar progressBar;
     private View view;
 
     private Button upper;
@@ -65,7 +67,7 @@ public class PlaneCatchFragment extends DialogFragment {
         this.locations = locations;
     }
 
-    public void setAllFragmentData(String planeName, String locations, int imageID, int progress, int max){
+    public void setAllFragmentData(String planeName, String locations, int imageID, int progress){
         // All private data should be set before calling onCreateView:
         this.planeName = planeName;
         this.locations = locations;
@@ -75,14 +77,15 @@ public class PlaneCatchFragment extends DialogFragment {
         this.upperButtonVisibility = 0;
         this.lowerButtonVisibility = 0;
         this.currentProgress = progress;
-        this.currentMax = max;
+        this.planeLevel = setCardLevel(progress);
+
     }
 
 
     public void setAllFragmentData(String planeName, String locations, int imageID,
                                    String upperButtonText, String lowerButtonText,
                                    int upperButtonVisibility, int lowerButtonVisibility,
-                                   int progress, int max){
+                                   int progress){
         // All private data should be set before calling onCreateView:
         this.planeName = planeName;
         this.locations = locations;
@@ -92,7 +95,7 @@ public class PlaneCatchFragment extends DialogFragment {
         this.upperButtonVisibility = upperButtonVisibility;
         this.lowerButtonVisibility = lowerButtonVisibility;
         this.currentProgress = progress;
-        this.currentMax = max;
+        this.planeLevel = setCardLevel(progress);
     }
 
     public interface PlaneCatchListener {
@@ -143,16 +146,28 @@ public class PlaneCatchFragment extends DialogFragment {
 
         this.lower = dialogView.findViewById(R.id.card_button_lower);
 
+        this.view = dialogView;
+
         this.setContent();
-
-       this.view = dialogView;
-
 
         // Create the AlertDialog object and return it
         Dialog result = builder.create();
 
         result.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return result;
+    }
+
+    private CardLevel setCardLevel(int progress) {
+
+        if (progress > 166) return LUMO;
+
+        else if( progress > 66 ) return PLATINUM;
+
+        else if ( progress > 16 ) return GOLD;
+
+        else if ( progress > 6 ) return SILVER;
+
+        else return BASIC;
     }
 
 
@@ -164,7 +179,7 @@ public class PlaneCatchFragment extends DialogFragment {
                 levelColor = "#FFe9e8e8";
                 break;
             case SILVER:
-                levelColor = "FFC0C0C0";
+                levelColor = "#FFC0C0C0";
                 break;
             case GOLD:
                 levelColor = "#FFFFD700";
@@ -193,11 +208,10 @@ public class PlaneCatchFragment extends DialogFragment {
 
         this.planeImageView.setImageResource(this.planeImage);
 
-        this.progressBar.setMax(currentMax);
-        this.progressBar.setProgress(currentProgress);
-
         this.planeImageView.setMaxHeight(120);
         this.planeImageView.setMaxWidth(120);
+
+        setBorderColor(this.view);
 
         this.upper.setText(this.upperButtonText);
         this.lower.setText(this.lowerButtonText);
