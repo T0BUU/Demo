@@ -39,6 +39,7 @@
 
     <string name="collection_progress_bar_text">ROUTES COLLECTED</string>
     <string name="collection_more_info"><u>View details</u></string>
+    <string name="collection_level_up_info"><b><u>COLLECT REWARD AND LEVEL UP!</u></b></string>
 
     <string name="button_login">Login \t\t ></string>
     <string name="button_logout">Logout \t\t ></string>

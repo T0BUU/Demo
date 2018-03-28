@@ -120,7 +120,8 @@
             android:onClick="onInfoClick"
             android:text="@string/collection_more_info"
             android:textAllCaps="false"
-            android:textColor="@color/nordicBlue" />
+            android:textColor="@color/nordicBlue"
+            android:textColorHighlight="@color/fuchsia" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
