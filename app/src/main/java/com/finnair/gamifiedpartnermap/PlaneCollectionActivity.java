@@ -190,19 +190,6 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         }
     }
 
-    /*private PlaneCatchFragment.CardLevel getCardLevel(int progress) {
-
-        if (progress > 166) return LUMO;
-
-        else if( progress > 66 ) return PLATINUM;
-
-        else if ( progress > 16 ) return GOLD;
-
-        else if ( progress > 6 ) return SILVER;
-
-        else return BASIC;
-    }*/
-
     private PlaneCatchFragment.CardLevel getCardLevel(String key) {
 
         PlaneCatchFragment.CardLevel level = cardLevelHashMap.get(key);
@@ -326,8 +313,6 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             PlaneCatchFragment.CardLevel cardLevel = getCardLevel(category);
 
             ConstraintLayout card = (ConstraintLayout) inflater.inflate(R.layout.collection_row_layout, row, false);
-
-            ((TextView) card.findViewById(R.id.challenge_description)).setText("LOCATIONS COLLECTED");
 
             setBorderColor(card, cardLevel);
 
