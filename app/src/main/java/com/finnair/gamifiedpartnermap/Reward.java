@@ -77,7 +77,7 @@ public class Reward {
     public ArrayList<String> getPartnerFields() {
         return partnerFields;
     }
-    
+
     private void parseJsonArray(JSONArray input, ArrayList<String> output) {
         if (input != null) {
             int len = input.length();
