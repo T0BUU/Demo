@@ -158,8 +158,23 @@
     "description" : "#PLUS_POINTS Finnair plus points!",
     "image" : null,
     "plus_points" : 50,
-    "partner_field" : ["Services and Wellness"],
-    "plane_models" : null
+    "partner_field" : [
+      "Restaurant",
+      "Car rental",
+      "Charity",
+      "Entertainment",
+      "Finance and insurance",
+      "Helsinki Airport",
+      "Golf and leisure time",
+      "Hotel",
+      "Shopping",
+      "Tour operators and cruise lines",
+      "Services and Wellness" ],
+    "plane_models" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"]
   },
   {
     "id" : 19,
@@ -167,8 +182,23 @@
     "description" : "#PLUS_POINTS Finnair plus points!",
     "image" : null,
     "plus_points" : 100,
-    "partner_field" : ["Services and Wellness"],
-    "plane_models" : null
+    "partner_field" : [
+      "Restaurant",
+      "Car rental",
+      "Charity",
+      "Entertainment",
+      "Finance and insurance",
+      "Helsinki Airport",
+      "Golf and leisure time",
+      "Hotel",
+      "Shopping",
+      "Tour operators and cruise lines",
+      "Services and Wellness" ],
+    "plane_models" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"]
   },
   {
     "id" : 20,
@@ -176,8 +206,23 @@
     "description" : "#PLUS_POINTS Finnair plus points!",
     "image" : null,
     "plus_points" : 150,
-    "partner_field" : ["Services and Wellness"],
-    "plane_models" : null
+    "partner_field" : [
+      "Restaurant",
+      "Car rental",
+      "Charity",
+      "Entertainment",
+      "Finance and insurance",
+      "Helsinki Airport",
+      "Golf and leisure time",
+      "Hotel",
+      "Shopping",
+      "Tour operators and cruise lines",
+      "Services and Wellness" ],
+    "plane_models" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"]
   },
   {
     "id" : 21,
@@ -185,8 +230,23 @@
     "description" : "#PLUS_POINTS Finnair plus points!",
     "image" : null,
     "plus_points" : 200,
-    "partner_field" : ["Services and Wellness"],
-    "plane_models" : null
+    "partner_field" : [
+      "Restaurant",
+      "Car rental",
+      "Charity",
+      "Entertainment",
+      "Finance and insurance",
+      "Helsinki Airport",
+      "Golf and leisure time",
+      "Hotel",
+      "Shopping",
+      "Tour operators and cruise lines",
+      "Services and Wellness" ],
+    "plane_models" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"]
   },
   {
     "id" : 22,
@@ -194,7 +254,22 @@
     "description" : "#PLUS_POINTS Finnair plus points!",
     "image" : null,
     "plus_points" : 250,
-    "partner_field" : ["Services and Wellness"],
-    "plane_models" : null
+    "partner_field" : [
+      "Restaurant",
+      "Car rental",
+      "Charity",
+      "Entertainment",
+      "Finance and insurance",
+      "Helsinki Airport",
+      "Golf and leisure time",
+      "Hotel",
+      "Shopping",
+      "Tour operators and cruise lines",
+      "Services and Wellness" ],
+    "plane_models" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"]
   }
 ]
