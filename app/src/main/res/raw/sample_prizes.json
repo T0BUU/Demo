@@ -1,0 +1,200 @@
+[
+  {
+    "id" : 1,
+    "type" : "a voucher or gift card",
+    "description" : "Restaurant Pastis three course menu for two",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Restaurant"],
+    "plane_models" : null
+  },
+  {
+    "id" : 2,
+    "type" : "a voucher or gift card",
+    "description" : "Restaurant Pastis brunch with glasses of champagne for two",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Restaurant"],
+    "plane_models" : null
+  },
+  {
+    "id" : 3,
+    "type" : "a voucher or gift card",
+    "description" : "The Mamma Rosa seasonal menu and glasses of sparkling wine for two",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Restaurant"],
+    "plane_models" : null
+  },
+  {
+    "id" : 4,
+    "type" : "a voucher or gift card",
+    "description" : "Restaurant Bröd 50 €",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Restaurant"],
+    "plane_models" : null
+  },
+  {
+    "id" : 5,
+    "type" : "a voucher or gift card",
+    "description" : "Restaurant Bröd 120 €",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Restaurant"],
+    "plane_models" : null
+  },
+  {
+    "id" : 6,
+    "type" : "a voucher or gift card",
+    "description" : "OlO Menu Voucher",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Restaurant"],
+    "plane_models" : null
+  },
+  {
+    "id" : 7,
+    "type" : "a voucher or gift card",
+    "description" : "Taste of Tokyo, 4 courses for two",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Restaurant"],
+    "plane_models" : null
+  },
+  {
+    "id" : 8,
+    "type" : "a voucher or gift card",
+    "description" : "Hotel Haven Grand Deluxe room -award voucher",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Hotel"],
+    "plane_models" : null
+  },
+  {
+    "id" : 9,
+    "type" : "a voucher or gift card",
+    "description" : "Hotel Haven Superior room -Award voucher",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Hotel"],
+    "plane_models" : null
+  },
+  {
+    "id" : 10,
+    "type" : "a voucher or gift card",
+    "description" : "Hotel Haven Prime Superior room -award voucher",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Hotel"],
+    "plane_models" : null
+  },
+  {
+    "id" : 11,
+    "type" : "a voucher or gift card",
+    "description" : "Hotel Fabian Comfort room -award voucher",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Hotel"],
+    "plane_models" : null
+  },
+  {
+    "id" : 12,
+    "type" : "a voucher or gift card",
+    "description" : "Hotel Klaus K Sky Studio room -award voucher",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Hotel"],
+    "plane_models" : null
+  },
+  {
+    "id" : 13,
+    "type" : "a voucher or gift card",
+    "description" : "Hotel Klaus K Passion and Mystical rooms -award voucher",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Hotel"],
+    "plane_models" : null
+  },
+  {
+    "id" : 14,
+    "type" : "a voucher or gift card",
+    "description" : "Hotel Klaus K Desire room -award voucher",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Hotel"],
+    "plane_models" : null
+  },
+  {
+    "id" : 15,
+    "type" : "a voucher or gift card",
+    "description" : "Award Winning Dental care - implant & crown",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Services and Wellness"],
+    "plane_models" : null
+  },
+  {
+    "id" : 16,
+    "type" : "a voucher or gift card",
+    "description" : "Helsinki day spa - Total Luxury Treatment",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Services and Wellness"],
+    "plane_models" : null
+  },
+  {
+    "id" : 17,
+    "type" : "a voucher or gift card",
+    "description" : "Helsinki day spa - Gift Voucher 100 €",
+    "image" : null,
+    "plus_points" : null,
+    "partner_field" : ["Services and Wellness"],
+    "plane_models" : null
+  },
+  {
+    "id" : 18,
+    "type" : "Finnair plus points",
+    "description" : "#PLUS_POINTS Finnair plus points!",
+    "image" : null,
+    "plus_points" : 50,
+    "partner_field" : ["Services and Wellness"],
+    "plane_models" : null
+  },
+  {
+    "id" : 19,
+    "type" : "Finnair plus points",
+    "description" : "#PLUS_POINTS Finnair plus points!",
+    "image" : null,
+    "plus_points" : 100,
+    "partner_field" : ["Services and Wellness"],
+    "plane_models" : null
+  },
+  {
+    "id" : 20,
+    "type" : "Finnair plus points",
+    "description" : "#PLUS_POINTS Finnair plus points!",
+    "image" : null,
+    "plus_points" : 150,
+    "partner_field" : ["Services and Wellness"],
+    "plane_models" : null
+  },
+  {
+    "id" : 21,
+    "type" : "Finnair plus points",
+    "description" : "#PLUS_POINTS Finnair plus points!",
+    "image" : null,
+    "plus_points" : 200,
+    "partner_field" : ["Services and Wellness"],
+    "plane_models" : null
+  },
+  {
+    "id" : 22,
+    "type" : "Finnair plus points",
+    "description" : "#PLUS_POINTS Finnair plus points!",
+    "image" : null,
+    "plus_points" : 250,
+    "partner_field" : ["Services and Wellness"],
+    "plane_models" : null
+  }
+]
