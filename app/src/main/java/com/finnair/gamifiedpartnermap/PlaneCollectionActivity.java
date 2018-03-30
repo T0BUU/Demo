@@ -22,19 +22,27 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Random;
 
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
@@ -44,7 +52,6 @@ import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.GOLD;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.LUMO;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.PLATINUM;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.SILVER;
-import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION_PLANES;
 
 
 /**
@@ -59,6 +66,8 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
     private HashMap<String, HashSet<String>> partnerCollectionHashMap;
     private HashMap<String, PlaneCatchFragment.CardLevel> cardLevelHashMap = new HashMap<>();
     private String USER_DATA_LOCATION_CARD_LEVELS = "myCardLevels";
+    private ArrayList<Reward> availableRewards;
+    private Random generator = new Random();
     private TabLayout collectionTabs;
     static
     {
@@ -98,10 +107,14 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plane_collection_layout);
+
+        readRewards();
 
         Intent intent = getIntent();
         planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
@@ -156,6 +169,53 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             }
         });
 
+
+    }
+
+    private void readRewards() {
+        //TODO: Replace this with a call to firebase.
+        InputStream is = getResources().openRawResource(R.raw.sample_prizes);
+        Writer writer = new StringWriter();
+        char[] buffer = new char[1024];
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        JSONArray json = null;
+
+        try {
+            json = new JSONArray(writer.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        availableRewards = new ArrayList<>();
+
+        for (int i = 0; i < json.length(); ++i) {
+            Log.d("Constructing rewards", "" + i);
+            try {
+                    Log.d("Current json obj", json.get(i).toString());
+                    Reward current = new Reward((JSONObject) json.get(i));
+                    availableRewards.add(current);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -339,6 +399,16 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         TextView view = (TextView) v;
 
         if (view.getText().toString().equals(getString(R.string.collection_level_up_info))) {
+            Reward randomReward = availableRewards.get(generator.nextInt(availableRewards.size()));
+
+            Log.d("Random Reward", "" + randomReward.getId());
+
+            RewardFragment rewardFragment = new RewardFragment();
+            rewardFragment.show(this.getFragmentManager().beginTransaction(), "Show reward");
+
+            rewardFragment.setAllFragmentData(randomReward.getDescription(), randomReward.getType(), randomReward.getImage(), randomReward.getAmount());
+
+
             ConstraintLayout parentLayout = (ConstraintLayout) v.getParent().getParent();
             String key = "" + ((TextView) parentLayout.findViewById(R.id.plane_model_text)).getText();
             PlaneCatchFragment.CardLevel currentLevel = levelUpCard(key);
@@ -358,6 +428,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             TextView infoText = (TextView) parentLayout.findViewById(R.id.collection_info_text);
             ProgressBar collectedProgress = (ProgressBar) parentLayout.findViewById(R.id.challenge_collected_progress);
             setCollectedText(collectedOutOf, collectedProgress, amountCollected, currentLevel, view);
+
 
             return;
         }

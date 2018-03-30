@@ -14,9 +14,11 @@ import java.util.ArrayList;
 
 public class Reward {
     private String description;
+    private String type;
     private String prettyDescription;
-    private int pointsAmount;
+    private int pointsAmount = -1;
     private int id;
+    private int image;
     private ArrayList<String> partnerFields = new ArrayList<>();
     private ArrayList<String> planeModels = new ArrayList<>();
 
@@ -26,11 +28,13 @@ public class Reward {
 
         try {
             id = json.getInt("id");
-            pointsAmount = json.getInt("plus_points");
             description = json.getString("description");
+            image = json.getInt("image");
+            type = json.getString("type");
 
-            if (!json.get("partner_field").equals(JSONObject.NULL) ) { parseJsonArray(json.getJSONArray("partner_field"), this.partnerFields); }
-            if (!json.get("plane_model").equals(JSONObject.NULL)) { parseJsonArray(json.getJSONArray("plane_model"), this.planeModels); }
+            if ( !json.get("plus_points").equals(JSONObject.NULL) ) {  pointsAmount = json.getInt("plus_points"); }
+            if ( !json.get("partner_field").equals(JSONObject.NULL) ) { parseJsonArray(json.getJSONArray("partner_field"), this.partnerFields); }
+            if ( !json.get("plane_models").equals(JSONObject.NULL) ) { parseJsonArray(json.getJSONArray("plane_models"), this.planeModels); }
 
 
         } catch (JSONException e) {
@@ -64,11 +68,17 @@ public class Reward {
     //Getters
     public String getDescription() { return prettyDescription; }
 
+    public String getType() { return type; }
+
     public int getAmount() {
         return pointsAmount;
     }
 
     public int getId() { return id; }
+
+    public int getImage() { return image; }
+
+
 
     public ArrayList<String> getPlaneModels() {
         return planeModels;
