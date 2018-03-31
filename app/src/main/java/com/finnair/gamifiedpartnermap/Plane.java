@@ -1,22 +1,11 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.app.Activity;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
-
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 
 public class Plane extends ClusterMarker {
@@ -26,10 +15,14 @@ public class Plane extends ClusterMarker {
     private String originCountry;
     private String icao24;
     private String planeType;
+    private boolean statusDistanceClose = false;
+    private boolean statusCollected = false;
+    private PorterDuffColorFilter planeColorFilter = null;
+
 
     public Plane(Activity activity){
         super(activity);
-        setCircleRadius(10000);
+        setCircleRadius(30000);
     }
 
 
@@ -54,70 +47,32 @@ public class Plane extends ClusterMarker {
 
 
     public void setMarkerImage(Integer screenWidth){
-        setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane, 2));
+        setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane, 2, null));
     }
-    public void setMarkerImage(String status){
-        if (status.equalsIgnoreCase("near"))
-            setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane_near, 1));
-        else if (status.equalsIgnoreCase("collected"))
-            setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane, 1));
+
+    public void setStatusDistanceClose(boolean status){ this.statusDistanceClose = status; }
+    public void setStatusCollected(boolean status){
+        this.statusCollected = status;
+    }
+
+
+    public void setMarkerImage(){
+
+        if (this.statusCollected) {
+            setAlpha(0.5f);
+        }
+        else {
+            setAlpha(1.0f);
+        }
+
+        if (statusDistanceClose)
+            planeColorFilter = new PorterDuffColorFilter(Color.argb(252, 0, 0, 160), PorterDuff.Mode.SRC_IN);
         else
-            setMarkerImage(bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane, 1));
+            planeColorFilter = null;
+
+        BitmapDescriptor bmd = bitmapDescriptorFromVector(this.activity, R.drawable.ic_airplane, 1, this.planeColorFilter);
+        setMarkerImage(bmd);
+
     }
 
-    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId, int sizeMultiplier) {
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
-        vectorDrawable.setBounds(0, 0, sizeMultiplier*vectorDrawable.getIntrinsicWidth(), sizeMultiplier*vectorDrawable.getIntrinsicHeight());
-        Bitmap bitmap = Bitmap.createBitmap(sizeMultiplier*vectorDrawable.getIntrinsicWidth(), sizeMultiplier*vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
-
-    public void savePlane(Context context){
-        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
-        String filename = "myPlanes";
-        String earlierText = readCollectedPlanes(context);
-        String text = getID();
-        String string = earlierText + " " + text;
-
-        try {
-            FileOutputStream outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(string.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String readCollectedPlanes(Context context) {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = context.openFileInput("myPlanes");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return ret;
-    }
 }

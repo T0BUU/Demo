@@ -1,16 +1,26 @@
 package com.finnair.gamifiedpartnermap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.Display;
+
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterItem;
 
@@ -27,11 +37,23 @@ public class ClusterMarker implements ClusterItem {
     private String id;
     private String snippet;
     private Double headingDegree = 0.0; // Plane overrides this. Partner doesn't
+    private boolean bonusMarkerEnabled = false;
+    private boolean bonusMarkerVisible = false;
+    private Marker bonusMarker;
+    private float screenWidth;
+    private GoogleMap mMap;
+    private BitmapDescriptor bonusIcon;
 
     private BitmapDescriptor bitmapIcon;
 
 
-    public ClusterMarker(Activity activity){ this.activity = activity; }
+    public ClusterMarker(Activity activity){
+        this.activity = activity;
+        Display display = this.activity.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        this.screenWidth = size.x;
+    }
 
     @Override
     public LatLng getPosition(){
@@ -68,6 +90,11 @@ public class ClusterMarker implements ClusterItem {
         this.markerOptions.anchor(0.5f, 0.5f);
     }
 
+
+    public void setAlpha(float alpha){
+        this.markerOptions.alpha(alpha);
+    }
+
     public void setMarkerImage(Integer screenWidth){
         // Default image (violet balloon). This is overridden in Partner and Plane
         setMarkerImage(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
@@ -83,14 +110,75 @@ public class ClusterMarker implements ClusterItem {
                 .flat(true);
     }
 
+
     // GET:
     public Location getLocation(){ return this.location; }
     public LatLng getLatLng(){ return this.latLng; }
     public Double getHeadingDegree(){ return this.headingDegree; }
-    public float getCircleRadius(){ return this.circleRadius; }
     public BitmapDescriptor getIcon(){ return this.bitmapIcon; }
     public String getID(){ return this.id; }
 
+    public void setBonusMarkerEnabled(boolean enable){
+        this.bonusMarkerEnabled = enable;
+        setBonusMarker();
+    }
+
+    public void setBonusMarkerVisible(boolean visible){
+        this.bonusMarkerVisible = visible;
+        setBonusMarker();
+    }
+
+
+    public void moveBonusMarker(LatLng latLng){
+        if (this.bonusMarker != null)
+            this.bonusMarker.setPosition(latLng);
+    }
+
+    public void setBonusMarker(GoogleMap map){
+        this.mMap = map;
+        Bitmap icon = BitmapFactory.decodeResource(this.activity.getResources(),
+                R.drawable.ic_letter_b_small);
+        icon = scaleDown(icon, screenWidth/12);
+        this.bonusIcon = BitmapDescriptorFactory.fromBitmap(icon);
+
+        if (this.bonusMarker == null){
+            if (this.bonusMarkerVisible && this.bonusMarkerEnabled){
+
+                this.bonusMarker = map.addMarker( new MarkerOptions()
+                        .position(this.latLng)
+                        .icon(bonusIcon)
+                        .rotation(0)
+                        .anchor(0.0f, 1.0f)
+                        .flat(true));
+            }
+        }
+    }
+
+    public void setBonusMarker(){
+        if (this.bonusMarker == null){ // No bonusMarker exists:
+            if (this.bonusMarkerEnabled && this.bonusMarkerVisible){ // if both visible and enabled:
+                bonusMarker = this.mMap.addMarker( new MarkerOptions()
+                        .position(this.latLng)
+                        .icon(this.bonusIcon)
+                        .rotation(0)
+                        .anchor(0.0f, 1.0f)
+                        .flat(true));
+            }
+        } else{ // bonusMarker exists:
+            if (!this.bonusMarkerEnabled || !this.bonusMarkerVisible){ // if either non-visible or disabled:
+                this.bonusMarker.remove();
+                this.bonusMarker = null;
+            }
+
+        }
+    }
+
+    public LatLng getBonusMarkerPosition(){
+        if (this.bonusMarker != null)
+            return this.bonusMarker.getPosition();
+        else
+            return null;
+    }
 
     protected int chooseMarkerImage(String imageType) {
 
@@ -117,21 +205,17 @@ public class ClusterMarker implements ClusterItem {
             return true;
         else
             return false;
-
     }
 
-    public BitmapDrawable writeOnDrawable(int drawableId, String text){
-
-        Bitmap bm = BitmapFactory.decodeResource(this.activity.getResources(), drawableId).copy(Bitmap.Config.ARGB_8888, true);
-        Paint paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(400);
-
-        Canvas canvas = new Canvas(bm);
-        canvas.drawText(text, 0, bm.getHeight()/2, paint);
-
-        return new BitmapDrawable(bm);
+    protected BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId, int sizeMultiplier, PorterDuffColorFilter colorFilter) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        if (colorFilter != null)
+            vectorDrawable.setColorFilter(colorFilter);
+        vectorDrawable.setBounds(0, 0, sizeMultiplier*vectorDrawable.getIntrinsicWidth(), sizeMultiplier*vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(sizeMultiplier*vectorDrawable.getIntrinsicWidth(), sizeMultiplier*vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     public static Bitmap scaleDown(Bitmap image, float maxImageSize) {
@@ -147,19 +231,5 @@ public class ClusterMarker implements ClusterItem {
         return newBitmap;
     }
 
-    private LatLng getPointGivenRadiusAndDegree(LatLng centre, double radius, double degree){
-        final double EARTH_RADIUS = 6378100.0;
-        // Convert to radians
-        double lat = centre.latitude * Math.PI / 180.0;
-        double lon = centre.longitude * Math.PI / 180.0;
-
-        double radians = Math.toRadians(degree);
-
-        // Calculate points
-        double latPoint = lat + (radius / EARTH_RADIUS) * Math.sin(radians);
-        double lonPoint = lon + (radius / EARTH_RADIUS) * Math.cos(radians) / Math.cos(lat);
-
-        return new LatLng(latPoint * 180.0 / Math.PI, lonPoint * 180.0 / Math.PI);
-    }
 
 }

@@ -379,10 +379,10 @@ public class DefaultClusterRenderer<T extends ClusterMarker> implements com.finn
 
             final Set<MarkerWithPosition> markersToRemove = mMarkers;
             final LatLngBounds visibleBounds = mProjection.getVisibleRegion().latLngBounds;
-            // TODO: Add some padding, so that markers can animate in from off-screen.
+            // TODO: Add some padding, so that markers can animatePulse in from off-screen.
 
             // Find all of the existing clusters that are on-screen. These are candidates for
-            // markers to animate from.
+            // markers to animatePulse from.
             List<Point> existingClustersOnScreen = null;
             if (DefaultClusterRenderer.this.mClusters != null && SHOULD_ANIMATE) {
                 existingClustersOnScreen = new ArrayList<Point>();
@@ -394,7 +394,7 @@ public class DefaultClusterRenderer<T extends ClusterMarker> implements com.finn
                 }
             }
 
-            // Create the new markers and animate them to their new positions.
+            // Create the new markers and animatePulse them to their new positions.
             final Set<MarkerWithPosition> newMarkers = Collections.newSetFromMap(
                     new ConcurrentHashMap<MarkerWithPosition, Boolean>());
             for (Cluster<T> c : clusters) {
@@ -421,7 +421,7 @@ public class DefaultClusterRenderer<T extends ClusterMarker> implements com.finn
             markersToRemove.removeAll(newMarkers);
 
             // Find all of the new clusters that were added on-screen. These are candidates for
-            // markers to animate from.
+            // markers to animatePulse from.
             List<Point> newClustersOnScreen = null;
             if (SHOULD_ANIMATE) {
                 newClustersOnScreen = new ArrayList<Point>();
@@ -436,8 +436,8 @@ public class DefaultClusterRenderer<T extends ClusterMarker> implements com.finn
             // Remove the old markers, animating them into clusters if zooming out.
             for (final MarkerWithPosition marker : markersToRemove) {
                 boolean onScreen = visibleBounds.contains(marker.position);
-                // Don't animate when zooming out more than 3 zoom levels.
-                // TODO: drop animation based on speed of device & number of markers to animate.
+                // Don't animatePulse when zooming out more than 3 zoom levels.
+                // TODO: drop animation based on speed of device & number of markers to animatePulse.
                 if (!zoomingIn && zoomDelta > -3 && onScreen && SHOULD_ANIMATE) {
                     final Point point = mSphericalMercatorProjection.toPoint(marker.position);
                     final Point closest = findClosestCluster(newClustersOnScreen, point);
@@ -575,9 +575,9 @@ public class DefaultClusterRenderer<T extends ClusterMarker> implements com.finn
         /**
          * Animates a markerWithPosition some time in the future.
          *
-         * @param marker the markerWithPosition to animate.
-         * @param from   the position to animate from.
-         * @param to     the position to animate to.
+         * @param marker the markerWithPosition to animatePulse.
+         * @param from   the position to animatePulse from.
+         * @param to     the position to animatePulse to.
          */
         public void animate(MarkerWithPosition marker, LatLng from, LatLng to) {
             lock.lock();
@@ -589,9 +589,9 @@ public class DefaultClusterRenderer<T extends ClusterMarker> implements com.finn
          * Animates a markerWithPosition some time in the future, and removes it when the animation
          * is complete.
          *
-         * @param marker the markerWithPosition to animate.
-         * @param from   the position to animate from.
-         * @param to     the position to animate to.
+         * @param marker the markerWithPosition to animatePulse.
+         * @param from   the position to animatePulse from.
+         * @param to     the position to animatePulse to.
          */
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         public void animateThenRemove(MarkerWithPosition marker, LatLng from, LatLng to) {
@@ -815,7 +815,7 @@ public class DefaultClusterRenderer<T extends ClusterMarker> implements com.finn
         /**
          * @param c            the cluster to render.
          * @param markersAdded a collection of markers to append any created markers.
-         * @param animateFrom  the location to animate the markerWithPosition from, or null if no
+         * @param animateFrom  the location to animatePulse the markerWithPosition from, or null if no
          *                     animation is required.
          */
         public CreateMarkerTask(Cluster<T> c, Set<MarkerWithPosition> markersAdded, LatLng animateFrom) {

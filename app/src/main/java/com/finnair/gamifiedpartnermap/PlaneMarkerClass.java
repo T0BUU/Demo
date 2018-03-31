@@ -15,19 +15,13 @@ import com.google.android.gms.maps.model.Marker;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
-import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Collection;
 import java.util.Set;
@@ -106,18 +100,23 @@ public class PlaneMarkerClass {
             newPlane.setMarkerOptions();
             newPlane.setMarkerImage(screenWidth);
             newPlane.setPlaneType( planeType );
-            newPlane.setMarkerImage("not near/collected");
+            newPlane.setMarkerImage();
+            newPlane.setBonusMarker(mMap);
+            newPlane.setBonusMarkerEnabled(true);
+            newPlane.setBonusMarkerVisible(true);
+
+
             planeHashMap.put(newPlane.getID(), newPlane);
             this.clusterManager.addItem(newPlane);
 
             readCollectedPlanes(activity);
-
         }
     }
 
 
 
     public void removePlaneFromMap(String planeID){
+        getPlaneByID(planeID).setBonusMarkerVisible(false);
         this.clusterManager.removeItem(getPlaneByID(planeID));
     }
 
@@ -199,14 +198,18 @@ public class PlaneMarkerClass {
                 } else {
                     // Animate the movement of an existing plane:
                     if (heading != null) {
-                        markerRenderer.animateMarkerMovement(planeHashMap.get(callSign), new LatLng(latitude, longitude), heading - 45);
+
                         if ( planeHashMap.get(callSign).isWithinReach(userLocation) ){
-                            planeHashMap.get(callSign).setMarkerImage("near");
+                            planeHashMap.get(callSign).setStatusDistanceClose(true);
+                            planeHashMap.get(callSign).setMarkerImage();
                             markerRenderer.setMarkerImage(planeHashMap.get(callSign));
+                            markerRenderer.animateMarkerPulse(planeHashMap.get(callSign));
                         } else {
-                            planeHashMap.get(callSign).setMarkerImage("not near/collected");
+                            planeHashMap.get(callSign).setStatusDistanceClose(false);
+                            planeHashMap.get(callSign).setMarkerImage();
                             markerRenderer.setMarkerImage(planeHashMap.get(callSign));
                         }
+                        markerRenderer.animatePlaneFlight(planeHashMap.get(callSign), new LatLng(latitude, longitude), heading - 45);
                     }
                 }
             }
@@ -225,9 +228,7 @@ public class PlaneMarkerClass {
                 } else {
                     addPlaneOnMap(openSkyStateVector.getCallsign(), openSkyStateVector.getLatitude(), openSkyStateVector.getLongitude(), 0.0, PLANE_TYPES.get(new Random().nextInt(PLANE_TYPES.size())));
                 }
-
             }
-
         }
     }
 

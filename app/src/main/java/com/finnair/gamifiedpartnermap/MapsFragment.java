@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 
@@ -34,6 +35,8 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -131,6 +134,7 @@ public class MapsFragment extends Fragment {
                         // Location not available so center manually . Location provider set to <"">
                         // Kamppi (good for testing firms): 60.167497, 24.934739
                         // Espoo (good for plane spotting): 60.2055, 24.6559
+                        // Frankfurt (lots of planes): 50.120602, 8.68355
                         userLocation = new Location("");
                         userLocation.setLatitude(60.2055); // 60.320850 hki-vantaa
                         userLocation.setLongitude(24.6559); // 24.952630
@@ -146,7 +150,12 @@ public class MapsFragment extends Fragment {
                         //Enable the myLocation Layer
                         mMap.setMyLocationEnabled(true);
 
-
+                // Delete immediately if you see this. Only for testing purposes (Santeri) ////////////////////////////////////////
+                mMap.addCircle(new CircleOptions()
+                        .center(new LatLng(userLocation.getLatitude(), userLocation.getLongitude()))
+                        .radius(30000)
+                        .strokeColor(Color.RED));
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
                 partnerClusterManager = new com.finnair.gamifiedpartnermap.ClusterManager<ClusterMarker>(getContext(), mMap, new MarkerManager(mMap));
@@ -155,7 +164,7 @@ public class MapsFragment extends Fragment {
 
 
 
-                MarkerRenderer partnerMarkerRenderer = new com.finnair.gamifiedpartnermap.MarkerRenderer(getContext(), mMap, partnerClusterManager, false);
+                final MarkerRenderer partnerMarkerRenderer = new com.finnair.gamifiedpartnermap.MarkerRenderer(getContext(), mMap, partnerClusterManager, false);
                 final MarkerRenderer planeMarkerRenderer = new com.finnair.gamifiedpartnermap.MarkerRenderer(getContext(), mMap, planeClusterManager, true);
                 planeMarkerClass = new PlaneMarkerClass(getActivity(), mMap, userLocation, planeClusterManager, planeMarkerRenderer);
 
@@ -188,6 +197,12 @@ public class MapsFragment extends Fragment {
                         planeMarkerClass.zoomListener(cameraPosition.zoom);
                         partnerClusterManager.cluster();
                         planeClusterManager.cluster();
+
+
+                        for (String partnerStr : partnerMarkerClass.partnerHashMap.keySet()){
+                            // Only necessary for Partners. Plane animations take care of zombies
+                            partnerMarkerRenderer.deleteZombieMarkers(partnerMarkerClass.getPartnerByID(partnerStr));
+                        }
                     }
                 });
 
@@ -213,18 +228,14 @@ public class MapsFragment extends Fragment {
                     @Override
                     public boolean onMarkerClick(final Marker marker) {
 
-
                         if (planeMarkerClass.containsMarker(marker)) {
                             // User clicked an airplane
                             Plane plane = planeMarkerClass.getPlaneByID(marker.getTitle());
                             if (plane.isWithinReach(userLocation)) {
-                                Log.d("POOP", "You can collect this plane!");
-
                                 ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
-
-                            } else{
+                            } else {
+                                plane.setBonusMarker(mMap);
                                 ((MainActivity) getActivity()).onPlaneCatch(plane, planeMarkerClass.getRandomPlane());
-
                             }
 
                         } else if (partnerMarkerClass.containsMarker(marker)) {
@@ -233,8 +244,6 @@ public class MapsFragment extends Fragment {
 
                             Partner partner = partnerMarkerClass.getPartnerByID(marker.getTitle());
                             if (partner.isWithinReach(userLocation)) {
-                                Log.d("POOP", "You can collect this plane!");
-
                                 ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                             }
                             else {
@@ -246,8 +255,6 @@ public class MapsFragment extends Fragment {
                             }
 
 
-                        } else {
-                            Log.d("POOP", "You most likely clicked a cluster. Nothing should happen.");
                         }
 
 
@@ -334,9 +341,13 @@ public class MapsFragment extends Fragment {
     */
     public void moveCameraToPartner(Partner partner){
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(partner.getPosition(), 15.0f));
+
         List<Marker> partnerMarkers = new ArrayList<>(partnerClusterManager.getMarkerCollection().getMarkers());
+
+
         for(Marker marker : partnerMarkers) {
-            if(marker.getPosition().equals(partner.getPosition())){
+            Log.d("POOP", "" + marker.getTitle() + " " + partner.getTitle());
+            if(marker.getTitle().equals(partner.getTitle())){
                 InfoWindowData info = new InfoWindowData();
                 info.setData(partner.getID(), partner.getAddress(), partner.getDescription());
 

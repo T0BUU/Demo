@@ -16,25 +16,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import org.apache.http.io.SessionOutputBuffer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Calendar;
-
-
 
 
 public class PartnerMarkerClass {
@@ -127,56 +117,6 @@ public class PartnerMarkerClass {
     }
 
 
-   /* public void savePartner(Context context, Partner saveMe){
-        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
-
-        try {
-            collectionHashMap.get(saveMe.getFieldOfBusiness()).add(saveMe.getAddress());
-        }
-        catch (java.lang.NullPointerException nil) {
-            HashSet<String> addMe = new HashSet<>();
-            addMe.add(String.format("%s %s", Calendar.getInstance().getTime().toString(), saveMe.getID()));
-
-            collectionHashMap.put(saveMe.getFieldOfBusiness(), addMe);
-        }
-
-        Log.d("Plane saving: ", collectionHashMap.toString());
-    }
-
-
-    private String formatPartners() {
-        String result = "";
-
-        for (String  category : collectionHashMap.keySet()) {
-            Iterator<String> row = collectionHashMap.get(category).iterator();
-
-            result += category;
-
-            while (row.hasNext()) {
-                result += String.format("#%s", row.next());
-            }
-
-            result += "\n";
-
-        }
-        return result;
-    }
-
-    public void savePartners(Context context){
-
-        String result = formatPartners();
-
-        try {
-            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION, Context.MODE_PRIVATE);
-            outputStream.write(result.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Log.d("Plane Saving", result);
-    }*/
-
     public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return this.collectionHashMap;
     }
@@ -241,6 +181,9 @@ public class PartnerMarkerClass {
         newPartner.setID(companyName);
         newPartner.setMarkerOptions();
         newPartner.setMarkerImage(screenWidth);
+        newPartner.setBonusMarker(mMap);
+        newPartner.setBonusMarkerEnabled(true);
+        newPartner.setBonusMarkerVisible(true);
 
         partnerHashMap.put(newPartner.getID(), newPartner);
         clusterManager.addItem(newPartner);
@@ -259,7 +202,6 @@ public class PartnerMarkerClass {
     //Getter for partnerHashMap.
     public ConcurrentHashMap<String, Partner> getPartnerHashMap() {
         if (partnerHashMap == null) {
-            System.out.println("!!!!partnerHashMap was null!!!!");
             return null;
         } else {
             return this.partnerHashMap;
