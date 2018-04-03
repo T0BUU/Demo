@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -143,7 +144,15 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         }
 
         //-------
+        FloatingActionButton cameraButton = findViewById(R.id.camera_fab);
+        cameraButton.setOnClickListener(new View.OnClickListener(){
 
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getApplicationContext(), CameraActivity.class);
+                startActivity(i);
+            }
+        });
     }
 
 
@@ -335,6 +344,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         startActivity(intent);
         finish();
     }
+
+
 
 }
 

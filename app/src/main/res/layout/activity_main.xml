@@ -41,7 +41,7 @@
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_camera_floating_button"
-            android:theme="@style/AppTheme.FloatingActionButtonOverlay"/>
+            android:theme="@style/AppTheme.FloatingActionButtonOverlay" />
     </RelativeLayout>
 
     <!-- Drawer which contains navigation -->
