@@ -21,14 +21,15 @@ import java.util.HashMap;
 import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
 import static com.finnair.gamifiedpartnermap.MainActivity.profileInfoStartUp;
 
-public class SplashActivity extends AppCompatActivity implements LocationPermissionDialog.LocationDialogListener {
+public class SplashActivity extends AppCompatActivity implements LocationPermissionDialog.LocationDialogListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
             HashMap<String, String> profileInformation = new HashMap();
 
@@ -51,7 +52,7 @@ public class SplashActivity extends AppCompatActivity implements LocationPermiss
             startActivity(intent);
 
         finish();
-        } else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, locationPermission);
+        } else ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA}, locationPermission);
 
 
     }
