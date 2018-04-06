@@ -3,6 +3,7 @@ package com.finnair.gamifiedpartnermap;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -31,13 +32,17 @@ public class RewardFragment extends DialogFragment {
     private int image;
     private String redeemText;
     private int plusPoints;
+    private boolean isLoggedIn;
+    private TextView parent;
 
     public RewardFragment(){}
 
-    public void setAllFragmentData(String rewardInfo, String rewardType, int image, int plusPoints) {
+    public void setAllFragmentData(String rewardInfo, String rewardType, int image, int plusPoints, boolean isLoggedIn, View parent) {
 
         descriptionText = rewardInfo;
         rewardTypeText = String.format("You have received:\n%s", rewardType);
+        this.isLoggedIn = isLoggedIn;
+        this.parent = (TextView) parent;
 
         if (image != -1) this.image = image;
         else this.image = R.drawable.finnair_logo;
@@ -75,9 +80,34 @@ public class RewardFragment extends DialogFragment {
     private void setContent(){
         // This method should be private and only called in onCreateView() after the view has been inflated
         // By the time this is called, all private data must be available
-        description.setText(Html.fromHtml(descriptionText));
-        rewardType.setText(rewardTypeText);
-        imageView.setImageResource(image);
+
+
+        if (!isLoggedIn) {
+            redeemButton.setText(R.string.reward_redeem_not_logged_in);
+           redeemButton.getBackground().setColorFilter(Color.GRAY, PorterDuff.Mode.DARKEN);
+
+            description.setVisibility(View.INVISIBLE);
+            rewardType.setVisibility(View.INVISIBLE);
+
+            redeemButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dismiss();
+                }
+            });
+        }
+        else {
+            description.setText(Html.fromHtml(descriptionText));
+            rewardType.setText(rewardTypeText);
+            imageView.setImageResource(image);
+            redeemButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ((PlaneCollectionActivity) getActivity()).redeemReward(parent);
+                    dismiss();
+                }
+            });
+        }
 
 
     }

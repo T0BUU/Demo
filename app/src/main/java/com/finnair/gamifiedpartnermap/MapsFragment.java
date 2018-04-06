@@ -411,8 +411,16 @@ public class MapsFragment extends Fragment {
         return planeMarkerClass.getCollection();
     }
 
+    public void refreshPlaneCollection() {
+        planeMarkerClass.readCollectedPlanes(getActivity());
+    }
+
     public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
         return partnerMarkerClass.getCollection();
+    }
+
+    public void refreshPartnerCollection() {
+        partnerMarkerClass.readCollectedPartners(getActivity());
     }
 
     public Pair<ArrayList<Plane>, ArrayList<Partner>> getRandomRewards(int amount) {

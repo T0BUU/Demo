@@ -29,7 +29,7 @@ public class Plane extends ClusterMarker {
 
     public Plane(Activity activity){
         super(activity);
-        setCircleRadius(10000);
+        setCircleRadius(100000);
     }
 
 

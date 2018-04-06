@@ -47,6 +47,7 @@ import java.util.Random;
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
+import static com.finnair.gamifiedpartnermap.MainActivity.isLoggedInMessage;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.BASIC;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.GOLD;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.LUMO;
@@ -69,6 +70,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
     private ArrayList<Reward> availableRewards;
     private Random generator = new Random();
     private TabLayout collectionTabs;
+    private boolean isLoggedIn;
     static
     {
         List<String> PLANE_TYPES = Arrays.asList("AIRBUS A350-900", "AIRBUS A330-300",
@@ -118,6 +120,8 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
         Intent intent = getIntent();
         planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
+
+        isLoggedIn = intent.getBooleanExtra(isLoggedInMessage, false);
 
         Log.d("Collection", "" + (planeCollectionHashMap.size()));
 
@@ -394,6 +398,30 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         }
     }
 
+    public void redeemReward(TextView v) {
+
+        ConstraintLayout parentLayout = (ConstraintLayout) v.getParent().getParent();
+        String key = "" + ((TextView) parentLayout.findViewById(R.id.plane_model_text)).getText();
+        PlaneCatchFragment.CardLevel currentLevel = levelUpCard(key);
+
+        setBorderColor(parentLayout, currentLevel);
+
+        int amountCollected;
+
+        if (collectionTabs.getSelectedTabPosition() == 0) {
+            amountCollected = planeCollectionHashMap.get(key).size();
+        }
+        else {
+            amountCollected = partnerCollectionHashMap.get(key).size();
+        }
+
+        TextView collectedOutOf = (TextView) parentLayout.findViewById(R.id.routes_collected_counter);
+        TextView infoText = (TextView) parentLayout.findViewById(R.id.collection_info_text);
+        ProgressBar collectedProgress = (ProgressBar) parentLayout.findViewById(R.id.challenge_collected_progress);
+        setCollectedText(collectedOutOf, collectedProgress, amountCollected, currentLevel, v);
+
+    }
+
 
     public void onInfoClick(View v) {
         TextView view = (TextView) v;
@@ -401,34 +429,10 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         if (view.getText().toString().equals(getString(R.string.collection_level_up_info))) {
             Reward randomReward = availableRewards.get(generator.nextInt(availableRewards.size()));
 
-            Log.d("Random Reward", "" + randomReward.getId());
-
             RewardFragment rewardFragment = new RewardFragment();
             rewardFragment.show(this.getFragmentManager().beginTransaction(), "Show reward");
 
-            rewardFragment.setAllFragmentData(randomReward.getDescription(), randomReward.getType(), randomReward.getImage(), randomReward.getAmount());
-
-
-            ConstraintLayout parentLayout = (ConstraintLayout) v.getParent().getParent();
-            String key = "" + ((TextView) parentLayout.findViewById(R.id.plane_model_text)).getText();
-            PlaneCatchFragment.CardLevel currentLevel = levelUpCard(key);
-
-            setBorderColor(parentLayout, currentLevel);
-
-            int amountCollected;
-
-            if (collectionTabs.getSelectedTabPosition() == 0) {
-                amountCollected = planeCollectionHashMap.get(key).size();
-            }
-            else {
-                amountCollected = partnerCollectionHashMap.get(key).size();
-            }
-
-            TextView collectedOutOf = (TextView) parentLayout.findViewById(R.id.routes_collected_counter);
-            TextView infoText = (TextView) parentLayout.findViewById(R.id.collection_info_text);
-            ProgressBar collectedProgress = (ProgressBar) parentLayout.findViewById(R.id.challenge_collected_progress);
-            setCollectedText(collectedOutOf, collectedProgress, amountCollected, currentLevel, view);
-
+            rewardFragment.setAllFragmentData(randomReward.getDescription(), randomReward.getType(), randomReward.getImage(), randomReward.getAmount(), isLoggedIn, v);
 
             return;
         }
