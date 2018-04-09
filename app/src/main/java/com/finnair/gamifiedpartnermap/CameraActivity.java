@@ -2,6 +2,9 @@ package com.finnair.gamifiedpartnermap;
 
 import android.content.Context;
 import android.graphics.Camera;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -9,17 +12,27 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Size;
 import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.TextureView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class CameraActivity extends AppCompatActivity {
 
+    //private SurfaceView surfaceView;
+    //private SurfaceHolder surfaceHolder;
     private TextureView previewTextureView;
     private TextureView.SurfaceTextureListener listener;
     private CameraManager manager;
@@ -35,12 +48,17 @@ public class CameraActivity extends AppCompatActivity {
             super.onCaptureStarted(session, request, timestamp, frameNumber);
         }
     };
+    private Size previewSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
+        /*surfaceView = findViewById(R.id.surfaceView);
+        surfaceHolder = surfaceView.getHolder();
+        surfaceHolder.setFormat(PixelFormat.TRANSPARENT);
+        surfaceView.setZOrderOnTop(true);*/
         // Setting up the listener for the texture view
         listener = new TextureView.SurfaceTextureListener() {
             @Override
@@ -48,7 +66,7 @@ public class CameraActivity extends AppCompatActivity {
                 // When the surface is available, try opening the camera
                 try{
                     //Find a rear-facing camera and try to open it.
-                   findCamera();
+                   findCamera(i, i1);
                    if(cameraID != null){
                        openCamera(cameraID);
                    }
@@ -69,6 +87,11 @@ public class CameraActivity extends AppCompatActivity {
 
             @Override
             public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
+                /*Canvas c =  surfaceHolder.lockCanvas();
+                Paint paint = new Paint();
+                paint.setARGB(0, 30,30, 30);
+                c.drawText("Finnair", 500, 500,paint);
+                surfaceHolder.unlockCanvasAndPost(c);*/
 
             }
         };
@@ -78,13 +101,15 @@ public class CameraActivity extends AppCompatActivity {
 
     }
 
-    private void findCamera() throws CameraAccessException {
+    private void findCamera(int width, int height) throws CameraAccessException {
         manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         for(String camID : manager.getCameraIdList()){
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(camID);
             // Find if the rear-facing camera
             if(characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK){
                 cameraID = camID;
+                StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                previewSize = getPreferredSize(map.getOutputSizes(SurfaceTexture.class), width, height);
                 break;
             }
         }
@@ -136,10 +161,12 @@ public class CameraActivity extends AppCompatActivity {
             // Setting up the surface and the surface texture.
             SurfaceTexture surfaceTexture = previewTextureView.getSurfaceTexture();
             Surface previewSurface = new Surface(surfaceTexture);
+            surfaceTexture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
 
             // Creating a capture request builder
             captureRequestBuilder = device.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.addTarget(previewSurface);
+
 
 
 
@@ -169,5 +196,26 @@ public class CameraActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Camera not accessible", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    private Size getPreferredSize(Size[]sizes, int width, int height){
+        List<Size> collectorSizes = new  ArrayList<>();
+        for(Size size : sizes){
+            if(width < height){
+                if(size.getWidth() > width && size.getHeight() > height) collectorSizes.add(size);
+            }else{
+                if(size.getWidth() < height && size.getHeight() < width){
+                    collectorSizes.add(size);
+                }
+            }
+        }
+        if(collectorSizes.size() >0) {return Collections.min(collectorSizes, new Comparator<Size>() {
+         @Override
+         public int compare(Size size, Size t1) {
+             return Long.signum(size.getWidth() * size.getHeight() - t1.getWidth()*t1.getHeight());
+         }
+            });
+        }
+        else return sizes[0];
     }
 }
