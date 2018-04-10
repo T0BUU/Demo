@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,8 +9,6 @@
     <TextureView
         android:id="@+id/previewTextureView"
         android:layout_width="732dp"
-        android:layout_height="981dp"
-        tools:layout_editor_absoluteX="-2dp"
-        tools:layout_editor_absoluteY="-95dp" />
+        android:layout_height="981dp" />
 
-</android.support.constraint.ConstraintLayout>
+</FrameLayout>
