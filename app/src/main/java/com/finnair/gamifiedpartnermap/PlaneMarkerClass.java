@@ -115,6 +115,7 @@ public class PlaneMarkerClass {
             newPlane.setPlaneType( planeType );
             newPlane.showRadarArcPolyline(false);
             planeHashMap.put(newPlane.getID(), newPlane);
+            //System.out.println("adding plane, id: " + newPlane.getID() + "icao: " + newPlane.getIcao24());
 
         }
     }

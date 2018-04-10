@@ -89,16 +89,18 @@ public class PartnerMarkerClass {
     }
 
     /*
-     * This updates showingMarkers list based on given parameter field_of_business.
+     * This updates showingMarkers list based on given parameter String field_of_business and boolean show (add/remove).
      * If showingPartners contain partners under field_of_business, this method removes them from list.
      * If showingPartners doesn't contain that field_of_business, it adds those to list.
      * Returns updated list.
      */
-    public List<Partner> filterFieldOfBusiness(String fob){
+    public List<Partner> filterFieldOfBusiness(String fob, boolean show){
         for(Partner partner : partnerHashMap.values()) {
             if (partner.getFieldOfBusiness().equals(fob)) {
-                if(showingPartners.contains(partner)){
-                    showingPartners.remove(partner);
+                if(!show){
+                    while(showingPartners.contains(partner)) {       //If there happened to be multiple partners
+                        showingPartners.remove(partner);             //Remove all of them.
+                    }
                 } else {
                     showingPartners.add(partner);
                 }
@@ -106,6 +108,14 @@ public class PartnerMarkerClass {
         }
         return showingPartners;
 
+    }
+
+    //Adds 1 partner to showingPartners and returns the list.
+    public List<Partner> filterSinglePartner(Partner p){
+        if(!showingPartners.contains(p)){
+            showingPartners.add(p);
+        }
+        return showingPartners;
     }
 
 
@@ -146,6 +156,5 @@ public class PartnerMarkerClass {
             return this.partnerHashMap;
         }
     }
-
 
 }

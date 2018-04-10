@@ -212,5 +212,9 @@ public class MainActivity extends AppCompatActivity implements PlaneCatchFragmen
         startActivity(intent);
     }
 
+    public MActivityLayout getMActivityLayout(){
+        return this.myMainLayout;
+    }
+
 }
 

@@ -33,19 +33,22 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Otto on 5.2.2018.
+ * Popup window class to show partners.
  */
 
 public class PartnerListWindow extends PopupWindow {
 
-    private List<String> partners;                                    //Arraylist which we populate with partner names.
-    private HashMap<String, List<String>> partnersUnderBusiness;      //HashMap which keys are fields_of_business and values are partner names.
-    private List<String> fieldsOfBusinesses;                          //List containing all fields_of_business.
+    private List<String> partners;                                  //Arraylist which we populate with partner names.
+    private HashMap<String, List<String>> partnersUnderBusiness;    //HashMap which keys are fields_of_business and values are partner names.
+    private List<String> fieldsOfBusinesses;                        //List containing all fields_of_business.
+    private HashMap<String, String> partnerAddresses;               //HashMap containing partner name as key and address as value.
 
     private Activity mActivity;
     private MapsFragment myMap;
@@ -55,17 +58,21 @@ public class PartnerListWindow extends PopupWindow {
 
 
     public PartnerListWindow(Activity act, MapsFragment mMap){
-
         mActivity = act;
         myMap = mMap;
     }
 
     /*
      * This function is called from MActivityLayout on partners button click.
-     * Shows popupwindow on top of mainLayout at the center of screen.
+     * If popup isn't showing, shows popup window on top of mainLayout at the center of screen.
+     * Else dismisses popup window.
      */
     public void showPopupWindow() {
-        popup.showAtLocation(mActivity.findViewById(R.id.main_content), Gravity.CENTER, 0, 0);
+        if (!popup.isShowing()) {
+            popup.showAtLocation(mActivity.findViewById(R.id.main_content), Gravity.CENTER, 0, 0);
+        } else {
+            popup.dismiss();
+        }
     }
 
     /*
@@ -92,24 +99,16 @@ public class PartnerListWindow extends PopupWindow {
         popup.setHeight(height);
         popup.setFocusable(true);
         popup.setContentView(myPopupView);
-        popup.setBackgroundDrawable(new BitmapDrawable());
+        //popup.setBackgroundDrawable(new BitmapDrawable());
 
         ExpandableListView myExpandableList = (ExpandableListView) myPopupView.findViewById(R.id.popup_expandable_list_view);
         if(myExpandableList == null) {
             System.out.println("!!!null expandableList!!!");
         }
-        ExpandableListAdapter expandingListAdapter = new PartnerPopupExpandableListAdapter(mActivity, partnersUnderBusiness, partnerMarkerClass, myMap);
+        ExpandableListAdapter expandingListAdapter = new PartnerPopupExpandableListAdapter(mActivity, partnersUnderBusiness, partnerAddresses ,partnerMarkerClass, myMap);
         myExpandableList.setAdapter(expandingListAdapter);
 
-        /*myExpandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
-                expandableListView.expandGroup(i);
-                return false;
-            }
-        });*/
-
-        myExpandableList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+       /* myExpandableList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int i) {
 
@@ -130,20 +129,22 @@ public class PartnerListWindow extends PopupWindow {
                 //myMap.moveCameraToPartner(p);
                 return false;
             }
-        });
+        });  */
     }
 
     /*
      * This method gets partnerHashMap from partnerMarkerClass,
      * parses received data to partnersUnderBusiness HashMap<field_of_business, partner.name>
-     * and partners List<partner.name>
+     * and partners List<partner.name>, and partnerAddresses HashMap<String, String>
      */
     public void setData(){
         partnerMarkerClass = myMap.getPartners();
         ConcurrentHashMap<String, Partner> partnerHashMap = partnerMarkerClass.getPartnerHashMap();
-        partners = new ArrayList<>();
 
+        partners = new ArrayList<>();
         partnersUnderBusiness = new HashMap<>();
+        partnerAddresses = new HashMap<>();
+
         ArrayList<String> partnerNames = new ArrayList<>(partnerHashMap.keySet());
         for(int i = 0; i < partnerNames.size(); i++){
             Partner current = partnerHashMap.get(partnerNames.get(i));
@@ -159,9 +160,13 @@ public class PartnerListWindow extends PopupWindow {
             } else {
                 System.out.println("----current partner was null");
             }
+            partnerAddresses.put(current.getID(), current.getAddress());
         }
+
         List<String> pUBKeys = new ArrayList<>(partnersUnderBusiness.keySet());
+
         for(int j = 0; j < pUBKeys.size(); j++){
+            Collections.sort(partnersUnderBusiness.get(pUBKeys.get(j)));         //Sort partnersUnderBusiness value lists.
             List<String> temp = partnersUnderBusiness.get(pUBKeys.get(j));
             partners.addAll(temp);
         }

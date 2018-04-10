@@ -343,17 +343,28 @@ public class MapsFragment extends Fragment {
     }
 
     /*
-     * This method moves camera to given partner and opens its infowindow.
      * Called from partnerListWindow when user clicks on partner name.
+     * This method moves camera to given partner and zoom
+     * Sets CancelableCallback for handling showInfoWindow and showPopupWindow after animation is ready.
      */
-    public void moveCameraToPartner(Partner partner){
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(partner.getPosition(), 15.0f));
-        List<Marker> partnerMarkers = new ArrayList<>(clusterManager.getMarkerCollection().getMarkers());
-        for(Marker marker : partnerMarkers) {
-            if(marker.getPosition().equals(partner.getPosition())){
-                marker.showInfoWindow();
+    public void moveCameraToPartner(final Partner partner, final PartnerListWindow pLW){
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(partner.getPosition(), 15.0f), new GoogleMap.CancelableCallback() {
+            @Override
+            public void onFinish(){
+                List<Marker> partnerMarkers = new ArrayList<>(clusterManager.getMarkerCollection().getMarkers());
+                for(Marker marker : partnerMarkers) {
+                    if(marker.getPosition().equals(partner.getPosition())){
+                        marker.showInfoWindow();
+                        pLW.showPopupWindow();
+                    }
+                }
+
             }
-        }
+            @Override
+            public void onCancel(){
+
+            }
+        });
     }
 
     /*

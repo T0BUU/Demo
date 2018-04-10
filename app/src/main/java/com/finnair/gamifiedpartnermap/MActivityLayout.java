@@ -45,11 +45,12 @@ import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
  */
 public class MActivityLayout implements View.OnClickListener {
 
-    private DrawerLayout drawerLayout;
+    private DrawerLayout drawerLayout;            //User profile view in drawerlayout.
     private PartnerListWindow partnerListWindow;  //Partner list popup window
     private MapsFragment mapFragment;
     private MainActivity mActivity;
     private FragmentManager fragmentManager;
+    private boolean partnerDataReady = false;     //Boolean value to check if partnerdata is ready
 
     public MActivityLayout(){}
 
@@ -77,6 +78,7 @@ public class MActivityLayout implements View.OnClickListener {
         settingsButton.setOnClickListener(this);
         partnersButton.setOnClickListener(this);
         drawerToggle.setOnClickListener(this);
+
 
         //Insert mapFragment to main_content FrameLayout
         fragmentManager.beginTransaction()
@@ -126,8 +128,10 @@ public class MActivityLayout implements View.OnClickListener {
                         .commit();
                 break;
             case R.id.toolbar_partners_button:                   //Open partner popup window.
-                partnerListWindow.showPopupWindow();
-                break;
+                if(partnerDataReady) {
+                    partnerListWindow.showPopupWindow();
+                    break;
+                }
             case R.id.open_drawer_button:                        //Open drawer, (Profile icon)
                 drawerLayout.openDrawer(GravityCompat.START);
             default: break;
@@ -138,10 +142,20 @@ public class MActivityLayout implements View.OnClickListener {
         return mapFragment.getCollection();
     }
 
-    //MainActivity calls this method after partnerMarkerClass has fetched data.
-    //Calls partnerListWindows method createPopupWindow which sets data and recreates the window.
+    /*
+     * MainActivity calls this method after partnerMarkerClass has fetched data.
+     * Sets partnersButton textcolor to color.nordicBlue and partnerDataReady to true.
+     * Calls partnerListWindows method createPopupWindow which sets data and recreates the window.
+     */
     public void notifyPartnerDataChanged(){
+        Button tempButton = (Button)mActivity.findViewById(R.id.toolbar_partners_button);
+        tempButton.setTextColor(mActivity.getResources().getColor(R.color.nordicBlue));
+        this.partnerDataReady = true;
         partnerListWindow.createPopupWindow();
+    }
+
+    public PartnerListWindow getPartnerListWindow(){
+        return this.partnerListWindow;
     }
 
 }

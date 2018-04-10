@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -16,7 +18,7 @@ import java.util.List;
 
 /**
  * Created by Otto on 14.2.2018.
- * Upper level adapter class for partner popup window, this sets group and child views.
+ * Custom adapter class for partner popup window, this sets group and child views.
  * Group contains title TextView which is field_of_business, and checkbox for filtering those on map.
  * Child contains only name of partner TextView.
  */
@@ -26,23 +28,24 @@ public class PartnerPopupExpandableListAdapter extends BaseExpandableListAdapter
     private Activity mActivity;
     private List<String> expandingTitles;                         //List for group names (field_of_business) strings.
     private HashMap<String, List<String>> partnersUnderBusiness;  //HashMap which has group names as keys and company names as values.
+    private HashMap<String, String> partnerAddresses;             //HashMap containing partner name as key and address as value.
     private boolean[] checkBoxStates;                             //Boolean array to hold groupCheckBoxStates.
 
     private PartnerMarkerClass partnerMarkerClass;
     private MapsFragment mapFragment;
 
-    public PartnerPopupExpandableListAdapter(Activity a, HashMap<String, List<String>> partnersMap,
+    public PartnerPopupExpandableListAdapter(Activity a, HashMap<String, List<String>> partnersMap, HashMap<String, String> pAddresses,
                                              PartnerMarkerClass pMC, MapsFragment mapF) {
         this.mActivity = a;
         this.partnersUnderBusiness = partnersMap;
         this.mapFragment = mapF;
         this.expandingTitles = new ArrayList<>(partnersUnderBusiness.keySet());
-        partnerMarkerClass = pMC;
+        this.partnerMarkerClass = pMC;
+        this.partnerAddresses = pAddresses;
         this.initCheckBoxStates();
-
     }
 
-    //Initialize checkboxes; init new ArrayList, then add value true (checked) for each group.
+    //Initialize checkboxes; init new boolean array, then add value true (checked) for each group.
     private void initCheckBoxStates(){
         checkBoxStates = new boolean[expandingTitles.size()];
         Arrays.fill(checkBoxStates, Boolean.TRUE);
@@ -63,7 +66,10 @@ public class PartnerPopupExpandableListAdapter extends BaseExpandableListAdapter
         return partnersUnderBusiness.get(this.expandingTitles.get(position)).get(expandedPosition);
     }
 
-    //Set new secondleveladapter for children view.
+    /*
+     * Sets child views of expandable list adapter.
+     * If convertView is null inflate new child view.
+     */
     @Override
     public View getChildView(final int listPos, final int expListPos,
                              boolean isLastChild, View convertView, ViewGroup parent) {
@@ -73,16 +79,46 @@ public class PartnerPopupExpandableListAdapter extends BaseExpandableListAdapter
             LayoutInflater inf = mActivity.getLayoutInflater();
             convertView = inf.inflate(R.layout.popup_expanding_list_child_view, null);
         }
+
+        //Partner name TextView
         TextView expListTextView = (TextView) convertView.findViewById(R.id.expanding_list_item);
+
+        //Other part of childView which is initially hidden.
+        final RelativeLayout expandView = (RelativeLayout)convertView.findViewById(R.id.popup_expanding_child_view);
+        expandView.setVisibility(View.GONE);
+
+        //Click listener for partner name TextView, shows/hides other part of childView.
         expListTextView.setText(childText);
         expListTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
-                String clickedChild = partnersUnderBusiness.get(expandingTitles.get(listPos)).get(expListPos);
-                Partner p = partnerMarkerClass.getPartnerByID(clickedChild);
-                mapFragment.moveCameraToPartner(p);
+                if(expandView.getVisibility() == View.GONE) {
+                    expandView.setVisibility(View.VISIBLE);
+                } else {
+                    expandView.setVisibility(View.GONE);
+                }
             }
         });
+
+        //Set hidden part of childView. It contains address TextView and locate to partner button.
+        TextView addressTextView = (TextView) expandView.findViewById(R.id.popup_address_text_view);
+        addressTextView.setText(partnerAddresses.get(childText));
+
+        ImageButton locateToPartnerButton = (ImageButton) expandView.findViewById(R.id.popup_locate_partner_button);
+        locateToPartnerButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                String clickedChild = partnersUnderBusiness.get(expandingTitles.get(listPos)).get(expListPos);
+                Partner p = partnerMarkerClass.getPartnerByID(clickedChild);
+                if(!checkBoxStates[listPos]) {           //If current field_of_business is filtered off, add current marker on map.
+                    List<Partner> templist = partnerMarkerClass.filterSinglePartner(p);
+                    mapFragment.filterPartners(templist);
+                }
+                MainActivity mAct = (MainActivity)mActivity;
+                mapFragment.moveCameraToPartner(p, mAct.getMActivityLayout().getPartnerListWindow());
+            }
+        });
+
         return convertView;
     }
 
@@ -143,12 +179,12 @@ public class PartnerPopupExpandableListAdapter extends BaseExpandableListAdapter
             @Override
             public void onClick(View view) {
                 if(checkBoxStates[listPos]){
-                    List<Partner> partnersToFilter = partnerMarkerClass.filterFieldOfBusiness(expandingTitles.get(listPos));
+                    List<Partner> partnersToFilter = partnerMarkerClass.filterFieldOfBusiness(expandingTitles.get(listPos), false);
                     mapFragment.filterPartners(partnersToFilter);
                     holder.cBox.setChecked(false);
                     checkBoxStates[listPos] = false;
                 } else {
-                    List<Partner> partnersToFilter = partnerMarkerClass.filterFieldOfBusiness(expandingTitles.get(listPos));
+                    List<Partner> partnersToFilter = partnerMarkerClass.filterFieldOfBusiness(expandingTitles.get(listPos), true);
                     mapFragment.filterPartners(partnersToFilter);
                     holder.cBox.setChecked(true);
                     checkBoxStates[listPos] = true;

@@ -14,6 +14,7 @@
     </string-array>
     <string name="actionbar_drawer_open">Open</string>
     <string name="actionbar_drawer_close">Close</string>
+    <string name="locate_button_description">Click to locate on map</string>
 
     <string name="header_profile_pic_text">Profile picture</string>
     <string name="header_profile_name">Not logged in</string>
