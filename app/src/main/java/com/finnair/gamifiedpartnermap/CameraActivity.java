@@ -1,11 +1,8 @@
 package com.finnair.gamifiedpartnermap;
 
+import android.app.Activity;
 import android.content.Context;
-import android.graphics.Camera;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -16,13 +13,12 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.util.Size;
 import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.TextureView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -31,12 +27,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends Activity {
 
-    //private SurfaceView surfaceView;
-    //private SurfaceHolder surfaceHolder;
+    // Setting up UI elements
     private TextureView previewTextureView;
     private TextureView.SurfaceTextureListener listener;
+    private ImageView topArrow;
+    private ImageView rightArrow;
+    private ImageView bottomArrow;
+    private ImageView leftArrow;
+    private ImageView[] arrows;
+
+    // Setting up camera related variables
     private CameraManager manager;
     private String cameraID;
     private CameraDevice device;
@@ -57,12 +59,18 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        /*surfaceView = findViewById(R.id.surfaceView);
-        surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.setFormat(PixelFormat.TRANSPARENT);
-        surfaceView.setZOrderOnTop(true);*/
+        // Setting up the arrows in the UI
+        topArrow    = findViewById(R.id.top_arrow);
+        rightArrow  = findViewById(R.id.right_arrow);
+        bottomArrow = findViewById(R.id.bottom_arrow);
+        leftArrow   = findViewById(R.id.left_arrow);
+        arrows =  new ImageView[]{topArrow, rightArrow, bottomArrow, leftArrow};
+
+
+
         // Setting up the listener for the texture view
         listener = new TextureView.SurfaceTextureListener() {
+            //int dir = -5;
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
                 // When the surface is available, try opening the camera
@@ -91,13 +99,17 @@ public class CameraActivity extends AppCompatActivity {
 
             @Override
             public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-                /*Canvas c =  surfaceHolder.lockCanvas();
-                Paint paint = new Paint();
-                paint.setARGB(0, 30,30, 30);
-                c.drawText("Finnair", 500, 500,paint);
-                surfaceHolder.unlockCanvasAndPost(c);*/
 
-            }
+               /* for(ImageView i : arrows){
+                    int alpha = (int) i.getImageAlpha();
+                    if(alpha < 100) dir = 5;
+                    else if (alpha > 250) dir = -5;
+                    i.setImageAlpha(alpha + dir);
+
+                }*/
+
+                }
+
         };
         previewTextureView = findViewById(R.id.previewTextureView);
         previewTextureView.setSurfaceTextureListener(listener);
