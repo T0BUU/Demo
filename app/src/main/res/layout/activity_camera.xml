@@ -8,8 +8,8 @@
 
     <TextureView
         android:id="@+id/previewTextureView"
-        android:layout_width="732dp"
-        android:layout_height="981dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 

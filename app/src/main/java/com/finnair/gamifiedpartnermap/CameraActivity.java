@@ -125,7 +125,7 @@ public class CameraActivity extends Activity {
             if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK) {
                 cameraID = camID;
                 StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-                previewSize = getPreferredSize(map.getOutputSizes(SurfaceTexture.class), width, height);
+                previewSize = getPreferredSize(map.getOutputSizes(SurfaceTexture.class), height, width);
                 break;
             }
         }
