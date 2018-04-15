@@ -95,7 +95,14 @@ public class MapsFragment extends Fragment {
     //These are used to get the users current userLocation.
     private LocationManager locationManager;
     private Criteria criteria;
-    private Location userLocation;
+    public Location userLocation;
+
+    private static double userLat;
+    private static double userLng;
+    private static double planeLat;
+    private static double planeLng;
+    private static double planeAlt;
+    public static ArrayList calc = new ArrayList(4);
 
     private GeofencingClient mGeofencingClient;
     private Geofence test;
@@ -246,6 +253,25 @@ public class MapsFragment extends Fragment {
                         if (planeMarkerClass.containsMarker(marker)) {
                             // User clicked an airplane
                             Plane plane = planeMarkerClass.getPlaneByID(marker.getTitle());
+
+                            if(plane.getGeoAltitude() == null){  // sometimes geoAltitude takes time to update, set it to 0 if null. That's usually good estimate.
+                                planeAlt = 0.0;
+                            }
+                            else {
+                                planeAlt = plane.getGeoAltitude();
+                            }
+
+                            calc.add(0, userLat = userLocation.getLatitude());  //Set all values to calulations.
+                            calc.add(1, userLng = userLocation.getLongitude());
+                            calc.add(2, planeLat = plane.getLatLng().latitude);
+                            calc.add(3, planeLng = plane.getLatLng().longitude);
+                            calc.add(4, planeAlt);
+
+                            Calculations calculations = new Calculations();
+                            calculations.getBearing();  // set bearing and angle
+
+
+
                             if (plane.isWithinReach(userLocation)) {
                                 Log.d("POOP", "You can collect this plane!");
 

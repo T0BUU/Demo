@@ -51,6 +51,8 @@ public class PartnerMarkerClass {
     private static final String TAG = PartnerMarkerClass.class.getSimpleName();
 
 
+
+
     public PartnerMarkerClass(Activity activity, GoogleMap mMap) {
 
         // Activity is for example MapsActivity
@@ -64,6 +66,7 @@ public class PartnerMarkerClass {
         this.screenHeight = size.y;
 
         readCollectedPartners(activity);
+
     }
 
     public void fetchFromFirebase(final ClusterManager clusterManager, final MarkerRenderer markerRenderer){

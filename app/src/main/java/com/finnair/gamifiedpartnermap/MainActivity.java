@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -29,6 +30,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.core.util.InternCache;
 import com.google.android.gms.maps.GoogleMap;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
@@ -51,6 +53,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
 
@@ -72,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
     SensorActivity sensorActivity;
 
+    public double azimuth;
+    public double pitch;
+    public double roll;
+
 
 
     //Constants.
@@ -84,6 +91,11 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
     private int CHALLENGE_LIMIT = 5;
     private ArrayList<Challenge> activeChallenges;
+
+    public static ArrayList<String> caughtPlanes = new ArrayList<String>(4);
+    public static ArrayList<String> caughtPartners = new ArrayList<String>(8);
+    public static HashMap<String, HashSet<String>> koneetHashMap = new HashMap<String, HashSet<String>>();
+    public static HashMap<String, HashSet<String>> partneritHashMap = new HashMap<String, HashSet<String>>();
 
 
     @Override
@@ -102,6 +114,17 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         if(sharedPreferences.contains("Access Token")){
             makeProfileRequest(sharedPreferences.getString("Access Token", ""));
         }
+
+        SensorManager sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+
+        azimuth = Calculations.bearing;
+        pitch = Calculations.angle;
+
+
+        sensorActivity = new SensorActivity(sensorManager,azimuth, pitch, roll);
+        sensorActivity.registerListeners();
+
 
         //TODO: Replace this with a call to firebase.
         InputStream is = getResources().openRawResource(R.raw.sample_challenges);
@@ -307,18 +330,28 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     }
 
     public void onPlaneCatch(Plane caughtPlane, Plane randomPlane) {
-        Intent intent = new Intent(this, CardSelectionActivity.class);
+        //Intent intent = new Intent(this, CardSelectionActivity.class);
 
-        ArrayList<String> caughtPlanes = new ArrayList<>();
+        //ArrayList<String> caughtPlanes = new ArrayList<>();
 
         caughtPlanes.add(caughtPlane.getPlaneType());
         caughtPlanes.add(caughtPlane.getOriginCountry());
         caughtPlanes.add(randomPlane.getPlaneType());
         caughtPlanes.add(randomPlane.getOriginCountry());
 
-        intent.putExtra(planesCaught, caughtPlanes);
-        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
-        intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
+        koneetHashMap.putAll(this.myMainLayout.getPlaneCollection());
+        partneritHashMap.putAll(this.myMainLayout.getPartnerCollection());
+
+        //intent.putExtra(planesCaught, caughtPlanes);
+        //intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+        //intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
+        catchPlane();
+        //startActivity(intent);
+        finish();
+    }
+
+    public void catchPlane(){
+        Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
         finish();
     }
@@ -326,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     public void onPartnerCatch(Partner caughtPartner, Partner randomPartner) {
         Intent intent = new Intent(this, CardSelectionActivity.class);
 
-        ArrayList<String> caughtPartners = new ArrayList<>();
+        //ArrayList<String> caughtPartners = new ArrayList<>();
 
         caughtPartners.add(caughtPartner.getFieldOfBusiness());
         caughtPartners.add(caughtPartner.getID());
@@ -338,9 +371,12 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         caughtPartners.add(randomPartner.getAddress());
         caughtPartners.add(randomPartner.getDescription());
 
-        intent.putExtra(partnersCaught, caughtPartners);
-        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
-        intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
+        koneetHashMap.putAll(this.myMainLayout.getPlaneCollection());
+        partneritHashMap.putAll(this.myMainLayout.getPartnerCollection());
+
+        //intent.putExtra(partnersCaught, caughtPartners);
+        //intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+        //intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
         startActivity(intent);
         finish();
     }

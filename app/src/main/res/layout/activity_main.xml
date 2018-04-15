@@ -24,7 +24,6 @@
 
             <!-- Content -->
 
-
             <FrameLayout
                 android:id="@+id/main_content"
                 android:layout_width="wrap_content"

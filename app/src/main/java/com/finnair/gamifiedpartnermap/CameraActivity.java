@@ -2,6 +2,7 @@ package com.finnair.gamifiedpartnermap;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
@@ -12,12 +13,16 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.os.Build;
 import android.support.annotation.NonNull;
 
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -26,8 +31,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class CameraActivity extends Activity {
+
+    public boolean plane_catched = false;
+    public static int rotaatio;
 
     // Setting up UI elements
     private TextureView previewTextureView;
@@ -71,6 +81,7 @@ public class CameraActivity extends Activity {
         // Setting up the listener for the texture view
         listener = new TextureView.SurfaceTextureListener() {
             //int dir = -5;
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
                 // When the surface is available, try opening the camera
@@ -114,9 +125,58 @@ public class CameraActivity extends Activity {
         previewTextureView = findViewById(R.id.previewTextureView);
         previewTextureView.setSurfaceTextureListener(listener);
 
+        Button catchplane = findViewById(R.id.catch_plane);
+        catchplane.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(CameraActivity.this, CardSelectionActivity.class);
+                startActivity(intent);
+                finish();
+
+            }
+        });
+
+
+
+
+
+        final Calculations calculations = new Calculations();
+
+        final Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+
+
+                hideTopArrow();
+                hideRightArrow();
+                //hideBottomArrow();
+                //hideLeftArrow();
+                showCatchButton();
+
+                if(Calculations.azimuthangle == true && Calculations.rollangle == true && plane_catched == true){
+                    timer.cancel();
+                    timer.purge();
+
+                }
+
+                calculations.azimuthAngle();
+                calculations.rollAngle();
+
+            }
+        },0,1);
+
 
     }
 
+
+
+
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void findCamera(int width, int height) throws CameraAccessException {
         manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         for (String camID : manager.getCameraIdList()) {
@@ -131,6 +191,7 @@ public class CameraActivity extends Activity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void openCamera(String cameraID) {
         try {
             // Prepare the state callback for use
@@ -172,6 +233,7 @@ public class CameraActivity extends Activity {
     /**
      * Creates a preview session that outputs the camera image continuously
      */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void createCameraPreviewSession() {
         try {
             // Setting up the surface and the surface texture.
@@ -212,6 +274,7 @@ public class CameraActivity extends Activity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private Size getPreferredSize(Size[] sizes, int width, int height) {
         List<Size> collectorSizes = new ArrayList<>();
         for (Size size : sizes) {
@@ -233,12 +296,14 @@ public class CameraActivity extends Activity {
         } else return sizes[0];
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void rotateImage(int width, int height) {
         if (previewSize == null || previewTextureView == null) {
             return;
         }
         Matrix matrix = new Matrix();
         int rotation = getWindowManager().getDefaultDisplay().getRotation();
+        rotaatio = rotation;
         RectF textureRectF = new RectF(0, 0, width, height);
         RectF previewRectF = new RectF(0, 0, previewSize.getHeight(), previewSize.getWidth());
         float centerX = textureRectF.centerX();
@@ -256,4 +321,208 @@ public class CameraActivity extends Activity {
 
         }
     }
+
+
+    void hideTopArrow(){
+
+        final ImageView image = (findViewById(R.id.top_arrow));
+        final ImageView image2 = (findViewById(R.id.bottom_arrow));
+
+        if (Calculations.rollangle == true){
+
+
+            image.setVisibility(View.INVISIBLE);
+            image2.setVisibility(View.INVISIBLE);
+
+
+        }
+
+
+        if(Calculations.showtoparrow == false && Calculations.showbottomrow == true && Calculations.rollangle == false) {
+
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    image.setVisibility(View.INVISIBLE);
+                    image2.setVisibility(View.VISIBLE);
+
+                }
+
+            });
+
+        }
+
+        if(Calculations.showtoparrow == true && Calculations.showbottomrow == false && Calculations.rollangle == false) {
+
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    image.setVisibility(View.VISIBLE);
+                    image2.setVisibility(View.INVISIBLE);
+
+                }
+
+            });
+
+        }
+
+
+    }
+
+
+    void hideRightArrow(){
+
+        final ImageView image = (findViewById(R.id.right_arrow));
+        final ImageView image2 = (findViewById(R.id.left_arrow));
+
+        if (Calculations.azimuthangle == true){
+
+
+            image.setVisibility(View.INVISIBLE);
+            image2.setVisibility(View.INVISIBLE);
+
+
+        }
+        if(Calculations.showrightarrow == true && Calculations.showleftarrow == false && Calculations.azimuthangle == false){
+
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    image.setVisibility(View.VISIBLE);
+                    image2.setVisibility(View.INVISIBLE);
+
+                }
+
+            });
+
+        }
+
+        if(Calculations.showrightarrow == false && Calculations.showleftarrow == true && Calculations.azimuthangle == false){
+
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    image.setVisibility(View.INVISIBLE);
+                    image2.setVisibility(View.VISIBLE);
+
+                }
+
+            });
+
+        }
+
+    }
+
+
+
+
+    void hideBottomArrow() {
+
+
+        final ImageView image = (findViewById(R.id.bottom_arrow));
+        final ImageView image2 = (findViewById(R.id.top_arrow));
+        if (Calculations.rollangle == true) {
+
+            image.setVisibility(View.INVISIBLE);
+
+
+        }
+
+        if(image.getVisibility() == View.VISIBLE){
+
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    image2.setVisibility(View.INVISIBLE);
+
+                }
+
+            });
+
+        }
+        if(image.getVisibility() == View.INVISIBLE && Calculations.rollangle != true){
+
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    image2.setVisibility(View.VISIBLE);
+
+                }
+
+            });
+
+        }
+
+    }
+
+    void hideLeftArrow() {
+
+
+        final ImageView image2 = (findViewById(R.id.left_arrow));
+        if (Calculations.azimuthangle == true && Calculations.showleftarrow == false) {
+
+            image2.setVisibility(View.INVISIBLE);
+
+
+        }
+
+        else{
+
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    image2.setVisibility(View.VISIBLE);
+
+                }
+
+            });
+
+        }
+
+    }
+
+    public void showCatchButton(){
+
+        final Button catch_plane = (findViewById(R.id.catch_plane));
+
+        if (Calculations.azimuthangle == true && Calculations.rollangle == true){
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    catch_plane.setVisibility(View.VISIBLE);
+                }
+            });
+
+
+
+        }
+
+        else{
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    catch_plane.setVisibility(View.GONE);
+
+                }
+            });
+        }
+
+    }
+
 }

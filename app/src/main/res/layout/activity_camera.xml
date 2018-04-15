@@ -51,4 +51,11 @@
         android:rotation="90"
         android:src="@android:drawable/arrow_down_float" />
 
+    <Button
+        android:id="@+id/catch_plane"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Catch Plane!" />
+
 </RelativeLayout>

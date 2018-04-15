@@ -102,22 +102,65 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
     private HashMap<String, HashSet<String>> planeCollectionHashMap;
     private HashMap<String, HashSet<String>> partnerCollectionHashMap;
 
+    public ArrayList<String> planes = new ArrayList<String>(4);
+    public ArrayList<String> partners = new ArrayList<String>(8);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if(MainActivity.caughtPlanes.size() > 0){
 
-        Intent intent = getIntent();
-        final ArrayList<String> planes = (ArrayList<String>) intent.getSerializableExtra(planesCaught);
-        final ArrayList<String> partners = (ArrayList<String>) intent.getSerializableExtra(partnersCaught);
+            String a = MainActivity.caughtPlanes.get(0);
+            String b = MainActivity.caughtPlanes.get(1);
+            String c = MainActivity.caughtPlanes.get(2);
+            String d = MainActivity.caughtPlanes.get(3);
 
-        planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
+            planes.add(0,a);
+            planes.add(1,b);
+            planes.add(2,c);
+            planes.add(3,d);
 
-        partnerCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePartners);
+        }
+
+        if(MainActivity.caughtPartners.size() > 0){
+
+            String e = MainActivity.caughtPartners.get(0);
+            String f = MainActivity.caughtPartners.get(1);
+            String g = MainActivity.caughtPartners.get(2);
+            String h = MainActivity.caughtPartners.get(3);
+            String i = MainActivity.caughtPartners.get(4);
+            String j = MainActivity.caughtPartners.get(5);
+            String k = MainActivity.caughtPartners.get(6);
+            String l = MainActivity.caughtPartners.get(7);
+
+            partners.add(0, e);
+            partners.add(1, f);
+            partners.add(2, g);
+            partners.add(3, h);
+            partners.add(4, i);
+            partners.add(5, j);
+            partners.add(6, k);
+            partners.add(7, l);
+
+        }
+
+
+        planeCollectionHashMap = MainActivity.koneetHashMap;
+        partnerCollectionHashMap = MainActivity.partneritHashMap;
+
+
+
+        //Intent intent = getIntent();
+        //final ArrayList<String> planes = (ArrayList<String>) intent.getSerializableExtra(planesCaught);
+        //final ArrayList<String> partners = (ArrayList<String>) intent.getSerializableExtra(partnersCaught);
+
+        //planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
+
+        //partnerCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePartners);
 
         Log.d("Collections: ", (planeCollectionHashMap == null) + " " + (partnerCollectionHashMap == null));
 
-        if (planes != null) {
+        if (planes.size() > 0) {
             setContentView(R.layout.plane_card_choose_layout);
             whichCaught = true;
             buildPlanePicking(planes);
