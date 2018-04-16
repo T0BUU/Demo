@@ -24,7 +24,10 @@ import android.os.MessageQueue;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
@@ -72,7 +75,22 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
     private static final int[] BUCKETS = {10, 20, 50, 100, 200, 500, 1000};
     private ShapeDrawable mColoredCircleBackground;
     private LayerDrawable planeClusterDrawable;
+    private MarkerModifier pulseMarkerModifier = new MarkerModifier();
+
     Context context;
+
+    public MarkerRenderer(Context context, GoogleMap map, ClusterManager<T> clusterManager, boolean planeCluster) {
+        this.planeCluster = planeCluster;
+        this.context = context;
+        mMap = map;
+        mAnimate = true;
+        mDensity = context.getResources().getDisplayMetrics().density;
+        mIconGenerator = new IconGenerator(context);
+        mIconGenerator.setContentView(makeSquareTextView(context));
+        mIconGenerator.setTextAppearance(R.style.amu_ClusterIcon_TextAppearance);
+        mIconGenerator.setBackground(makeClusterBackground());
+        mClusterManager = clusterManager;
+    }
 
     public void setMarkerImage(ClusterMarker clusterMarker){
         Marker marker = mMarkerCache.get( (T)clusterMarker);
@@ -80,30 +98,44 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
             marker.setIcon(clusterMarker.getIcon());
             marker.setAnchor(0.5f, 0.5f);
         }
-
     }
 
-
-    public void animateMarkerMovement(ClusterMarker clusterMarker, LatLng destination, Double heading){
+    public void animatePlaneFlight(ClusterMarker clusterMarker, LatLng destination, Double heading){
         clusterMarker.setHeading(heading);
         Marker marker = mMarkerCache.get((T)clusterMarker);
 
         if (marker != null){
             marker.setRotation(clusterMarker.getHeadingDegree().floatValue());
             final MarkerModifier markerModifier = new MarkerModifier();
-            markerModifier.animate(clusterMarker, clusterMarker.getLatLng(), destination);
+            markerModifier.animateFlight(clusterMarker, clusterMarker.getLatLng(), destination);
             markerModifier.mAnimationTasks.poll().perform();
         }
     }
 
+    public void animateMarkerPulse(ClusterMarker clusterMarker){
+        this.pulseMarkerModifier.animatePulse(clusterMarker);
+        this.pulseMarkerModifier.mAnimationTasks.poll().perform();
+    }
 
+    public void deleteZombieMarkers(ClusterMarker clusterMarker){
+        if (getMarker((T) clusterMarker) == null){
+            clusterMarker.setBonusMarkerEnabled(false);
+        } else{
+            clusterMarker.setBonusMarkerEnabled(true);
+        }
+    }
+
+    abstract private class AnyAnimationTask extends AnimatorListenerAdapter implements ValueAnimator.AnimatorUpdateListener{
+        public void perform(){}
+        public void deleteAnimation(){}
+    }
 
     /**
      * Animates a markerWithPosition from one position to another. TODO: improve performance for
      * slow devices (e.g. Nexus S).
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    private class AnimationTask extends AnimatorListenerAdapter implements ValueAnimator.AnimatorUpdateListener {
+    private class AnimationTask extends AnyAnimationTask {
         private final MarkerWithPosition markerWithPosition;
         private final Marker marker;
         private final LatLng from;
@@ -112,6 +144,7 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
         private MarkerManager mMarkerManager;
         private boolean flightAnimation = false;
 
+        // Animate clustering/de-clustering:
         private AnimationTask(MarkerWithPosition markerWithPosition, LatLng from, LatLng to) {
             this.markerWithPosition = markerWithPosition;
             this.marker = markerWithPosition.marker;
@@ -120,24 +153,29 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
             this.flightAnimation = false;
         }
 
+        // Animate FLIGHT:    (Animating the pulse effect is in its own class PlaneAnimationTask)
         private AnimationTask(ClusterMarker clusterMarker, LatLng from, LatLng to){
 
             this.marker = mMarkerCache.get((T)clusterMarker);
+
+            setMarkerImage(clusterMarker);
             this.markerWithPosition = new MarkerWithPosition(this.marker);
+
             this.from = from;
             this.to = to;
             this.flightAnimation = true;
         }
 
+        @Override
         public void perform() {
             ValueAnimator valueAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
-            valueAnimator.setInterpolator(ANIMATION_INTERP);
+
             if (flightAnimation) {
                 valueAnimator.setDuration(5 * 1000);
-                Log.d("POOP", "animated air planes");
+                valueAnimator.setInterpolator(FLIGHT_ANIMATION_INTERP);
             } else {
                 valueAnimator.setDuration(300);
-                Log.d("POOP", "animated partners");
+                valueAnimator.setInterpolator(ANIMATION_INTERP);
             }
             valueAnimator.addUpdateListener(this);
             valueAnimator.addListener(this);
@@ -147,11 +185,19 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
         @Override
         public void onAnimationEnd(Animator animation) {
             if (mRemoveOnComplete) {
+
+                ClusterMarker clusterMarker = getClusterItem(marker);
+                if (clusterMarker != null) {clusterMarker.setBonusMarkerEnabled(false);}
+
                 Cluster<T> cluster = mMarkerToCluster.get(marker);
                 mClusterToMarker.remove(cluster);
                 mMarkerCache.remove(marker);
                 mMarkerToCluster.remove(marker);
                 mMarkerManager.remove(marker);
+
+            } else{
+                ClusterMarker clusterMarker = getClusterItem(marker);
+                if (clusterMarker != null) {clusterMarker.setBonusMarkerEnabled(true);}
             }
 
             ClusterMarker clusterMarker = getClusterItem(marker);
@@ -159,9 +205,14 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
                 clusterMarker.setPosition(marker.getPosition());
             }
             markerWithPosition.position = to;
+
+            if (clusterMarker != null) {
+                clusterMarker.setPosition(marker.getPosition());
+            }
+            markerWithPosition.position = to;
         }
 
-        public void removeOnAnimationComplete(MarkerManager markerManager) {
+        private void removeOnAnimationComplete(MarkerManager markerManager) {
             mMarkerManager = markerManager;
             mRemoveOnComplete = true;
         }
@@ -173,15 +224,62 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
             double lngDelta = to.longitude - from.longitude;
 
             // Take the shortest path across the 180th meridian.
-            if (Math.abs(lngDelta) > 180) {
-                lngDelta -= Math.signum(lngDelta) * 360;
-            }
+            if (Math.abs(lngDelta) > 180) { lngDelta -= Math.signum(lngDelta) * 360; }
+
             double lng = lngDelta * fraction + from.longitude;
             LatLng position = new LatLng(lat, lng);
             marker.setPosition(position);
+
+            ClusterMarker clusterMarker = getClusterItem(marker);
+            if (clusterMarker != null) {
+                clusterMarker.moveBonusMarker(position);
+            }
         }
     }
 
+
+    /**
+     * Animates a markerWithPosition from one position to another. TODO: improve performance for
+     * slow devices (e.g. Nexus S).
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    private class PulseAnimationTask extends AnyAnimationTask {
+        private final Marker marker;
+        private ValueAnimator valueAnimator;
+        private Plane plane;
+
+        // Animate clustering/de-clustering:
+        private PulseAnimationTask(Plane plane) {
+            this.marker = mMarkerCache.get((T)plane);
+            this.plane = plane;
+            this.plane.setStatusDistanceClose(true);
+            this.plane.setMarkerImage();
+            setMarkerImage(this.plane);
+        }
+
+        @Override
+        public void perform() {
+            valueAnimator = ValueAnimator.ofFloat(0.5f, 1.0f);
+            valueAnimator.setInterpolator(PULSE_ANIMATION_INTERP);
+            valueAnimator.setDuration(3000); // 2 sec per animation
+            valueAnimator.setRepeatCount(4); // 5 (1 + 4) animations
+            valueAnimator.addUpdateListener(this);
+            valueAnimator.addListener(this);
+            valueAnimator.start();
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+            float fraction = valueAnimator.getAnimatedFraction();
+            if (marker != null)
+                marker.setAlpha(fraction);
+        }
+    }
 
 
 
@@ -201,7 +299,10 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
         private Queue<CreateMarkerTask> mOnScreenCreateMarkerTasks = new LinkedList<CreateMarkerTask>();
         private Queue<Marker> mRemoveMarkerTasks = new LinkedList<Marker>();
         private Queue<Marker> mOnScreenRemoveMarkerTasks = new LinkedList<Marker>();
-        public Queue<AnimationTask> mAnimationTasks = new LinkedList<AnimationTask>();
+        public Queue<AnyAnimationTask> mAnimationTasks = new LinkedList<AnyAnimationTask>();
+
+        private ConcurrentHashMap<ClusterMarker, PulseAnimationTask> pulseAnimationHashMap;
+
 
         /**
          * Whether the idle listener has been added to the UI thread's MessageQueue.
@@ -210,6 +311,7 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
 
         private MarkerModifier() {
             super(Looper.getMainLooper());
+            this.pulseAnimationHashMap = new ConcurrentHashMap<>();
         }
 
         /**
@@ -258,11 +360,25 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
             lock.unlock();
         }
 
-        public void animate(ClusterMarker clusterMarker, LatLng from, LatLng to) {
+        public void animateFlight(ClusterMarker clusterMarker, LatLng from, LatLng to) {
             lock.lock();
             mAnimationTasks.add(new AnimationTask(clusterMarker, from, to));
             lock.unlock();
         }
+
+        public void animatePulse(ClusterMarker clusterMarker){
+            lock.lock();
+
+            while(mAnimationTasks.contains(pulseAnimationHashMap.get(clusterMarker))){
+                mAnimationTasks.remove( pulseAnimationHashMap.get(clusterMarker) ); // Remove old if it existed so that the linked list won't end up with several
+            }
+
+            pulseAnimationHashMap.put(clusterMarker, new PulseAnimationTask((Plane)clusterMarker));
+            mAnimationTasks.add( pulseAnimationHashMap.get(clusterMarker) );
+            lock.unlock();
+        }
+
+
 
         /**
          * Animates a markerWithPosition some time in the future, and removes it when the animation
@@ -274,6 +390,7 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
          */
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         public void animateThenRemove(MarkerWithPosition marker, LatLng from, LatLng to) {
+
             lock.lock();
             AnimationTask animationTask = new AnimationTask(marker, from, to);
             animationTask.removeOnAnimationComplete(mClusterManager.getMarkerManager());
@@ -334,6 +451,10 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
         }
 
         private void removeMarker(Marker m) {
+
+            ClusterMarker clusterMarker = getClusterItem(m);
+            if (clusterMarker != null) {clusterMarker.setBonusMarkerEnabled(false);}
+
             Cluster<T> cluster = mMarkerToCluster.get(m);
             mClusterToMarker.remove(cluster);
             mMarkerCache.remove(m);
@@ -388,6 +509,11 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
 
 
 
+
+
+
+
+
     /**
      * Markers that are currently on the map.
      */
@@ -433,19 +559,7 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
     private ClusterManager.OnClusterItemInfoWindowClickListener<T> mItemInfoWindowClickListener;
 
 
-    public MarkerRenderer(Context context, GoogleMap map, ClusterManager<T> clusterManager, boolean planeCluster) {
-        this.planeCluster = planeCluster;
-        this.context = context;
-        mMap = map;
-        mAnimate = true;
-        mDensity = context.getResources().getDisplayMetrics().density;
-        mIconGenerator = new IconGenerator(context);
-        mIconGenerator.setContentView(makeSquareTextView(context));
-        mIconGenerator.setTextAppearance(R.style.amu_ClusterIcon_TextAppearance);
-        mIconGenerator.setBackground(makeClusterBackground());
-        mClusterManager = clusterManager;
 
-    }
 
     @Override
     public void onAdd() {
@@ -747,11 +861,14 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
                 }
             }
 
+
             // Remove the old markers, animating them into clusters if zooming out.
             for (final MarkerWithPosition marker : markersToRemove) {
+
                 boolean onScreen = visibleBounds.contains(marker.position);
                 // Don't animate when zooming out more than 3 zoom levels.
                 // TODO: drop animation based on speed of device & number of markers to animate.
+
                 if (!zoomingIn && zoomDelta > -3 && onScreen && SHOULD_ANIMATE) {
                     final Point point = mSphericalMercatorProjection.toPoint(marker.position);
                     final Point closest = findClosestCluster(newClustersOnScreen, point);
@@ -1047,6 +1164,7 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
     }
 
     private static final TimeInterpolator ANIMATION_INTERP = new DecelerateInterpolator();
-
+    private static final TimeInterpolator FLIGHT_ANIMATION_INTERP = new LinearInterpolator();
+    private static final TimeInterpolator PULSE_ANIMATION_INTERP = new AccelerateDecelerateInterpolator();
 
 }

@@ -16,25 +16,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import org.apache.http.io.SessionOutputBuffer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Calendar;
-
-
 
 
 public class PartnerMarkerClass {
@@ -201,6 +191,9 @@ public class PartnerMarkerClass {
         newPartner.setID(companyName);
         newPartner.setMarkerOptions();
         newPartner.setMarkerImage(screenWidth);
+        newPartner.setBonusMarker(mMap);
+        newPartner.setBonusMarkerEnabled(true);
+        newPartner.setBonusMarkerVisible(true);
 
         for (Challenge c : challenges) {
             if (c == null) break;
@@ -224,7 +217,6 @@ public class PartnerMarkerClass {
     //Getter for partnerHashMap.
     public ConcurrentHashMap<String, Partner> getPartnerHashMap() {
         if (partnerHashMap == null) {
-            System.out.println("!!!!partnerHashMap was null!!!!");
             return null;
         } else {
             return this.partnerHashMap;

@@ -16,18 +16,15 @@ public class Partner extends ClusterMarker {
     private String fieldOfBusiness;
     private String address;
 
-
     public Partner(Activity activity){
         super(activity);
         setCircleRadius(250);
     }
 
-
-
     public void setMarkerImage(Integer screenWidth){
 
         Bitmap bitmap = BitmapFactory.decodeResource(this.activity.getResources(), chooseMarkerImage(this.fieldOfBusiness)); //
-        Bitmap smallBitmap = scaleDown(bitmap, screenWidth / 8);
+        Bitmap smallBitmap = scaleDown(bitmap, screenWidth / 12);
         BitmapDescriptor bitmapIcon = BitmapDescriptorFactory.fromBitmap( smallBitmap );
 
         setMarkerImage(bitmapIcon);
