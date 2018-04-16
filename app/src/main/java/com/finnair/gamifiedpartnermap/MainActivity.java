@@ -96,8 +96,11 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     final static String activeChallengesMessage = "com.finnair.gamifiedpartnermap.activeChallengesMessage";
     final static String relatedChallengesToPlanes = "com.finnair.gamifiedpartnermap.relatedChallengesPlanes";
     final static String relatedChallengesToPartners = "com.finnair.gamifiedpartnermap.relatedChallengesPartners";
+    final static String isLoggedInMessage = "com.finnair.gamifiedpartnermap.isLoggedIn";
+    final static String goToCollectionMessage = "com.finnair.gamifiedpartnermap.goToCollection";
 
     private int CHALLENGE_LIMIT = 5;
+    private boolean isLoggedIn = false;
     private ArrayList<Challenge> activeChallenges;
 
 
@@ -402,6 +405,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
         Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
 
+        isLoggedIn = false;
+
         // Remove the token from memory
         SharedPreferences sp = getApplicationContext().getSharedPreferences("Auth", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -483,6 +488,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             pointsBox.setVisibility(View.VISIBLE);
             profileLevel.setVisibility(View.VISIBLE);
             login.setText(getString(R.string.button_logout));
+
+            isLoggedIn = true;
         } catch (JSONException e) {
             // If the field 'id' not available in the response, the token is invalid, e.g. expired
             SharedPreferences sp = getApplicationContext().getSharedPreferences("Auth", Context.MODE_PRIVATE);
@@ -497,13 +504,17 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
     public void onCardButtonClick(View v) {
 
-                Intent intent = new Intent(this, PlaneCollectionActivity.class);
-                intent.putExtra(whichWasCaughtMessage, true);
-                intent.putExtra(catchMessagePartners,  this.myMainLayout.getPartnerCollection());
-                intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
-                startActivity(intent);
-                finish();
+        openCardCollection(true);
 
+    }
+
+    private void openCardCollection(Boolean tab) {
+        Intent intent = new Intent(this, PlaneCollectionActivity.class);
+        intent.putExtra(whichWasCaughtMessage, tab);
+        intent.putExtra(catchMessagePartners,  this.myMainLayout.getPartnerCollection());
+        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+        intent.putExtra(isLoggedInMessage, this.isLoggedIn);
+        startActivity(intent);
     }
 
     public void onPlaneCatch(Plane caughtPlane, Plane randomPlane) {
@@ -522,8 +533,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         intent.putExtra(planesCaught, caughtPlanes);
         intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
         intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
-        startActivity(intent);
-        finish();
+        startActivityForResult(intent, 12);
+
     }
 
     public void onPartnerCatch(Partner caughtPartner, Partner randomPartner) {
@@ -547,8 +558,25 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         intent.putExtra(partnersCaught, caughtPartners);
         intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
         intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
-        startActivity(intent);
-        finish();
+        startActivityForResult(intent, 12);
+
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 12) {
+            myMainLayout.refreshPartnerCollection();
+            myMainLayout.refreshPlaneCollection();
+
+            if(resultCode == RESULT_OK) {
+                Boolean goToCollection = data.getBooleanExtra(goToCollectionMessage, false);
+
+                if (goToCollection) {
+                    openCardCollection(data.getBooleanExtra(whichWasCaughtMessage, true));
+                }
+            }
+            else {}
+        }
     }
 
     @Override

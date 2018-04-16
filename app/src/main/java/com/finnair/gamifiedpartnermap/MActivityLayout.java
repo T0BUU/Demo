@@ -317,8 +317,16 @@ public class MActivityLayout implements View.OnClickListener {
         return mapFragment.getPlaneCollection();
     }
 
+    public void refreshPlaneCollection() {
+        mapFragment.refreshPlaneCollection();
+    }
+
     public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
         return mapFragment.getPartnerCollection();
+    }
+
+    public void refreshPartnerCollection() {
+        mapFragment.refreshPartnerCollection();
     }
 
     public Pair<ArrayList<Plane>, ArrayList<Partner>> getRandomRewards(int amount) {

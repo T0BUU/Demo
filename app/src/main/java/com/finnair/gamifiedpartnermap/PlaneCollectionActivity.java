@@ -22,29 +22,37 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Random;
 
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
+import static com.finnair.gamifiedpartnermap.MainActivity.isLoggedInMessage;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.BASIC;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.GOLD;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.LUMO;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.PLATINUM;
 import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.SILVER;
-import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION_PLANES;
 
 
 /**
@@ -59,7 +67,10 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
     private HashMap<String, HashSet<String>> partnerCollectionHashMap;
     private HashMap<String, PlaneCatchFragment.CardLevel> cardLevelHashMap = new HashMap<>();
     private String USER_DATA_LOCATION_CARD_LEVELS = "myCardLevels";
+    private ArrayList<Reward> availableRewards;
+    private Random generator = new Random();
     private TabLayout collectionTabs;
+    private boolean isLoggedIn;
     static
     {
         List<String> PLANE_TYPES = Arrays.asList("AIRBUS A350-900", "AIRBUS A330-300",
@@ -98,13 +109,19 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plane_collection_layout);
 
+        readRewards();
+
         Intent intent = getIntent();
         planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
+
+        isLoggedIn = intent.getBooleanExtra(isLoggedInMessage, false);
 
         Log.d("Collection", "" + (planeCollectionHashMap.size()));
 
@@ -159,6 +176,53 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
     }
 
+    private void readRewards() {
+        //TODO: Replace this with a call to firebase.
+        InputStream is = getResources().openRawResource(R.raw.sample_prizes);
+        Writer writer = new StringWriter();
+        char[] buffer = new char[1024];
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        JSONArray json = null;
+
+        try {
+            json = new JSONArray(writer.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        availableRewards = new ArrayList<>();
+
+        for (int i = 0; i < json.length(); ++i) {
+            Log.d("Constructing rewards", "" + i);
+            try {
+                    Log.d("Current json obj", json.get(i).toString());
+                    Reward current = new Reward((JSONObject) json.get(i));
+                    availableRewards.add(current);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
 
     void populatePlanes(LinearLayout baseLayout, LayoutInflater inflater) {
         for (String planeType : planeCollectionHashMap.keySet()) {
@@ -189,19 +253,6 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             baseLayout.addView(row);
         }
     }
-
-    /*private PlaneCatchFragment.CardLevel getCardLevel(int progress) {
-
-        if (progress > 166) return LUMO;
-
-        else if( progress > 66 ) return PLATINUM;
-
-        else if ( progress > 16 ) return GOLD;
-
-        else if ( progress > 6 ) return SILVER;
-
-        else return BASIC;
-    }*/
 
     private PlaneCatchFragment.CardLevel getCardLevel(String key) {
 
@@ -327,8 +378,6 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
             ConstraintLayout card = (ConstraintLayout) inflater.inflate(R.layout.collection_row_layout, row, false);
 
-            ((TextView) card.findViewById(R.id.challenge_description)).setText("LOCATIONS COLLECTED");
-
             setBorderColor(card, cardLevel);
 
             TextView name = (TextView) card.findViewById(R.id.plane_model_text);
@@ -349,30 +398,41 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         }
     }
 
+    public void redeemReward(TextView v) {
+
+        ConstraintLayout parentLayout = (ConstraintLayout) v.getParent().getParent();
+        String key = "" + ((TextView) parentLayout.findViewById(R.id.plane_model_text)).getText();
+        PlaneCatchFragment.CardLevel currentLevel = levelUpCard(key);
+
+        setBorderColor(parentLayout, currentLevel);
+
+        int amountCollected;
+
+        if (collectionTabs.getSelectedTabPosition() == 0) {
+            amountCollected = planeCollectionHashMap.get(key).size();
+        }
+        else {
+            amountCollected = partnerCollectionHashMap.get(key).size();
+        }
+
+        TextView collectedOutOf = (TextView) parentLayout.findViewById(R.id.routes_collected_counter);
+        TextView infoText = (TextView) parentLayout.findViewById(R.id.collection_info_text);
+        ProgressBar collectedProgress = (ProgressBar) parentLayout.findViewById(R.id.challenge_collected_progress);
+        setCollectedText(collectedOutOf, collectedProgress, amountCollected, currentLevel, v);
+
+    }
+
 
     public void onInfoClick(View v) {
         TextView view = (TextView) v;
 
         if (view.getText().toString().equals(getString(R.string.collection_level_up_info))) {
-            ConstraintLayout parentLayout = (ConstraintLayout) v.getParent().getParent();
-            String key = "" + ((TextView) parentLayout.findViewById(R.id.plane_model_text)).getText();
-            PlaneCatchFragment.CardLevel currentLevel = levelUpCard(key);
+            Reward randomReward = availableRewards.get(generator.nextInt(availableRewards.size()));
 
-            setBorderColor(parentLayout, currentLevel);
+            RewardFragment rewardFragment = new RewardFragment();
+            rewardFragment.show(this.getFragmentManager().beginTransaction(), "Show reward");
 
-            int amountCollected;
-
-            if (collectionTabs.getSelectedTabPosition() == 0) {
-                amountCollected = planeCollectionHashMap.get(key).size();
-            }
-            else {
-                amountCollected = partnerCollectionHashMap.get(key).size();
-            }
-
-            TextView collectedOutOf = (TextView) parentLayout.findViewById(R.id.routes_collected_counter);
-            TextView infoText = (TextView) parentLayout.findViewById(R.id.collection_info_text);
-            ProgressBar collectedProgress = (ProgressBar) parentLayout.findViewById(R.id.challenge_collected_progress);
-            setCollectedText(collectedOutOf, collectedProgress, amountCollected, currentLevel, view);
+            rewardFragment.setAllFragmentData(randomReward.getDescription(), randomReward.getType(), randomReward.getImage(), randomReward.getAmount(), isLoggedIn, v);
 
             return;
         }

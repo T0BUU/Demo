@@ -35,6 +35,7 @@ import java.util.List;
 import static com.finnair.gamifiedpartnermap.MainActivity.activeChallengesMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
+import static com.finnair.gamifiedpartnermap.MainActivity.goToCollectionMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.partnersCaught;
 import static com.finnair.gamifiedpartnermap.MainActivity.planesCaught;
 import static com.finnair.gamifiedpartnermap.MainActivity.relatedChallengesToCaught;
@@ -242,26 +243,33 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
        savePartners(this);
        saveChallenges(this);
 
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(whichWasCaughtMessage, whichCaught);
+
         switch (v.getId()) {
             case upper: {
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                intent.putExtra(goToCollectionMessage, false);
                 break;
             }
             case lower: {
-                Intent intent = new Intent(this, PlaneCollectionActivity.class);
-                intent.putExtra(whichWasCaughtMessage, whichCaught);
-                intent.putExtra(catchMessagePartners, partnerCollectionHashMap);
-                intent.putExtra(catchMessagePlanes, planeCollectionHashMap);
-                startActivity(intent);
-                finish();
+                intent.putExtra(goToCollectionMessage, true);
                 break;
             }
             default: {
                 Log.d("Card button click", "Something went wrong!");
             }
         }
+
+        setResult(Activity.RESULT_OK, intent);
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent data = new Intent();
+        // add data to Intent
+        setResult(Activity.RESULT_CANCELED, data);
+        super.onBackPressed();
     }
 
     @Override
