@@ -1,5 +1,6 @@
 package com.finnair.gamifiedpartnermap;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,10 +32,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.finnair.gamifiedpartnermap.MainActivity.activeChallengesMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
 import static com.finnair.gamifiedpartnermap.MainActivity.partnersCaught;
 import static com.finnair.gamifiedpartnermap.MainActivity.planesCaught;
+import static com.finnair.gamifiedpartnermap.MainActivity.relatedChallengesToCaught;
+import static com.finnair.gamifiedpartnermap.MainActivity.relatedChallengesToRandom;
 import static com.finnair.gamifiedpartnermap.PartnerMarkerClass.USER_DATA_LOCATION_PARTNERS;
 import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION_PLANES;
 
@@ -40,44 +46,9 @@ import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION
  * Created by huzla on 1.3.2018.
  */
 
-public class CardSelectionActivity extends AppCompatActivity implements PlaneCatchFragment.PlaneCatchListener {
+public class CardSelectionActivity extends CollectionSavingActivity implements PlaneCatchFragment.PlaneCatchListener {
 
-    private static final HashMap<String, Integer> modelsToImages;
-    static
-    {
-        List<String> PLANE_TYPES = Arrays.asList("AIRBUS A350-900", "AIRBUS A330-300",
-                "AIRBUS A321", "AIRBUS A321-231",
-                "AIRBUS A320", "AIRBUS A319",
-                "EMBRAER 190", "ATR 72-212A");
 
-        List<Integer> PLANE_IMAGES = Arrays.asList(R.drawable.a350_900, R.drawable.a330_300,
-                R.drawable.a321, R.drawable.a321_sharklet, R.drawable.a320,
-                R.drawable.a319, R.drawable.embraer_190, R.drawable.x350x113_norra);
-
-        modelsToImages = new HashMap<String, Integer>();
-
-        for (int i = 0; i < PLANE_TYPES.size(); ++i) {
-            modelsToImages.put(PLANE_TYPES.get(i), PLANE_IMAGES.get(i));
-        }
-
-    }
-
-    private int matchCategoryToImage(String category) {
-        switch (category) {
-            case "Restaurant": return R.drawable.ic_restaurants;
-            case "Car rental": return R.drawable.ic_car_rental;
-            case "Charity": return R.drawable.ic_charity;
-            case "Entertainment": return R.drawable.ic_entertainment;
-            case "Finance and insurance": return R.drawable.ic_finance;
-            case "Helsinki Airport": return R.drawable.ic_helsinki_vantaa;
-            case "Golf and leisure time": return R.drawable.ic_hobbies;
-            case "Hotel": return R.drawable.ic_hotels_spas;
-            case "Shopping": return R.drawable.ic_shopping;
-            case "Tour operators and cruise lines": return R.drawable.ic_travel;
-            case "Services and Wellness": return R.drawable.ic_services_healthcare;
-            default: return  R.raw.aalto_logo;
-        }
-    }
 
 
     public static String whichWasCaughtMessage = "com.finnair.gamifiedpartnermap.whichCaught";
@@ -99,8 +70,8 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
     private String randomPartnerAddress;
     private String randomPartnerDescript;
 
-    private HashMap<String, HashSet<String>> planeCollectionHashMap;
-    private HashMap<String, HashSet<String>> partnerCollectionHashMap;
+    private ArrayList<Challenge> relatedChallengesCaught;
+    private ArrayList<Challenge> relatedChallengesRandom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +81,14 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
         Intent intent = getIntent();
         final ArrayList<String> planes = (ArrayList<String>) intent.getSerializableExtra(planesCaught);
         final ArrayList<String> partners = (ArrayList<String>) intent.getSerializableExtra(partnersCaught);
+
+        relatedChallengesCaught =  intent.getParcelableArrayListExtra(relatedChallengesToCaught);
+        relatedChallengesRandom = intent.getParcelableArrayListExtra(relatedChallengesToRandom);
+        activeChallenges = intent.getParcelableArrayListExtra(activeChallengesMessage);
+
+        for (Challenge c : activeChallenges) {
+            Log.d("Building", "" + c.getPartnerFields() + " " + c.getPartnerNames() + " " + c.getPlaneDestinations() + " " + c.getPlaneModels());
+        }
 
         planeCollectionHashMap = (HashMap<String, HashSet<String>>) intent.getSerializableExtra(catchMessagePlanes);
 
@@ -154,10 +133,15 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
             public void onClick(View v) {
                 savePlane(caughtPlaneType, caughtCountry);
 
+                for (Challenge challenge : relatedChallengesCaught ) {
+                    activeChallenges.get(challenge.getIndex()).incrementProgress();
+                }
+
+
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(caughtPlaneType,caughtCountry, modelsToImages.get(caughtPlaneType));
+                caught.setAllFragmentData(caughtPlaneType,caughtCountry, modelsToImages.get(caughtPlaneType), 1);
                 Log.d("POOP", "TEST");
 
 
@@ -169,10 +153,15 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
             @Override
             public void onClick(View v) {
                 savePlane(randomPlaneType, randomCountry);
+
+                for (Challenge challenge : relatedChallengesRandom ) {
+                    activeChallenges.get(challenge.getIndex()).incrementProgress();
+                }
+
                 PlaneCatchFragment caught = new PlaneCatchFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught plane");
-                caught.setAllFragmentData(randomPlaneType, randomCountry,  modelsToImages.get(randomPlaneType));
+                caught.setAllFragmentData(randomPlaneType, randomCountry,  modelsToImages.get(randomPlaneType), 1);
                 Log.d("POOP", "TEST");
             }
         });
@@ -204,12 +193,17 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                 String currentTime = getCurrentTimeStamp();
                 savePartner(caughtPartnerField, caughtPartnerID, currentTime);
 
+                for (Challenge challenge : relatedChallengesCaught ) {
+                    activeChallenges.get(challenge.getIndex()).incrementProgress();
+                }
+
+
                 PartnerInfoFragment caught = new PartnerInfoFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
                 String partnerInfo = String.format("%s\t%s, %s", currentTime, caughtPartnerID, caughtPartnerAddress);
 
-                caught.setAllFragmentData(partnerInfo, caughtPartnerField, matchCategoryToImage(caughtPartnerField));
+                caught.setAllFragmentData(partnerInfo, caughtPartnerField, matchCategoryToImage(caughtPartnerField), 1);
                 Log.d("POOP", "TEST");
 
 
@@ -222,6 +216,10 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
             public void onClick(View v) {
                String currentTime = getCurrentTimeStamp();
 
+                for (Challenge challenge : relatedChallengesRandom ) {
+                    activeChallenges.get(challenge.getIndex()).incrementProgress();
+                }
+
                 savePartner(randomPartnerField, randomPartnerID, currentTime);
 
                 PartnerInfoFragment caught = new PartnerInfoFragment();
@@ -229,18 +227,12 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
                 String partnerInfo = String.format("%s\t%s, %s", currentTime, randomPartnerID, randomPartnerAddress);
 
-                caught.setAllFragmentData(partnerInfo, randomPartnerField, matchCategoryToImage(randomPartnerField));
+                caught.setAllFragmentData(partnerInfo, randomPartnerField, matchCategoryToImage(randomPartnerField), 1);
                 Log.d("POOP", "TEST");
             }
         });
     }
 
-    public static String getCurrentTimeStamp() {
-        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
-        Date now = new Date();
-        String strDate = sdfDate.format(now);
-        return strDate;
-    }
 
     public void onCardButtonClick(View v) {
         final int upper = R.id.card_button_upper;
@@ -248,6 +240,7 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
 
        savePlanes(this);
        savePartners(this);
+       saveChallenges(this);
 
         switch (v.getId()) {
             case upper: {
@@ -269,104 +262,6 @@ public class CardSelectionActivity extends AppCompatActivity implements PlaneCat
                 Log.d("Card button click", "Something went wrong!");
             }
         }
-    }
-
-    public void savePlane(String planeType, String country) {
-
-        try {
-            planeCollectionHashMap.get(planeType).add(country);
-        }
-        catch (java.lang.NullPointerException nil) {
-            HashSet<String> addMe = new HashSet<>();
-            addMe.add(country);
-
-            planeCollectionHashMap.put(planeType, addMe);
-        }
-
-        Log.d("Plane saving: ", planeCollectionHashMap.toString());
-
-    }
-
-    public void savePartner(String field, String name, String time){
-        // All apps (root or not) have a default data directory, which is /data/data/<package_name>
-
-        try {
-            partnerCollectionHashMap.get(field).add(String.format("%s %s", time, name));
-        }
-        catch (java.lang.NullPointerException nil) {
-            HashSet<String> addMe = new HashSet<>();
-            addMe.add(String.format("%s %s", time, name));
-
-            partnerCollectionHashMap.put(field, addMe);
-        }
-
-        Log.d("Partner saving: ", partnerCollectionHashMap.toString());
-    }
-
-    private String formatPlanes() {
-        String result = "";
-
-        for (String planeType : planeCollectionHashMap.keySet()) {
-            Iterator<String> row = planeCollectionHashMap.get(planeType).iterator();
-
-            result += planeType;
-
-            while (row.hasNext()) {
-                result += String.format("#%s", row.next());
-            }
-
-            result += "\n";
-
-        }
-        return result;
-    }
-
-    private String formatPartners() {
-        String result = "";
-
-        for (String  category : partnerCollectionHashMap.keySet()) {
-            Iterator<String> row = partnerCollectionHashMap.get(category).iterator();
-
-            result += category;
-
-            while (row.hasNext()) {
-                result += String.format("#%s", row.next());
-            }
-
-            result += "\n";
-
-        }
-        return result;
-    }
-
-    public void savePlanes(Context context){
-
-        String result = formatPlanes();
-
-        try {
-            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION_PLANES, Context.MODE_PRIVATE);
-            outputStream.write(result.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Log.d("Plane Saving", result);
-    }
-
-    public void savePartners(Context context){
-
-        String result = formatPartners();
-
-        try {
-            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION_PARTNERS, Context.MODE_PRIVATE);
-            outputStream.write(result.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Log.d("Partner Saving", result);
     }
 
     @Override

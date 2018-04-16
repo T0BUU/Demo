@@ -24,15 +24,23 @@
     <string name="toolbar_partners_text">Partners</string>
 
     <string name="drawer_points_image_description">Points logo here</string>
-    <string name="drawer_points_text">Points</string>
-    <string name="dwawer_cards_image_description">Cards image here</string>
+    <string name="drawer_points_amount">20,000</string>
+    <string name="drawer_points_text">Finnair Plus Points</string>
+    <string name="drawer_not_logged_in_registration_message">Not yet A Finnair Plus Member?\nJoin now and get instant access to valuable benefits – for free!</string>
+    <string name="drawer_not_logged_in_registration_button">Join Finnair Plus \t\t ></string>
+    <string name="drawer_collection_button">Go to collection \t\t></string>
+    <string name="drawer_active_challenges_button">View Active Challenges \t\t ></string>
+    <string name="drawer_active_challenges_list_go_back_button">&lt; \t\t Go back</string>
+    <string name="drawer_cards_image_description">Cards image here</string>
     <string name="drawer_cards_text">Cards</string>
     <string name="drawer_settings_button_text">Settings button here</string>
 
 
+
     <string name="collection_progress_bar_text">ROUTES COLLECTED</string>
     <string name="collection_more_info"><u>View details</u></string>
+    <string name="collection_level_up_info"><b><u>COLLECT REWARD AND LEVEL UP!</u></b></string>
 
-    <string name="button_login">Login</string>
-    <string name="button_logout">Logout</string>
+    <string name="button_login">Login \t\t ></string>
+    <string name="button_logout">Logout \t\t ></string>
 </resources>

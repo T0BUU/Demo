@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:drawable/picture_frame"
+        android:foreground="@drawable/challenge_item_foreground"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingEnd="5dp"
+        android:paddingStart="5dp"
+        tools:layout_editor_absoluteX="30dp"
+        tools:layout_editor_absoluteY="30dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imageView6"
+                android:layout_width="20sp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:tint="@color/common_google_signin_btn_text_light_focused"
+                android:tintMode="src_in"
+                app:srcCompat="@drawable/f_emblem_blue" />
+
+            <Space
+                android:layout_width="20sp"
+                android:layout_height="wrap_content"
+                android:layout_weight="10" />
+
+            <ImageButton
+                android:id="@+id/challenge_cancel"
+                android:layout_width="10sp"
+                android:layout_height="10sp"
+                android:layout_marginEnd="5sp"
+                android:layout_weight="1"
+                android:background="?android:attr/fastScrollTrackDrawable"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/ic_close_button_blue_8dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/challenge_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="NO ACTIVE CHALLENGE"
+            android:textColor="@color/gray"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.447" />
+
+        <ProgressBar
+            android:id="@+id/challenge_collected_progress"
+            style="@style/MyProgressBarTwo"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:max="50"
+            android:paddingEnd="5dp"
+            android:progress="0"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

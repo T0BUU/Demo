@@ -31,7 +31,7 @@ public class PartnerMarkerClass {
 
     Integer screenWidth;
     Integer screenHeight;
-    Activity activity;
+    MainActivity activity;
     ConcurrentHashMap<String, Partner> partnerHashMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, HashSet<String>> collectionHashMap;
 
@@ -44,7 +44,7 @@ public class PartnerMarkerClass {
     public PartnerMarkerClass(Activity activity, GoogleMap mMap) {
 
         // Activity is for example MapsActivity
-        this.activity = activity;
+        this.activity = (MainActivity) activity;
         this.mMap = mMap;
         // Get window size for scaling Marker image size:
         Display display = this.activity.getWindowManager().getDefaultDisplay();
@@ -72,7 +72,7 @@ public class PartnerMarkerClass {
                     String business = singleSnapshot.child("field_of_business").getValue().toString();
                     String description = singleSnapshot.child("description").getValue().toString();
 
-                    addOneMarkerOnMap(lat, lng, companyName, business, description, address, clusterManager, markerRenderer);
+                    addOneMarkerOnMap(lat, lng, companyName, business, description, address, clusterManager, markerRenderer, activity.getActiveChallenges());
 
                 }
 
@@ -171,7 +171,8 @@ public class PartnerMarkerClass {
 
 
     public void addOneMarkerOnMap(Double latitude, Double longitude, String companyName, String business,
-                                  String description, String address, ClusterManager clusterManager, MarkerRenderer markerRenderer){
+                                  String description, String address, ClusterManager clusterManager, MarkerRenderer markerRenderer,
+                                  ArrayList<Challenge> challenges){
 
         Partner newPartner = new Partner(activity);
         newPartner.setPosition(latitude, longitude);
@@ -184,6 +185,11 @@ public class PartnerMarkerClass {
         newPartner.setBonusMarker(mMap);
         newPartner.setBonusMarkerEnabled(true);
         newPartner.setBonusMarkerVisible(true);
+
+        for (Challenge c : challenges) {
+            if (c == null) break;
+            if (c.isRelated(newPartner)) newPartner.addRelatedChallenge(c);
+        }
 
         partnerHashMap.put(newPartner.getID(), newPartner);
         clusterManager.addItem(newPartner);

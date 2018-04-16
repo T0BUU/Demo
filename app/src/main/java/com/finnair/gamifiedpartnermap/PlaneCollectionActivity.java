@@ -1,29 +1,35 @@
 package com.finnair.gamifiedpartnermap;
 
-import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fasterxml.jackson.databind.JsonSerializer;
-
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,6 +39,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.finnair.gamifiedpartnermap.CardSelectionActivity.whichWasCaughtMessage;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePartners;
 import static com.finnair.gamifiedpartnermap.MainActivity.catchMessagePlanes;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.BASIC;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.GOLD;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.LUMO;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.PLATINUM;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.SILVER;
+import static com.finnair.gamifiedpartnermap.PlaneMarkerClass.USER_DATA_LOCATION_PLANES;
 
 
 /**
@@ -45,6 +57,8 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
     private static final HashMap<String, Integer> modelsToImages;
     private HashMap<String, HashSet<String>> planeCollectionHashMap;
     private HashMap<String, HashSet<String>> partnerCollectionHashMap;
+    private HashMap<String, PlaneCatchFragment.CardLevel> cardLevelHashMap = new HashMap<>();
+    private String USER_DATA_LOCATION_CARD_LEVELS = "myCardLevels";
     private TabLayout collectionTabs;
     static
     {
@@ -101,6 +115,9 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         final LayoutInflater inflater = getLayoutInflater();
         collectionTabs = findViewById(R.id.collection_tab);
 
+        findViewById(R.id.toolbar).findViewById(R.id.open_drawer_button).getBackground().setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
+        ((Button) findViewById(R.id.toolbar).findViewById(R.id.toolbar_partners_button)).setTextColor(Color.GRAY);
+
         ((ImageButton)(findViewById(R.id.my_collection).
                 findViewById(R.id.toolbar).
                 findViewById(R.id.finnair_logo_button))).setOnClickListener(new View.OnClickListener() {
@@ -109,6 +126,8 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
                 finishMe();
             }
         });
+
+        readCollectedCardLevels(this);
 
         if (openTab) {
             collectionTabs.getTabAt(0).select();
@@ -145,8 +164,14 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         for (String planeType : planeCollectionHashMap.keySet()) {
             Log.d("Collection: " , planeType);
             TableRow row = new TableRow(this);
+            int amountCollected = this.planeCollectionHashMap.get(planeType).size();
+            PlaneCatchFragment.CardLevel cardLevel = getCardLevel(planeType);
+
+            Log.d("Card Level", "" + (cardLevel == null));
 
             ConstraintLayout card = (ConstraintLayout) inflater.inflate(R.layout.collection_row_layout, row, false);
+
+            setBorderColor(card, cardLevel);
 
             TextView name = (TextView) card.findViewById(R.id.plane_model_text);
             name.setText(planeType);
@@ -155,22 +180,156 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             image.setImageResource(modelsToImages.get(planeType));
 
             TextView collectedOutOf = (TextView) card.findViewById(R.id.routes_collected_counter);
-            collectedOutOf.setText(this.planeCollectionHashMap.get(planeType).size() + "/50");
+            TextView infoText = (TextView) card.findViewById(R.id.collection_info_text);
+            ProgressBar collectedProgress = (ProgressBar) card.findViewById(R.id.challenge_collected_progress);
+            setCollectedText(collectedOutOf, collectedProgress, amountCollected, cardLevel, infoText);
 
-            ProgressBar collectedProgress = (ProgressBar) card.findViewById(R.id.routes_collected_progress);
-            collectedProgress.setProgress(this.planeCollectionHashMap.get(planeType).size());
             row.addView(card);
 
             baseLayout.addView(row);
         }
     }
 
+    /*private PlaneCatchFragment.CardLevel getCardLevel(int progress) {
+
+        if (progress > 166) return LUMO;
+
+        else if( progress > 66 ) return PLATINUM;
+
+        else if ( progress > 16 ) return GOLD;
+
+        else if ( progress > 6 ) return SILVER;
+
+        else return BASIC;
+    }*/
+
+    private PlaneCatchFragment.CardLevel getCardLevel(String key) {
+
+        PlaneCatchFragment.CardLevel level = cardLevelHashMap.get(key);
+
+        if (level == null) {
+            cardLevelHashMap.put(key, BASIC);
+            return BASIC;
+        }
+
+        return level;
+
+    }
+
+    private void setCollectedText(TextView textView, ProgressBar progressBar,
+                                  int amountCollected, PlaneCatchFragment.CardLevel cardLevel,
+                                    TextView infoText) {
+        int max;
+        int currentProgress;
+
+        switch (cardLevel) {
+            case BASIC:
+                max = 5;
+                currentProgress = amountCollected - 1;
+                break;
+            case SILVER:
+                max = 10;
+                currentProgress = amountCollected - 6;
+                break;
+            case GOLD:
+                max = 50;
+                currentProgress = amountCollected - 16;
+                break;
+            case PLATINUM:
+                max = 100;
+                currentProgress = amountCollected - 66;
+                break;
+            case LUMO:
+                max = 500;
+                currentProgress = amountCollected - 166;
+                break;
+            default:
+                max = 1;
+                currentProgress = 1;
+        }
+
+        progressBar.setMax(max);
+
+        if (currentProgress >= max) {
+            textView.setText(String.format("%d/%d", max, max));
+            progressBar.setProgress(max);
+            infoText.setText(R.string.collection_level_up_info);
+            infoText.setTextColor(Color.argb(0xFF,0xb4, 0xcb, 0x66));
+            progressBar.getProgressDrawable().setColorFilter(Color.argb(0xFF,0xb4, 0xcb, 0x66), PorterDuff.Mode.SRC_IN);
+        }
+        else {
+            textView.setText(String.format("%d/%d", currentProgress, max));
+            infoText.setText(R.string.collection_more_info);
+            infoText.setTextColor(getResources().getColor(R.color.nordicBlue));
+            progressBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.nordicBlue), PorterDuff.Mode.SRC_IN);
+            progressBar.setProgress(currentProgress);
+        }
+
+    }
+
+
+    private void setBorderColor(View view, PlaneCatchFragment.CardLevel cardLevel) {
+        String levelColor;
+
+        switch (cardLevel) {
+            case BASIC:
+                levelColor = "#FFE9E8E8";
+                break;
+            case SILVER:
+                levelColor = "#FFC0C0C0";
+                break;
+            case GOLD:
+                levelColor = "#FFFFD700";
+                break;
+            case PLATINUM:
+                levelColor = "#FFA6C6EE";
+                break;
+            case LUMO:
+                levelColor = "#FF000000";
+                break;
+            default:
+                levelColor = "#FFCCCCCC";
+        }
+
+        Log.d("Color", levelColor);
+       ((GradientDrawable)view.getBackground()).setStroke(10, Color.parseColor(levelColor));
+    }
+
+    private PlaneCatchFragment.CardLevel levelUpCard(String key) {
+       PlaneCatchFragment.CardLevel cardLevel = cardLevelHashMap.get(key);
+
+        switch (cardLevel) {
+            case BASIC:
+                cardLevelHashMap.put(key, SILVER);
+                break;
+            case SILVER:
+                cardLevelHashMap.put(key, GOLD);
+                break;
+            case GOLD:
+                cardLevelHashMap.put(key, PLATINUM);
+                break;
+            case PLATINUM:
+                cardLevelHashMap.put(key, LUMO);
+                break;
+            default:
+                cardLevelHashMap.put(key, LUMO);
+        }
+
+        return cardLevelHashMap.get(key);
+    }
+
     void populatePartners(LinearLayout baseLayout, LayoutInflater inflater) {
         for (String category : partnerCollectionHashMap.keySet()) {
             Log.d("Collection: " , category);
             TableRow row = new TableRow(this);
+            int amountCollected = this.partnerCollectionHashMap.get(category).size();
+            PlaneCatchFragment.CardLevel cardLevel = getCardLevel(category);
 
             ConstraintLayout card = (ConstraintLayout) inflater.inflate(R.layout.collection_row_layout, row, false);
+
+            ((TextView) card.findViewById(R.id.challenge_description)).setText("LOCATIONS COLLECTED");
+
+            setBorderColor(card, cardLevel);
 
             TextView name = (TextView) card.findViewById(R.id.plane_model_text);
             name.setText(category);
@@ -179,10 +338,11 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
             image.setImageResource(matchCategoryToImage(category));
 
             TextView collectedOutOf = (TextView) card.findViewById(R.id.routes_collected_counter);
-            collectedOutOf.setText(partnerCollectionHashMap.get(category).size() + "/50");
+            TextView infoText = (TextView) card.findViewById(R.id.collection_info_text);
 
-            ProgressBar collectedProgress = (ProgressBar) card.findViewById(R.id.routes_collected_progress);
-            collectedProgress.setProgress(partnerCollectionHashMap.get(category).size());
+            ProgressBar collectedProgress = (ProgressBar) card.findViewById(R.id.challenge_collected_progress);
+            setCollectedText(collectedOutOf, collectedProgress, amountCollected, cardLevel, infoText);
+
             row.addView(card);
 
             baseLayout.addView(row);
@@ -191,6 +351,32 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
 
 
     public void onInfoClick(View v) {
+        TextView view = (TextView) v;
+
+        if (view.getText().toString().equals(getString(R.string.collection_level_up_info))) {
+            ConstraintLayout parentLayout = (ConstraintLayout) v.getParent().getParent();
+            String key = "" + ((TextView) parentLayout.findViewById(R.id.plane_model_text)).getText();
+            PlaneCatchFragment.CardLevel currentLevel = levelUpCard(key);
+
+            setBorderColor(parentLayout, currentLevel);
+
+            int amountCollected;
+
+            if (collectionTabs.getSelectedTabPosition() == 0) {
+                amountCollected = planeCollectionHashMap.get(key).size();
+            }
+            else {
+                amountCollected = partnerCollectionHashMap.get(key).size();
+            }
+
+            TextView collectedOutOf = (TextView) parentLayout.findViewById(R.id.routes_collected_counter);
+            TextView infoText = (TextView) parentLayout.findViewById(R.id.collection_info_text);
+            ProgressBar collectedProgress = (ProgressBar) parentLayout.findViewById(R.id.challenge_collected_progress);
+            setCollectedText(collectedOutOf, collectedProgress, amountCollected, currentLevel, view);
+
+            return;
+        }
+
         if (collectionTabs.getSelectedTabPosition() == 0) {
             PlaneCatchFragment caught = new PlaneCatchFragment();
             caught.show(this.getFragmentManager().beginTransaction(), "Caught plane");
@@ -204,7 +390,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
                 collectedCountries += countriesIterator.next() + "\n";
             }
 
-            caught.setAllFragmentData(planeModel, collectedCountries, modelsToImages.get(planeModel));
+            caught.setAllFragmentData(planeModel, collectedCountries, modelsToImages.get(planeModel), planeCollectionHashMap.get(planeModel).size());
         }
         else {
             PartnerInfoFragment caught = new PartnerInfoFragment();
@@ -219,7 +405,7 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
                 collectedPartners += partnersIterator.next() + "\n";
             }
 
-            caught.setAllFragmentData(collectedPartners, category, matchCategoryToImage(category));
+            caught.setAllFragmentData(collectedPartners, category, matchCategoryToImage(category), partnerCollectionHashMap.get(category).size());
         }
 
 
@@ -248,10 +434,93 @@ public class PlaneCollectionActivity extends AppCompatActivity implements PlaneC
         }
     }
 
+    private String formatCardLevels() {
+        String result = "";
+
+        for (String key : cardLevelHashMap.keySet()) {
+
+            result += String.format("%s#%s\n",key, cardLevelHashMap.get(key));
+
+        }
+        return result;
+    }
+
+    private void saveCardLevels(Context context){
+
+        String result = formatCardLevels();
+
+        try {
+            FileOutputStream outputStream = context.openFileOutput(USER_DATA_LOCATION_CARD_LEVELS, Context.MODE_PRIVATE);
+            outputStream.write(result.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.d("Cards Saving", result);
+    }
+
+    private void readCollectedCardLevels(Context context) {
+
+        HashMap<String, PlaneCatchFragment.CardLevel> result = new HashMap<>();
+
+        try {
+            InputStream inputStream = context.openFileInput(USER_DATA_LOCATION_CARD_LEVELS);
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+
+                    String[] firstSplit = receiveString.split("#");
+                    String cardLevel = firstSplit[1];
+
+                    result.put(firstSplit[0], matchCardLevel(cardLevel));
+
+                }
+
+                inputStream.close();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        this.cardLevelHashMap = result;
+    }
+
+
+    private PlaneCatchFragment.CardLevel matchCardLevel(String string) {
+        switch (string) {
+            case "BASIC":
+                return BASIC;
+            case "SILVER":
+                return SILVER;
+            case "GOLD":
+                return GOLD;
+            case "PLATINUM":
+                return PLATINUM;
+            case "LUMO":
+                return LUMO;
+            default:
+                return BASIC;
+        }
+    }
+
     private void finishMe() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onPause() {
+        saveCardLevels(this);
+        super.onPause();
     }
 
     @Override

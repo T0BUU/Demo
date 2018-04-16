@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.Image;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.method.ScrollingMovementMethod;
@@ -16,11 +17,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.BASIC;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.GOLD;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.LUMO;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.PLATINUM;
+import static com.finnair.gamifiedpartnermap.PlaneCatchFragment.CardLevel.SILVER;
 
 
 /**
@@ -28,15 +36,27 @@ import java.util.List;
  */
 
 public class PlaneCatchFragment extends DialogFragment {
+    public enum CardLevel {
+        BASIC, SILVER, GOLD, PLATINUM, LUMO
+    }
 
     private String planeName = "ERROR";
-    private int planeLevel = -1; //This could be used to indicated different kinds of cards(gold, silver etc.)
+    private CardLevel planeLevel = BASIC; //This could be used to indicated different kinds of cards(gold, silver etc.)
     private String locations = "ERROR";
     private int planeImage;
+    private String upperButtonText;
+    private String lowerButtonText;
+    private int upperButtonVisibility;
+    private int lowerButtonVisibility;
+    private int currentProgress;
 
     private TextView nameTextView;
     private TextView countriesTextView;
     private ImageView planeImageView;
+    private View view;
+
+    private Button upper;
+    private Button lower;
 
 
     public PlaneCatchFragment(){}  // This default constructor should be left alone
@@ -47,11 +67,35 @@ public class PlaneCatchFragment extends DialogFragment {
         this.locations = locations;
     }
 
-    public void setAllFragmentData(String planeName, String locations, int imageID){
+    public void setAllFragmentData(String planeName, String locations, int imageID, int progress){
         // All private data should be set before calling onCreateView:
         this.planeName = planeName;
         this.locations = locations;
         this.planeImage = imageID;
+        this.upperButtonText = "Go To Map";
+        this.lowerButtonText = "Go To Collection";
+        this.upperButtonVisibility = 0;
+        this.lowerButtonVisibility = 0;
+        this.currentProgress = progress;
+        this.planeLevel = setCardLevel(progress);
+
+    }
+
+
+    public void setAllFragmentData(String planeName, String locations, int imageID,
+                                   String upperButtonText, String lowerButtonText,
+                                   int upperButtonVisibility, int lowerButtonVisibility,
+                                   int progress){
+        // All private data should be set before calling onCreateView:
+        this.planeName = planeName;
+        this.locations = locations;
+        this.planeImage = imageID;
+        this.upperButtonText = upperButtonText;
+        this.lowerButtonText = lowerButtonText;
+        this.upperButtonVisibility = upperButtonVisibility;
+        this.lowerButtonVisibility = lowerButtonVisibility;
+        this.currentProgress = progress;
+        this.planeLevel = setCardLevel(progress);
     }
 
     public interface PlaneCatchListener {
@@ -98,23 +142,61 @@ public class PlaneCatchFragment extends DialogFragment {
 
         this.planeImageView = dialogView.findViewById(R.id.plane_card_image);
 
+        this.upper = dialogView.findViewById(R.id.card_button_upper);
 
+        this.lower = dialogView.findViewById(R.id.card_button_lower);
 
-        //Set the color of border. Maybe we should have different types of with different colors for borders cards?
-        ((GradientDrawable)dialogView.findViewById(R.id.plane_info_table).getBackground()).setStroke(10, Color.parseColor("#CCCCCC"));
+        this.view = dialogView;
 
         this.setContent();
-
-
 
         // Create the AlertDialog object and return it
         Dialog result = builder.create();
 
-        result.setCanceledOnTouchOutside(false);
-
         result.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return result;
     }
+
+    private CardLevel setCardLevel(int progress) {
+
+        if (progress > 166) return LUMO;
+
+        else if( progress > 66 ) return PLATINUM;
+
+        else if ( progress > 16 ) return GOLD;
+
+        else if ( progress > 6 ) return SILVER;
+
+        else return BASIC;
+    }
+
+
+    private void setBorderColor(View dialogView) {
+        String levelColor;
+
+        switch (this.planeLevel) {
+            case BASIC:
+                levelColor = "#FFe9e8e8";
+                break;
+            case SILVER:
+                levelColor = "#FFC0C0C0";
+                break;
+            case GOLD:
+                levelColor = "#FFFFD700";
+                break;
+            case PLATINUM:
+                levelColor = "#FFA6C6EE";
+                break;
+            case LUMO:
+                levelColor = "#FF000000";
+                break;
+            default:
+                levelColor = "#CCCCCC";
+        }
+        ((GradientDrawable)dialogView.findViewById(R.id.plane_info_table).getBackground()).setStroke(10, Color.parseColor(levelColor));
+    }
+
+
 
 
     private void setContent(){
@@ -128,6 +210,14 @@ public class PlaneCatchFragment extends DialogFragment {
 
         this.planeImageView.setMaxHeight(120);
         this.planeImageView.setMaxWidth(120);
+
+        setBorderColor(this.view);
+
+        this.upper.setText(this.upperButtonText);
+        this.lower.setText(this.lowerButtonText);
+        this.upper.setVisibility(this.upperButtonVisibility);
+        this.lower.setVisibility(this.lowerButtonVisibility);
+
 
     }
 

@@ -24,6 +24,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterItem;
 
+import java.util.ArrayList;
+
 
 public class ClusterMarker implements ClusterItem {
 
@@ -45,6 +47,8 @@ public class ClusterMarker implements ClusterItem {
     private BitmapDescriptor bonusIcon;
 
     private BitmapDescriptor bitmapIcon;
+
+    private ArrayList<Challenge> relatedChallenges = new ArrayList<>();
 
 
     public ClusterMarker(Activity activity){
@@ -110,6 +114,13 @@ public class ClusterMarker implements ClusterItem {
                 .flat(true);
     }
 
+    public void addRelatedChallenge(Challenge c) {
+        this.relatedChallenges.add(c);
+    }
+
+    public void removeRelatedChallenge(Challenge c) {
+        relatedChallenges.remove(c);
+    }
 
     // GET:
     public Location getLocation(){ return this.location; }
@@ -117,6 +128,7 @@ public class ClusterMarker implements ClusterItem {
     public Double getHeadingDegree(){ return this.headingDegree; }
     public BitmapDescriptor getIcon(){ return this.bitmapIcon; }
     public String getID(){ return this.id; }
+    public ArrayList<Challenge> getRelatedChallenges() { return this.relatedChallenges; }
 
     public void setBonusMarkerEnabled(boolean enable){
         this.bonusMarkerEnabled = enable;

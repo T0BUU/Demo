@@ -14,13 +14,22 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -48,8 +57,26 @@ import com.google.maps.android.clustering.Cluster;
 
 
 import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import static com.finnair.gamifiedpartnermap.MainActivity.locationPermission;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapsFragment extends Fragment {
@@ -228,6 +255,7 @@ public class MapsFragment extends Fragment {
                     @Override
                     public boolean onMarkerClick(final Marker marker) {
 
+
                         if (planeMarkerClass.containsMarker(marker)) {
                             // User clicked an airplane
                             Plane plane = planeMarkerClass.getPlaneByID(marker.getTitle());
@@ -247,11 +275,8 @@ public class MapsFragment extends Fragment {
                                 ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                             }
                             else {
-                                InfoWindowData info = new InfoWindowData();
-                                info.setData(partner.getID(), partner.getAddress(), partner.getDescription());
 
-                                marker.setTag(info);
-                                marker.showInfoWindow();
+                                ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                             }
 
 
@@ -346,7 +371,6 @@ public class MapsFragment extends Fragment {
 
 
         for(Marker marker : partnerMarkers) {
-            Log.d("POOP", "" + marker.getTitle() + " " + partner.getTitle());
             if(marker.getTitle().equals(partner.getTitle())){
                 InfoWindowData info = new InfoWindowData();
                 info.setData(partner.getID(), partner.getAddress(), partner.getDescription());
@@ -381,6 +405,28 @@ public class MapsFragment extends Fragment {
 
     public ConcurrentHashMap<String, HashSet<String>> getPartnerCollection() {
         return partnerMarkerClass.getCollection();
+    }
+
+    public Pair<ArrayList<Plane>, ArrayList<Partner>> getRandomRewards(int amount) {
+        Random generator = new Random();
+        int planesAmount = generator.nextInt(amount+1);
+        int partnersAmount = amount - planesAmount;
+
+        ArrayList<Plane> randomPlanes = new ArrayList<>();
+        ArrayList<Partner> randomPartners = new ArrayList<>();
+
+        while (planesAmount > 0) {
+            randomPlanes.add(planeMarkerClass.getRandomPlane());
+            planesAmount--;
+        }
+
+        while (partnersAmount > 0) {
+            randomPartners.add(partnerMarkerClass.getRandomPartner());
+            partnersAmount--;
+        }
+
+        return new Pair<>(randomPlanes, randomPartners);
+
     }
 
     public PartnerMarkerClass getPartners() {

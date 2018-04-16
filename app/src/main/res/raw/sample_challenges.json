@@ -1,0 +1,154 @@
+[
+  {
+    "id" : 1,
+    "description" : "Collect #AMOUNT planes",
+    "plane_model" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"],
+    "plane_destination" : null,
+    "partner_field" : null,
+    "partner_name" : null,
+    "amount" : 5,
+    "reward" : 5
+  },
+
+  {
+    "id" : 2,
+    "description" : "Collect #AMOUNT partners",
+    "plane_model" : null,
+    "plane_destination" : null,
+    "partner_field" : [
+      "Restaurant",
+      "Car rental",
+      "Charity",
+      "Entertainment",
+      "Finance and insurance",
+      "Helsinki Airport",
+      "Golf and leisure time",
+      "Hotel",
+      "Shopping",
+      "Tour operators and cruise lines",
+      "Services and Wellness" ],
+    "partner_name" : null,
+    "amount" : 5,
+    "reward" : 5
+  },
+
+  {
+    "id" : 3,
+    "description" : "Collect #AMOUNT #PARTNER_FIELD type partners",
+    "plane_model" : null ,
+    "plane_destination" : null,
+    "partner_field" : ["Restaurant"],
+    "partner_name" : null,
+    "amount" : 3,
+    "reward" : 5
+  },
+
+  {
+    "id" : 4,
+    "description" : "Collect #AMOUNT #PLANE_MODEL model planes",
+    "plane_model" : ["AIRBUS A350-900"],
+    "plane_destination" : null,
+    "partner_field" : null,
+    "partner_name" : null,
+    "amount" : 3,
+    "reward" : 5
+  },
+
+  {
+    "id" : 5,
+    "description" : "Collect #AMOUNT card",
+    "plane_model" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"],
+    "plane_destination" : null,
+    "partner_field" : [
+      "Restaurant",
+      "Car rental",
+      "Charity",
+      "Entertainment",
+      "Finance and insurance",
+      "Helsinki Airport",
+      "Golf and leisure time",
+      "Hotel",
+      "Shopping",
+      "Tour operators and cruise lines",
+      "Services and Wellness" ],
+    "partner_name" : null,
+    "amount" : 1,
+    "reward" : 2
+  },
+
+
+  {
+    "id" : 6,
+    "description" : "Collect #AMOUNT planes",
+    "plane_model" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"],
+    "plane_destination" : null,
+    "partner_field" : null,
+    "partner_name" : null,
+    "amount" : 10,
+    "reward" : 25
+  },
+
+
+  {
+    "id" : 7,
+    "description" : "Collect #AMOUNT planes going to #PLANE_DESTINATION",
+    "plane_model" : null,
+    "plane_destination" : ["Russia"],
+    "partner_field" : null,
+    "partner_name" : null,
+    "amount" : 2,
+    "reward" : 7
+  },
+
+
+  {
+    "id" : 8,
+    "description" : "Collect #AMOUNT #PARTNER_NAME locations",
+    "plane_model" : null ,
+    "plane_destination" : null,
+    "partner_field" : null,
+    "partner_name" : ["Tokyo 55"],
+    "amount" : 3,
+    "reward" : 3
+  },
+
+
+  {
+    "id" : 9,
+    "description" : "Collect #AMOUNT #PLANE_MODEL model planes",
+    "plane_model" : ["AIRBUS A350-900", "EMBRAER 190"],
+    "plane_destination" : null,
+    "partner_field" : null,
+    "partner_name" : null,
+    "amount" : 3,
+    "reward" : 5
+  },
+
+  {
+    "id" : 10,
+    "description" : "Collect #AMOUNT plane",
+    "plane_model" : ["AIRBUS A350-900", "AIRBUS A330-300",
+      "AIRBUS A321", "AIRBUS A321-231",
+      "AIRBUS A320", "AIRBUS A319",
+      "AIRBUS A319", "EMBRAER 190",
+      "ATR 72-212A"],
+    "plane_destination" : null,
+    "partner_field" : null,
+    "partner_name" : null,
+    "amount" : 1,
+    "reward" : 2
+  }
+
+]
