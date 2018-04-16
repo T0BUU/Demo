@@ -380,10 +380,15 @@ public class MapsFragment extends Fragment {
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(partner.getPosition(), 15.0f), new GoogleMap.CancelableCallback() {
             @Override
             public void onFinish(){
-                List<Marker> partnerMarkers = new ArrayList<>(clusterManager.getMarkerCollection().getMarkers());
+                List<Marker> partnerMarkers = new ArrayList<>(partnerClusterManager.getMarkerCollection().getMarkers());
                 for(Marker marker : partnerMarkers) {
                     if(marker.getPosition().equals(partner.getPosition())){
+                        InfoWindowData info = new InfoWindowData();
+                        info.setData(partner.getID(), partner.getAddress(), partner.getDescription());
+
+                        marker.setTag(info);
                         marker.showInfoWindow();
+
                         pLW.showPopupWindow();
                     }
                 }
