@@ -108,6 +108,7 @@ public class PlaneMarkerClass {
             newPlane.setPlaneType( planeType );
             newPlane.setMarkerImage("not near/collected");
             planeHashMap.put(newPlane.getID(), newPlane);
+            //System.out.println("adding plane, id: " + newPlane.getID() + "icao: " + newPlane.getIcao24());
             this.clusterManager.addItem(newPlane);
 
             for (Challenge c : challenges) {

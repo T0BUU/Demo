@@ -593,5 +593,9 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         readChallenges();
     }
 
+    public MActivityLayout getMActivityLayout(){
+        return this.myMainLayout;
+    }
+
 }
 

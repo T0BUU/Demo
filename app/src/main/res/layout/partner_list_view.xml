@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_margin="48dp"
     android:background="@drawable/header_background"
     android:id="@+id/popup_partner_window">
@@ -24,7 +24,7 @@
 
         <ExpandableListView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/popup_expandable_list_view"/>
 
     </RelativeLayout>
