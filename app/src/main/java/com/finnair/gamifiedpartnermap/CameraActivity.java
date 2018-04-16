@@ -331,9 +331,16 @@ public class CameraActivity extends Activity {
         if (Calculations.rollangle == true){
 
 
-            image.setVisibility(View.INVISIBLE);
-            image2.setVisibility(View.INVISIBLE);
+            runOnUiThread(new Runnable() {
 
+                @Override
+                public void run() {
+                    image.setVisibility(View.INVISIBLE);
+                    image2.setVisibility(View.INVISIBLE);
+
+                }
+
+            });
 
         }
 
@@ -380,10 +387,17 @@ public class CameraActivity extends Activity {
 
         if (Calculations.azimuthangle == true){
 
+            runOnUiThread(new Runnable() {
 
-            image.setVisibility(View.INVISIBLE);
-            image2.setVisibility(View.INVISIBLE);
+                @Override
+                public void run() {
 
+                    image.setVisibility(View.INVISIBLE);
+                    image2.setVisibility(View.INVISIBLE);
+
+                }
+
+            });
 
         }
         if(Calculations.showrightarrow == true && Calculations.showleftarrow == false && Calculations.azimuthangle == false){
@@ -430,7 +444,13 @@ public class CameraActivity extends Activity {
         final ImageView image2 = (findViewById(R.id.top_arrow));
         if (Calculations.rollangle == true) {
 
-            image.setVisibility(View.INVISIBLE);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    image.setVisibility(View.INVISIBLE);
+                }
+            });
+
 
 
         }
@@ -471,8 +491,13 @@ public class CameraActivity extends Activity {
 
         final ImageView image2 = (findViewById(R.id.left_arrow));
         if (Calculations.azimuthangle == true && Calculations.showleftarrow == false) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    image2.setVisibility(View.INVISIBLE);
+                }
+            });
 
-            image2.setVisibility(View.INVISIBLE);
 
 
         }
