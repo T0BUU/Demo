@@ -3,6 +3,7 @@ package com.finnair.gamifiedpartnermap;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
@@ -172,6 +173,20 @@ public class CameraActivity extends Activity {
 
     }
 
+    @Override
+    public void onPause(){
+        super.onPause();
+        device.close();
+        device = null;
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        previewTextureView.setSurfaceTextureListener(listener);
+    }
+
+
 
 
 
@@ -185,7 +200,9 @@ public class CameraActivity extends Activity {
             if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK) {
                 cameraID = camID;
                 StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-                previewSize = getPreferredSize(map.getOutputSizes(SurfaceTexture.class), height, width);
+                if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    previewSize = getPreferredSize(map.getOutputSizes(SurfaceTexture.class), height, width);
+                }else previewSize = getPreferredSize(map.getOutputSizes(SurfaceTexture.class), width, height);
                 break;
             }
         }
