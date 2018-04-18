@@ -8,9 +8,11 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -32,6 +34,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.core.util.InternCache;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.gson.Gson;
 
@@ -79,8 +82,18 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     private MapsFragment mapFragment;
     private GoogleMap gMap;
 
+    private String planesListing = "";
 
     SensorActivity sensorActivity;
+
+    public double azimuth;
+    public double pitch;
+    public double roll;
+
+    private Plane caughtPlane;
+    private Plane randomPlane;
+    private Partner caughtPartner;
+    private Partner randomPartner;
 
 
 
@@ -103,6 +116,11 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     private boolean isLoggedIn = false;
     private ArrayList<Challenge> activeChallenges;
 
+    public static ArrayList<String> caughtPlanes = new ArrayList<String>(4);
+    public static ArrayList<String> caughtPartners = new ArrayList<String>(8);
+    public static HashMap<String, HashSet<String>> koneetHashMap = new HashMap<String, HashSet<String>>();
+    public static HashMap<String, HashSet<String>> partneritHashMap = new HashMap<String, HashSet<String>>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +140,17 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         if(sharedPreferences.contains("Access Token")){
             makeProfileRequest(sharedPreferences.getString("Access Token", ""));
         }
+
+        SensorManager sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+
+        azimuth = Calculations.bearing;
+        pitch = Calculations.angle;
+
+
+        sensorActivity = new SensorActivity(sensorManager,azimuth, pitch, roll);
+        sensorActivity.registerListeners();
+
 
 
     }
@@ -165,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
         //Read challenges from disk and then add additional once.
 
-       JSONArray readJson = readCollectedActiveChallenges(this);
+        JSONArray readJson = readCollectedActiveChallenges(this);
 
         for (int i = 0; i < readJson.length() && i < CHALLENGE_LIMIT; ++i) {
             try {
@@ -257,17 +286,17 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
     public void onChallengeCancelClick(View v) {
 
-       TableRow row = (TableRow) v.getParent().getParent().getParent().getParent();
-       LinearLayout challengeList = (LinearLayout) row.getParent();
-       int index = challengeList.indexOfChild(row);
-       LayoutInflater inflater = getLayoutInflater();
+        TableRow row = (TableRow) v.getParent().getParent().getParent().getParent();
+        LinearLayout challengeList = (LinearLayout) row.getParent();
+        int index = challengeList.indexOfChild(row);
+        LayoutInflater inflater = getLayoutInflater();
 
-       Challenge emptyChallenge = new Challenge();
-       emptyChallenge.setIndex(index);
+        Challenge emptyChallenge = new Challenge();
+        emptyChallenge.setIndex(index);
 
-       activeChallenges.set(index, emptyChallenge);
+        activeChallenges.set(index, emptyChallenge);
 
-       addChallengeToView(row, inflater, emptyChallenge);
+        addChallengeToView(row, inflater, emptyChallenge);
 
     }
 
@@ -400,6 +429,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
 
 
 
+
     // Logs the user out
     protected void logout() {
 
@@ -518,23 +548,27 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     }
 
     public void onPlaneCatch(Plane caughtPlane, Plane randomPlane) {
-        Intent intent = new Intent(this, CardSelectionActivity.class);
+        //Intent intent = new Intent(this, CardSelectionActivity.class);
 
-        ArrayList<String> caughtPlanes = new ArrayList<>();
+        //ArrayList<String> caughtPlanes = new ArrayList<>();
 
-        caughtPlanes.add(caughtPlane.getPlaneType());
-        caughtPlanes.add(caughtPlane.getOriginCountry());
-        caughtPlanes.add(randomPlane.getPlaneType());
-        caughtPlanes.add(randomPlane.getOriginCountry());
+       this.caughtPlane = caughtPlane;
+       this.randomPlane = randomPlane;
 
-        intent.putParcelableArrayListExtra(activeChallengesMessage, this.activeChallenges);
-        intent.putExtra(relatedChallengesToCaught, caughtPlane.getRelatedChallenges());
-        intent.putExtra(relatedChallengesToRandom, randomPlane.getRelatedChallenges());
-        intent.putExtra(planesCaught, caughtPlanes);
-        intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
-        intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
+        koneetHashMap.putAll(this.myMainLayout.getPlaneCollection());
+        partneritHashMap.putAll(this.myMainLayout.getPartnerCollection());
+
+        //intent.putExtra(planesCaught, caughtPlanes);
+        //intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+        //intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
+        catchPlane();
+        //startActivity(intent);
+
+    }
+
+    public void catchPlane(){
+        Intent intent = new Intent(this, CameraActivity.class);
         startActivityForResult(intent, 12);
-
     }
 
     public void onPartnerCatch(Partner caughtPartner, Partner randomPartner) {
@@ -574,8 +608,29 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
                 if (goToCollection) {
                     openCardCollection(data.getBooleanExtra(whichWasCaughtMessage, true));
                 }
+                else {
+                    Intent intent = new Intent(this, CardSelectionActivity.class);
+
+                    ArrayList<String> caughtPlanes = new ArrayList<>();
+
+                    caughtPlanes.add(caughtPlane.getPlaneType());
+                    caughtPlanes.add(caughtPlane.getOriginCountry());
+                    caughtPlanes.add(randomPlane.getPlaneType());
+                    caughtPlanes.add(randomPlane.getOriginCountry());
+
+                    intent.putParcelableArrayListExtra(activeChallengesMessage, this.activeChallenges);
+                    intent.putExtra(relatedChallengesToCaught, caughtPlane.getRelatedChallenges());
+                    intent.putExtra(relatedChallengesToRandom, randomPlane.getRelatedChallenges());
+                    intent.putExtra(planesCaught, caughtPlanes);
+                    intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+                    intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
+                    startActivityForResult(intent, 12);
+                }
             }
-            else {}
+            else {
+
+
+            }
         }
     }
 

@@ -8,8 +8,11 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.camera2.full" />
 
 
     <application
@@ -109,8 +112,7 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
+        <activity android:name=".CameraActivity" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"></activity>
     </application>
-
-
 
 </manifest>

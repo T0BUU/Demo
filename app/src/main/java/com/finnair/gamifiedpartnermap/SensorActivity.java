@@ -1,18 +1,16 @@
 package com.finnair.gamifiedpartnermap;
 
-import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 import android.widget.TextView;
 
 /**
  * Created by noctuaPC on 19.2.2018.
  */
 
-public class SensorActivity implements SensorEventListener {
+public class SensorActivity extends CardSelectionActivity implements SensorEventListener {
     /**
      TODO:
      WARNING! Always remember to disable sensors when finished.
@@ -85,23 +83,26 @@ public class SensorActivity implements SensorEventListener {
 
      */
 
-    public SensorManager sensorManager;
+    public static SensorManager sensorManager;
+    public static SensorEvent sensorEvent;
     private final float[] accelerometerReading = new float[3];
     private final float[] magnetometerReading = new float[3];
 
     private final float[] rotationMatrix = new float[9];
-    private final float[] orientationAngles = new float[3];
-    private TextView textView;
-    private float azimuth;
-    private float pitch;
-    private float roll;
-    private double angleToTarget;
+    public final float[] orientationAngles = new float[3];
+    public static float azimuth;
+    public float pitch;
+    public float roll;
+    private double azimuthToTarget;
+    private double pitchToTarget;
+    private double rollToTarget;
 
 
-    public SensorActivity(SensorManager sensorManager, TextView textView, double angle){
+    public SensorActivity(SensorManager sensorManager, double azimuthToTarget, double pitchToTarget, double rollToTarget){
         this.sensorManager = sensorManager;
-        this.textView = textView;
-        this.angleToTarget = angle;
+        this.azimuthToTarget = azimuthToTarget;
+        this.pitchToTarget = pitchToTarget;
+        this.rollToTarget = rollToTarget;
     }
 
     @Override
@@ -128,11 +129,6 @@ public class SensorActivity implements SensorEventListener {
 
         updateOrientationAngles();
 
-        this.textView.setText( "Azimuth: " +
-                Math.round( Math.toDegrees(getAzimuth()) )  + "  Pitch: " +
-                Math.round( Math.toDegrees(getPitch()) ) + "  Roll: "+
-                Math.round( Math.toDegrees(getRoll()) ) + " Angle to target: " +
-                this.angleToTarget);
 
     }
 
@@ -147,5 +143,17 @@ public class SensorActivity implements SensorEventListener {
         this.azimuth = orientationAngles[0];
         this.pitch = orientationAngles[1];
         this.roll = orientationAngles[2];
+
+        final Calculations calculations = new Calculations();
+        calculations.deviceAzimuth = Math.toDegrees(getAzimuth()); // Update angles to calculations
+        calculations.devicePitch = Math.toDegrees(getPitch());
+        calculations.deviceRoll = Math.toDegrees(getRoll());
+        calculations.azimuthAngle();
+        calculations.rollAngle();
+
+
     }
+
+
+
 }
