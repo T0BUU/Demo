@@ -116,10 +116,12 @@ public class ClusterMarker implements ClusterItem {
 
     public void addRelatedChallenge(Challenge c) {
         this.relatedChallenges.add(c);
+        this.setBonusMarkerVisible(true);
     }
 
     public void removeRelatedChallenge(Challenge c) {
         relatedChallenges.remove(c);
+        this.setBonusMarkerVisible(false);
     }
 
     // GET:
@@ -149,8 +151,8 @@ public class ClusterMarker implements ClusterItem {
     public void setBonusMarker(GoogleMap map){
         this.mMap = map;
         Bitmap icon = BitmapFactory.decodeResource(this.activity.getResources(),
-                R.drawable.ic_letter_b_small);
-        icon = scaleDown(icon, screenWidth/12);
+                R.mipmap.ic_precence_online_small);
+        icon = scaleDown(icon, screenWidth/14);
         this.bonusIcon = BitmapDescriptorFactory.fromBitmap(icon);
 
         if (this.bonusMarker == null){

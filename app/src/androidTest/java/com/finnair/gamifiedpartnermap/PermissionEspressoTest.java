@@ -35,7 +35,7 @@ import android.util.Log;
 
 //Test the functionality used to ask for location permissions.
 //THIS WILL FAIL IF PERMISSION HAS ALREADY BEEN GIVEN!
-//These test were implemented before the switch to fragment based tabs!
+//These tests were implemented before the switch to fragment based tabs!
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 
@@ -49,7 +49,6 @@ public class PermissionEspressoTest {
     @Test
     public void TestSystemPermission() {
         boolean buttonsFound = true;
-
 
             UiDevice device = UiDevice.getInstance(getInstrumentation());
             UiObject allowPermissions;

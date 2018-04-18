@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         }
 
         //Read challenges from disk and then add additional once.
-
+        /*
        JSONArray readJson = readCollectedActiveChallenges(this);
 
         for (int i = 0; i < readJson.length() && i < CHALLENGE_LIMIT; ++i) {
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
                 e.printStackTrace();
             }
         }
-
+        */
         Random generator = new Random();
 
         for (int i = 0; i < json.length() && i < CHALLENGE_LIMIT; ++i) {

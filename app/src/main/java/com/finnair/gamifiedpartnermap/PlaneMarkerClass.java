@@ -102,16 +102,16 @@ public class PlaneMarkerClass {
             newPlane.setPlaneType( planeType );
             newPlane.setMarkerImage();
             newPlane.setBonusMarker(mMap);
-            newPlane.setBonusMarkerEnabled(true);
-            newPlane.setBonusMarkerVisible(true);
-
 
             planeHashMap.put(newPlane.getID(), newPlane);
             this.clusterManager.addItem(newPlane);
 
             for (Challenge c : challenges) {
                 if (c == null) break;
-                if (c.isRelated(newPlane)) newPlane.addRelatedChallenge(c);
+                if (c.isRelated(newPlane)) {
+                    Log.d("crap2", c.getDescription() );
+                    newPlane.addRelatedChallenge(c);
+                }
             }
 
             readCollectedPlanes(activity);

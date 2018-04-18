@@ -183,12 +183,12 @@ public class PartnerMarkerClass {
         newPartner.setMarkerOptions();
         newPartner.setMarkerImage(screenWidth);
         newPartner.setBonusMarker(mMap);
-        newPartner.setBonusMarkerEnabled(true);
-        newPartner.setBonusMarkerVisible(true);
 
         for (Challenge c : challenges) {
             if (c == null) break;
-            if (c.isRelated(newPartner)) newPartner.addRelatedChallenge(c);
+            if (c.isRelated(newPartner)){
+                newPartner.addRelatedChallenge(c);
+            }
         }
 
         partnerHashMap.put(newPartner.getID(), newPartner);

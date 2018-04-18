@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.util.Log;
+
 import com.google.android.gms.maps.model.BitmapDescriptor;
 
 
@@ -33,8 +35,6 @@ public class Plane extends ClusterMarker {
         if (icao24 != null) this.icao24 = icao24;
         if (originCountry != null) this.originCountry = originCountry;
     }
-
-
 
     public void setPlaneType(String type) { this.planeType = type; }
 
