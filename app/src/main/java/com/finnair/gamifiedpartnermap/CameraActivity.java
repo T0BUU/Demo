@@ -133,7 +133,7 @@ public class CameraActivity extends Activity {
             public void onClick(View view) {
 
                 Intent intent = new Intent(CameraActivity.this, MainActivity.class);
-                setResult(Activity.RESULT_OK, intent);
+                setResult(Activity.RESULT_FIRST_USER, intent);
                 finish();
 
             }

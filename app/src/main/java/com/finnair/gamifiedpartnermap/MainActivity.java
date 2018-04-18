@@ -608,24 +608,26 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
                 if (goToCollection) {
                     openCardCollection(data.getBooleanExtra(whichWasCaughtMessage, true));
                 }
-                else {
-                    Intent intent = new Intent(this, CardSelectionActivity.class);
+                else { }
 
-                    ArrayList<String> caughtPlanes = new ArrayList<>();
+            }
+            else if(resultCode == RESULT_FIRST_USER) {
+                Intent intent = new Intent(this, CardSelectionActivity.class);
 
-                    caughtPlanes.add(caughtPlane.getPlaneType());
-                    caughtPlanes.add(caughtPlane.getOriginCountry());
-                    caughtPlanes.add(randomPlane.getPlaneType());
-                    caughtPlanes.add(randomPlane.getOriginCountry());
+                ArrayList<String> caughtPlanes = new ArrayList<>();
 
-                    intent.putParcelableArrayListExtra(activeChallengesMessage, this.activeChallenges);
-                    intent.putExtra(relatedChallengesToCaught, caughtPlane.getRelatedChallenges());
-                    intent.putExtra(relatedChallengesToRandom, randomPlane.getRelatedChallenges());
-                    intent.putExtra(planesCaught, caughtPlanes);
-                    intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
-                    intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
-                    startActivityForResult(intent, 12);
-                }
+                caughtPlanes.add(caughtPlane.getPlaneType());
+                caughtPlanes.add(caughtPlane.getOriginCountry());
+                caughtPlanes.add(randomPlane.getPlaneType());
+                caughtPlanes.add(randomPlane.getOriginCountry());
+
+                intent.putParcelableArrayListExtra(activeChallengesMessage, this.activeChallenges);
+                intent.putExtra(relatedChallengesToCaught, caughtPlane.getRelatedChallenges());
+                intent.putExtra(relatedChallengesToRandom, randomPlane.getRelatedChallenges());
+                intent.putExtra(planesCaught, caughtPlanes);
+                intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
+                intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
+                startActivityForResult(intent, 12);
             }
             else {
 
