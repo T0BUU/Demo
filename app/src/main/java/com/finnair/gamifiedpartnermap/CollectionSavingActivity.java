@@ -92,8 +92,9 @@ public abstract class CollectionSavingActivity extends AppCompatActivity {
 
     }
 
-    protected void savePartner(String field, String name, String time){
+    protected void savePartner(String field, String name){
         // All apps (root or not) have a default data directory, which is /data/data/<package_name>
+        String time = getCurrentTimeStamp();
 
         try {
             partnerCollectionHashMap.get(field).add(String.format("%s %s", time, name));

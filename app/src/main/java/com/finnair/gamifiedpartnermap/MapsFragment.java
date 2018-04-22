@@ -460,6 +460,16 @@ public class MapsFragment extends Fragment {
         partnerMarkerClass.readCollectedPartners(getActivity());
     }
 
+    public void removeChallenge(Challenge c) {
+        partnerMarkerClass.removeChallenge(c);
+        planeMarkerClass.removeChallenge(c);
+    }
+
+    public void addChallenge(Challenge c) {
+        partnerMarkerClass.addChallenge(c);
+        planeMarkerClass.addChallenge(c);
+    }
+
     public Pair<ArrayList<Plane>, ArrayList<Partner>> getRandomRewards(int amount) {
         Random generator = new Random();
         int planesAmount = generator.nextInt(amount+1);

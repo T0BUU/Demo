@@ -97,12 +97,12 @@ public class PartnerMarkerClass {
     }
 
     /*
-     * This updates showingMarkers list based on given parameter field_of_business.
+     * This updates showingMarkers list based on given parameter String field_of_business and boolean show (add/remove).
      * If showingPartners contain partners under field_of_business, this method removes them from list.
      * If showingPartners doesn't contain that field_of_business, it adds those to list.
      * Returns updated list.
      */
-    public List<Partner> filterFieldOfBusiness(String fob){
+    public List<Partner> filterFieldOfBusiness(String fob, boolean show){
         for(Partner partner : partnerHashMap.values()) {
             if (partner.getFieldOfBusiness().equals(fob)) {
                 if(!show){
@@ -126,8 +126,21 @@ public class PartnerMarkerClass {
         return showingPartners;
     }
 
+
     public ConcurrentHashMap<String, HashSet<String>> getCollection() {
         return this.collectionHashMap;
+    }
+
+    public void removeChallenge(Challenge c) {
+        for (Partner p : partnerHashMap.values()) {
+            p.removeRelatedChallenge(c);
+        }
+    }
+
+    public void addChallenge(Challenge c) {
+        for (Partner p : partnerHashMap.values()) {
+            p.addRelatedChallenge(c);
+        }
     }
 
     public Partner getRandomPartner() {
@@ -192,8 +205,8 @@ public class PartnerMarkerClass {
         newPartner.setMarkerOptions();
         newPartner.setMarkerImage(screenWidth);
         newPartner.setBonusMarker(mMap);
-        newPartner.setBonusMarkerEnabled(true);
-        newPartner.setBonusMarkerVisible(true);
+        newPartner.setBonusMarkerEnabled(false);
+        newPartner.setBonusMarkerVisible(false);
 
         for (Challenge c : challenges) {
             if (c == null) break;

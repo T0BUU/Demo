@@ -31,17 +31,6 @@
                 android:layout_height="match_parent"/>
         </LinearLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/camera_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="@dimen/fab_margin"
-            android:clickable="true"
-            android:focusable="true"
-            android:src="@drawable/ic_camera_floating_button"
-            android:theme="@style/AppTheme.FloatingActionButtonOverlay" />
     </RelativeLayout>
 
     <!-- Drawer which contains navigation -->

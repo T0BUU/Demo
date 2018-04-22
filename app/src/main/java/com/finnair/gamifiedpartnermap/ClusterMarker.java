@@ -121,7 +121,7 @@ public class ClusterMarker implements ClusterItem {
 
     public void removeRelatedChallenge(Challenge c) {
         relatedChallenges.remove(c);
-        this.setBonusMarkerVisible(false);
+        if (relatedChallenges.isEmpty()) this.setBonusMarkerVisible(false);
     }
 
     // GET:

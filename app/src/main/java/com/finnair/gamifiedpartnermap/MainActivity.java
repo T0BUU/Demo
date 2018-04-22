@@ -294,6 +294,9 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         LayoutInflater inflater = getLayoutInflater();
 
         if (activeChallenges.get(index).isCompleted()) {
+
+            myMainLayout.removeChallenge(activeChallenges.get(index));
+
             myMainLayout.closeDrawer();
 
             Challenge emptyChallenge = new Challenge();
@@ -534,9 +537,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     }
 
     public void onPlaneCatch(Plane caughtPlane, Plane randomPlane) {
-        //Intent intent = new Intent(this, CardSelectionActivity.class);
 
-        //ArrayList<String> caughtPlanes = new ArrayList<>();
 
        this.caughtPlane = caughtPlane;
        this.randomPlane = randomPlane;
@@ -544,11 +545,8 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         koneetHashMap.putAll(this.myMainLayout.getPlaneCollection());
         partneritHashMap.putAll(this.myMainLayout.getPartnerCollection());
 
-        //intent.putExtra(planesCaught, caughtPlanes);
-        //intent.putExtra(catchMessagePlanes, this.myMainLayout.getPlaneCollection());
-        //intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
         catchPlane();
-        //startActivity(intent);
+
 
     }
 
@@ -587,6 +585,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         if (requestCode == 12) {
             myMainLayout.refreshPartnerCollection();
             myMainLayout.refreshPlaneCollection();
+            myMainLayout.setChallengeVisuals();
 
             if(resultCode == RESULT_OK) {
                 Boolean goToCollection = data.getBooleanExtra(goToCollectionMessage, false);

@@ -174,7 +174,7 @@ public class MActivityLayout implements View.OnClickListener {
     }
 
 
-    private void setChallengeVisuals() {
+    public void setChallengeVisuals() {
         ImageView completedChallengesIndicator = mActivity.findViewById(R.id.toolbar).findViewById(R.id.completed_challenges_indicator);
 
         completedChallengesIndicator.setVisibility(View.INVISIBLE);
@@ -327,6 +327,14 @@ public class MActivityLayout implements View.OnClickListener {
 
     public Pair<ArrayList<Plane>, ArrayList<Partner>> getRandomRewards(int amount) {
         return mapFragment.getRandomRewards(amount);
+    }
+
+    public void removeChallenge(Challenge c) {
+        mapFragment.removeChallenge(c);
+    }
+
+    public void addChallenge(Challenge c) {
+        mapFragment.addChallenge(c);
     }
 
     public void closeDrawer() {

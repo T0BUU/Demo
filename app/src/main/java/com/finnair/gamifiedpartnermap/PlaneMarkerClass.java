@@ -139,6 +139,18 @@ public class PlaneMarkerClass {
 
     }
 
+    public void addChallenge(Challenge c) {
+        for (Plane p : planeHashMap.values()) {
+            if (c.isRelated(p)) p.addRelatedChallenge(c);
+        }
+    }
+
+    public void removeChallenge(Challenge c) {
+        for (Plane p : planeHashMap.values()) {
+            if (c.isRelated(p)) p.removeRelatedChallenge(c);
+        }
+    }
+
 
     private class AsyncOpenSkyDownload extends AsyncTask<String, Integer, String> {
         // https://stackoverflow.com/questions/9671546/asynctask-android-example
@@ -150,36 +162,34 @@ public class PlaneMarkerClass {
 
         @Override
         protected String doInBackground(String... params){
-
             int i = 0;
             publishProgress(i);
-
             try {
                 openSkyStates = openSkyApi.getStates(0, null);
-
             } catch (Exception e) {
+
+                if (openSkyApi == null){
+                    openSkyApi = new OpenSkyApi("AaltoSoftwareProject", "softaprojekti");
+                }
+
                 e.printStackTrace();
             }
             return "";
         }
-
         @Override
         protected void onPostExecute(String result){
             super.onPostExecute(result);
-            Log.d("POOP", "Plane locations updated.");
-
-            ArrayList<String> callSigns = new ArrayList<>();
-
-            Collection<OpenSkyStateVector> states = openSkyStates.getStates();
-
-            if (states != null){
-                for(OpenSkyStateVector openSkyStateVector : states){
-                    updatePlanesWithStateVectors(openSkyStateVector);
-                    callSigns.add(openSkyStateVector.getCallsign());
+            if (openSkyStates != null){  // This is new ///////////////////////////////////////
+                ArrayList<String> callSigns = new ArrayList<>();
+                Collection<OpenSkyStateVector> states = openSkyStates.getStates();
+                if (states != null){
+                    for(OpenSkyStateVector openSkyStateVector : states){
+                        updatePlanesWithStateVectors(openSkyStateVector);
+                        callSigns.add(openSkyStateVector.getCallsign());
+                    }
+                    removePlanesWhichHaveLanded(callSigns);
                 }
-                removePlanesWhichHaveLanded(callSigns);
             }
-
         }
     }
 

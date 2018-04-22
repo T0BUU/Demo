@@ -1,5 +1,6 @@
 package com.finnair.gamifiedpartnermap;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.Color;
@@ -122,6 +123,14 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
             }
         }
 
+        for (int index = 0; index < planes.size(); index += 2) {
+            savePlane(planes.get(index), planes.get(index+1));
+        }
+
+        for (int index = 0; index < partners.size(); index += 4) {
+            savePartner(partners.get(index), partners.get(index+1));
+        }
+
         savePartners(this);
         savePlanes(this);
         saveChallenges(this);
@@ -225,7 +234,11 @@ public class CardRewardActivity extends CollectionSavingActivity implements Plan
     public void onCardButtonClick(View v) {
         cardDialog.dismiss();
 
-        if (indeces.size() == 0) finish();
+        if (indeces.size() == 0) {
+            Intent intent = new Intent(this, MainActivity.class);
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+        }
     }
 
     @Override

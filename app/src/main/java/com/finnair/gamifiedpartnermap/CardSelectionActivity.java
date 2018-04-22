@@ -191,8 +191,8 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
 
             @Override
             public void onClick(View v) {
-                String currentTime = getCurrentTimeStamp();
-                savePartner(caughtPartnerField, caughtPartnerID, currentTime);
+
+                savePartner(caughtPartnerField, caughtPartnerID);
 
                 for (Challenge challenge : relatedChallengesCaught ) {
                     activeChallenges.get(challenge.getIndex()).incrementProgress();
@@ -202,7 +202,7 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
                 PartnerInfoFragment caught = new PartnerInfoFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
-                String partnerInfo = String.format("%s\t%s, %s", currentTime, caughtPartnerID, caughtPartnerAddress);
+                String partnerInfo = String.format("\t%s, %s", caughtPartnerID, caughtPartnerAddress);
 
                 caught.setAllFragmentData(partnerInfo, caughtPartnerField, matchCategoryToImage(caughtPartnerField), 1);
                 Log.d("POOP", "TEST");
@@ -215,18 +215,17 @@ public class CardSelectionActivity extends CollectionSavingActivity implements P
 
             @Override
             public void onClick(View v) {
-               String currentTime = getCurrentTimeStamp();
 
                 for (Challenge challenge : relatedChallengesRandom ) {
                     activeChallenges.get(challenge.getIndex()).incrementProgress();
                 }
 
-                savePartner(randomPartnerField, randomPartnerID, currentTime);
+                savePartner(randomPartnerField, randomPartnerID);
 
                 PartnerInfoFragment caught = new PartnerInfoFragment();
                 caught.setCancelable(false);
                 caught.show(getFragmentManager().beginTransaction(), "Caught partner");
-                String partnerInfo = String.format("%s\t%s, %s", currentTime, randomPartnerID, randomPartnerAddress);
+                String partnerInfo = String.format("\t%s, %s", randomPartnerID, randomPartnerAddress);
 
                 caught.setAllFragmentData(partnerInfo, randomPartnerField, matchCategoryToImage(randomPartnerField), 1);
                 Log.d("POOP", "TEST");
