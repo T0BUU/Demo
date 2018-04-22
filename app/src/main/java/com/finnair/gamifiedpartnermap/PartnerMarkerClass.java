@@ -41,8 +41,6 @@ public class PartnerMarkerClass {
     private static final String TAG = PartnerMarkerClass.class.getSimpleName();
 
 
-
-
     public PartnerMarkerClass(Activity activity, GoogleMap mMap) {
 
         // Activity is for example MapsActivity
@@ -56,7 +54,6 @@ public class PartnerMarkerClass {
         this.screenHeight = size.y;
 
         readCollectedPartners(activity);
-
     }
 
     public void fetchFromFirebase(final ClusterManager clusterManager, final MarkerRenderer markerRenderer){
@@ -100,12 +97,12 @@ public class PartnerMarkerClass {
     }
 
     /*
-     * This updates showingMarkers list based on given parameter String field_of_business and boolean show (add/remove).
+     * This updates showingMarkers list based on given parameter field_of_business.
      * If showingPartners contain partners under field_of_business, this method removes them from list.
      * If showingPartners doesn't contain that field_of_business, it adds those to list.
      * Returns updated list.
      */
-    public List<Partner> filterFieldOfBusiness(String fob, boolean show){
+    public List<Partner> filterFieldOfBusiness(String fob){
         for(Partner partner : partnerHashMap.values()) {
             if (partner.getFieldOfBusiness().equals(fob)) {
                 if(!show){

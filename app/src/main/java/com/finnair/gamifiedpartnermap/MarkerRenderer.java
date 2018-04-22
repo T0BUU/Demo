@@ -261,8 +261,8 @@ public class MarkerRenderer<T extends ClusterMarker> implements com.finnair.gami
         public void perform() {
             valueAnimator = ValueAnimator.ofFloat(0.5f, 1.0f);
             valueAnimator.setInterpolator(PULSE_ANIMATION_INTERP);
-            valueAnimator.setDuration(3000); // 2 sec per animation
-            valueAnimator.setRepeatCount(4); // 5 (1 + 4) animations
+            valueAnimator.setDuration(3000); // 3 sec per animation
+            valueAnimator.setRepeatCount(4); // 5 (1 + 4) animations --> 15 second animation (the same as plane update freq
             valueAnimator.addUpdateListener(this);
             valueAnimator.addListener(this);
             valueAnimator.start();

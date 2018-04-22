@@ -71,7 +71,7 @@ public class Challenge implements Parcelable {
 
         result = result.replaceAll("[\\[\\](){}]","");
 
-           prettyDescription = result;
+        prettyDescription = result;
     }
 
     Challenge() {
@@ -161,9 +161,11 @@ public class Challenge implements Parcelable {
     public boolean isRelated(Plane plane) {
         boolean result = false;
 
-        result = result || planeModels.contains(plane.getPlaneType());
-        result = result || planeDestinations.contains(plane.getOriginCountry());
+        result = planeModels.contains(plane.getPlaneType());
+        // if (plane.getOriginCountry() != null)
+            // result = result || planeDestinations.contains(plane.getOriginCountry());
 
+        if (result) Log.d("fuck", "PHOOOOOK, plane. Type: " + plane.getPlaneType() + "  Origin: " + plane.getOriginCountry());
         return result;
     }
 
@@ -172,6 +174,12 @@ public class Challenge implements Parcelable {
 
         result = result || partnerFields.contains(partner.getFieldOfBusiness());
         result = result || partnerNames.contains(partner.getID());
+
+
+        if (result) {
+            Log.d("fuck1", "PHOOOOOK, partner. Business: " + partner.getFieldOfBusiness() + "  ID: " + partner.getID());
+            Log.d("fuck2", "partnerFields: " + partnerFields.toString() + " partnerNames: " + partnerNames.toString());
+        }
 
         return result;
     }

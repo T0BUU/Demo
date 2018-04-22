@@ -303,7 +303,7 @@ public class MapsFragment extends Fragment {
                                 ((MainActivity) getActivity()).onPartnerCatch(partner, partnerMarkerClass.getRandomPartner());
                             }
                             else {
-                               /*InfoWindowData info = new InfoWindowData();
+/*InfoWindowData                info = new InfoWindowData();
                                 info.setData(partner.getID(), partner.getAddress(), partner.getDescription());
 
                                 marker.setTag(info);
@@ -425,7 +425,6 @@ public class MapsFragment extends Fragment {
             }
         });
     }
-
 
     /*
      * This method filters markers shown on map.

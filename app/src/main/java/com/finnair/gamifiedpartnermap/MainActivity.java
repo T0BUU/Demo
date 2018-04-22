@@ -8,11 +8,9 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -82,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
     private MapsFragment mapFragment;
     private GoogleMap gMap;
 
-    private String planesListing = "";
 
     SensorActivity sensorActivity;
 
@@ -140,17 +137,6 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         if(sharedPreferences.contains("Access Token")){
             makeProfileRequest(sharedPreferences.getString("Access Token", ""));
         }
-
-        SensorManager sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-
-
-        azimuth = Calculations.bearing;
-        pitch = Calculations.angle;
-
-
-        sensorActivity = new SensorActivity(sensorManager,azimuth, pitch, roll);
-        sensorActivity.registerListeners();
-
 
 
     }
@@ -354,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
             intent.putExtra(catchMessagePartners, this.myMainLayout.getPartnerCollection());
             intent.putExtra(relatedChallengesToPlanes, new Gson().toJson(relatedChallengesPlanes));
             intent.putExtra(relatedChallengesToPartners, new Gson().toJson(relatedChallengesPartners));
-            startActivity(intent);
+            startActivityForResult(intent, 12);
 
         }
 
