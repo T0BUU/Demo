@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -137,6 +138,17 @@ public class MainActivity extends AppCompatActivity implements ProfileResponseHa
         if(sharedPreferences.contains("Access Token")){
             makeProfileRequest(sharedPreferences.getString("Access Token", ""));
         }
+
+        SensorManager sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+
+        azimuth = Calculations.bearing;
+        pitch = Calculations.angle;
+
+
+        sensorActivity = new SensorActivity(sensorManager,azimuth, pitch, roll);
+        sensorActivity.registerListeners();
+
 
 
     }
