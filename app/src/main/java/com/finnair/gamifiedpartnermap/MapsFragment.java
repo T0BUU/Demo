@@ -354,41 +354,7 @@ public class MapsFragment extends Fragment {
         });
 
 
-        //TODO: Currently adds a simple geofence to the first 100 locations. Figure out something different.
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-            mGeofencingClient = LocationServices.getGeofencingClient(getActivity());
-
-            test = new Geofence.Builder()
-                    .setRequestId("Otaniemi")
-                    .setCircularRegion(60.1841, 24.8301, 100.0f)
-                    .setExpirationDuration(60000L * 10L)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .build();
-
-            markerForGeofence(new LatLng(60.1841, 24.8301));
-
-            mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
-                    .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-
-                        }
-                    })
-                    .addOnFailureListener(getActivity(), new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                        }
-                    });
-        }
-
-
-
-
-
-        //-----------------------
 
 
 
@@ -496,49 +462,6 @@ public class MapsFragment extends Fragment {
         return partnerMarkerClass;
     }
 
-
-    private GeofencingRequest getGeofencingRequest() {
-        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-        builder.addGeofence(test);
-        return builder.build();
-
-    }
-
-    private void markerForGeofence(LatLng latLng) {
-        Log.i(TAG, "markerForGeofence(" + latLng + ")");
-        String title = latLng.latitude + ", " + latLng.longitude;
-        // Define marker options
-        MarkerOptions markerOptions = new MarkerOptions()
-                .position(latLng)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-                .title(title);
-        if (mMap != null) {
-            // Remove last geoFenceMarker
-            if (geoFenceMarker != null)
-                geoFenceMarker.remove();
-
-            geoFenceMarker = mMap.addMarker(markerOptions);
-        }
-    }
-
-
-
-
-    private PendingIntent getGeofencePendingIntent() {
-
-        if (mGeofencePendingIntent != null) {
-            return mGeofencePendingIntent;
-        }
-
-
-        Intent intent = new Intent(getContext(), GeofenceTransitionsIntentService.class);
-
-        mGeofencePendingIntent = PendingIntent.getService(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        return mGeofencePendingIntent;
-    }
-
     public Criteria getCriteria() {
         return criteria;
     }
@@ -575,20 +498,6 @@ public class MapsFragment extends Fragment {
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            mGeofencingClient.removeGeofences(getGeofencePendingIntent())
-                    .addOnSuccessListener(getActivity(), new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-
-                        }
-                    })
-                    .addOnFailureListener(getActivity(), new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                        }
-                    });
         }
 
         mMapView.onDestroy();

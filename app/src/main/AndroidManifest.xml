@@ -88,8 +88,6 @@
             android:name=".CardSelectionActivity">
         </activity>
 
-        <service android:name=".GeofenceTransitionsIntentService" />
-
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="com.finnair.gamifiedpartnermap.HANDLE_AUTHORIZATION_RESPONSE" />
