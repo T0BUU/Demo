@@ -64,13 +64,15 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_maps">
+            android:label="@string/title_activity_maps"
+            android:screenOrientation="portrait">
 
         </activity>
 
         <activity
             android:name=".PlaneCollectionActivity"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait">
                 <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".MainActivity" />
@@ -78,14 +80,16 @@
 
         <activity
             android:name=".CardRewardActivity"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
 
         <activity
-            android:name=".CardSelectionActivity">
+            android:name=".CardSelectionActivity"
+            android:screenOrientation="portrait">
         </activity>
 
         <activity android:name=".LoginActivity">
